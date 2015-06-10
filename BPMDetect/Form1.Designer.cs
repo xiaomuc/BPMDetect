@@ -46,13 +46,13 @@
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.tvPlayList = new System.Windows.Forms.TreeView();
             this.txBpmDetectSettings = new System.Windows.Forms.TextBox();
-            this.chart2 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.lviTuneTracks = new System.Windows.Forms.ListView();
             this.columnHeader1 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader2 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader3 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader4 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader5 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.chart2 = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.txConsole = new System.Windows.Forms.TextBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -61,6 +61,15 @@
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
             this.btListStop = new System.Windows.Forms.ToolStripButton();
             this.btWrite = new System.Windows.Forms.ToolStripButton();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
+            this.listView1 = new System.Windows.Forms.ListView();
+            this.columnHeader6 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader7 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
+            this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -75,6 +84,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.chart2)).BeginInit();
             this.tabPage1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStripContainer1
@@ -124,6 +134,7 @@
             // tabControl1
             // 
             this.tabControl1.Controls.Add(this.tabPage2);
+            this.tabControl1.Controls.Add(this.tabPage3);
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
@@ -182,6 +193,46 @@
             this.txBpmDetectSettings.Text = "bpm_low 80\r\nbpm_high 200\r\nprio_low 110\r\nprio_high 150\r\nwindow_size 2048\r\nthreshol" +
     "d 0.5\r\n";
             // 
+            // lviTuneTracks
+            // 
+            this.lviTuneTracks.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader1,
+            this.columnHeader2,
+            this.columnHeader3,
+            this.columnHeader4,
+            this.columnHeader5});
+            this.lviTuneTracks.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lviTuneTracks.FullRowSelect = true;
+            this.lviTuneTracks.Location = new System.Drawing.Point(0, 0);
+            this.lviTuneTracks.Name = "lviTuneTracks";
+            this.lviTuneTracks.Size = new System.Drawing.Size(630, 98);
+            this.lviTuneTracks.TabIndex = 0;
+            this.lviTuneTracks.UseCompatibleStateImageBehavior = false;
+            this.lviTuneTracks.View = System.Windows.Forms.View.Details;
+            this.lviTuneTracks.VirtualMode = true;
+            this.lviTuneTracks.RetrieveVirtualItem += new System.Windows.Forms.RetrieveVirtualItemEventHandler(this.lviTuneTracks_RetrieveVirtualItem);
+            this.lviTuneTracks.DoubleClick += new System.EventHandler(this.btiTunes_DoubleClick);
+            // 
+            // columnHeader1
+            // 
+            this.columnHeader1.Text = "Name";
+            // 
+            // columnHeader2
+            // 
+            this.columnHeader2.Text = "Artist";
+            // 
+            // columnHeader3
+            // 
+            this.columnHeader3.Text = "Album";
+            // 
+            // columnHeader4
+            // 
+            this.columnHeader4.Text = "BPM(set)";
+            // 
+            // columnHeader5
+            // 
+            this.columnHeader5.Text = "BPM(Detect)";
+            // 
             // chart2
             // 
             chartArea1.AxisX.Interval = 10D;
@@ -211,43 +262,6 @@
             this.chart2.Size = new System.Drawing.Size(630, 127);
             this.chart2.TabIndex = 0;
             this.chart2.Text = "chart2";
-            // 
-            // lviTuneTracks
-            // 
-            this.lviTuneTracks.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
-            this.columnHeader1,
-            this.columnHeader2,
-            this.columnHeader3,
-            this.columnHeader4,
-            this.columnHeader5});
-            this.lviTuneTracks.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.lviTuneTracks.Location = new System.Drawing.Point(0, 0);
-            this.lviTuneTracks.Name = "lviTuneTracks";
-            this.lviTuneTracks.Size = new System.Drawing.Size(630, 98);
-            this.lviTuneTracks.TabIndex = 0;
-            this.lviTuneTracks.UseCompatibleStateImageBehavior = false;
-            this.lviTuneTracks.View = System.Windows.Forms.View.Details;
-            this.lviTuneTracks.DoubleClick += new System.EventHandler(this.btiTunes_DoubleClick);
-            // 
-            // columnHeader1
-            // 
-            this.columnHeader1.Text = "Name";
-            // 
-            // columnHeader2
-            // 
-            this.columnHeader2.Text = "Artist";
-            // 
-            // columnHeader3
-            // 
-            this.columnHeader3.Text = "Album";
-            // 
-            // columnHeader4
-            // 
-            this.columnHeader4.Text = "BPM(set)";
-            // 
-            // columnHeader5
-            // 
-            this.columnHeader5.Text = "BPM(Detect)";
             // 
             // tabPage1
             // 
@@ -279,10 +293,11 @@
             this.btiTunes,
             this.toolStripButton1,
             this.btListStop,
-            this.btWrite});
+            this.btWrite,
+            this.toolStripButton2});
             this.toolStrip1.Location = new System.Drawing.Point(3, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(289, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(373, 25);
             this.toolStrip1.TabIndex = 0;
             // 
             // btOpen
@@ -337,6 +352,82 @@
             this.btWrite.Text = "WriteBpm";
             this.btWrite.Click += new System.EventHandler(this.btWrite_Click);
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.listView1);
+            this.tabPage3.Controls.Add(this.textBox1);
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(785, 231);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "walking";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // textBox1
+            // 
+            this.textBox1.Dock = System.Windows.Forms.DockStyle.Left;
+            this.textBox1.Location = new System.Drawing.Point(0, 0);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.textBox1.Size = new System.Drawing.Size(225, 231);
+            this.textBox1.TabIndex = 0;
+            this.textBox1.Text = "#bpm-from to minute-min max\r\n110 112 4 6\r\n119 121 4 6\r\n128 130 19 21\r\n119 121 9 1" +
+    "1\r\n\\次郎\\walk";
+            this.textBox1.WordWrap = false;
+            // 
+            // toolStripButton2
+            // 
+            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
+            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton2.Name = "toolStripButton2";
+            this.toolStripButton2.Size = new System.Drawing.Size(53, 22);
+            this.toolStripButton2.Text = "playlist";
+            this.toolStripButton2.Click += new System.EventHandler(this.toolStripButton2_Click);
+            // 
+            // listView1
+            // 
+            this.listView1.Columns.AddRange(new System.Windows.Forms.ColumnHeader[] {
+            this.columnHeader6,
+            this.columnHeader7,
+            this.columnHeader8,
+            this.columnHeader9,
+            this.columnHeader10});
+            this.listView1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.listView1.Location = new System.Drawing.Point(225, 0);
+            this.listView1.Name = "listView1";
+            this.listView1.Size = new System.Drawing.Size(560, 231);
+            this.listView1.TabIndex = 1;
+            this.listView1.UseCompatibleStateImageBehavior = false;
+            this.listView1.View = System.Windows.Forms.View.Details;
+            // 
+            // columnHeader6
+            // 
+            this.columnHeader6.Text = "Name";
+            this.columnHeader6.Width = 25;
+            // 
+            // columnHeader7
+            // 
+            this.columnHeader7.Text = "Artist";
+            this.columnHeader7.Width = 25;
+            // 
+            // columnHeader8
+            // 
+            this.columnHeader8.Text = "Album";
+            this.columnHeader8.Width = 25;
+            // 
+            // columnHeader9
+            // 
+            this.columnHeader9.Text = "BPM";
+            this.columnHeader9.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            this.columnHeader9.Width = 25;
+            // 
+            // columnHeader10
+            // 
+            this.columnHeader10.Text = "Time";
+            this.columnHeader10.Width = 456;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -366,6 +457,8 @@
             this.tabPage1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -396,6 +489,15 @@
         private System.Windows.Forms.ToolStripProgressBar toolStripProgressBar1;
         private System.Windows.Forms.ToolStripButton btWrite;
         private System.Windows.Forms.TextBox txBpmDetectSettings;
+        private System.Windows.Forms.TabPage tabPage3;
+        private System.Windows.Forms.ListView listView1;
+        private System.Windows.Forms.ColumnHeader columnHeader6;
+        private System.Windows.Forms.ColumnHeader columnHeader7;
+        private System.Windows.Forms.ColumnHeader columnHeader8;
+        private System.Windows.Forms.ColumnHeader columnHeader9;
+        private System.Windows.Forms.ColumnHeader columnHeader10;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.ToolStripButton toolStripButton2;
     }
 }
 

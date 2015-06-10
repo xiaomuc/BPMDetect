@@ -16,6 +16,12 @@ namespace BPMDetect
 {
     public partial class Form1 : Form
     {
+        class BpmListItem
+        {
+            public IITTrack track;
+            public int detectBPM;
+        }
+        List<BpmListItem> list = new List<BpmListItem>();
         public Form1()
         {
             InitializeComponent();
@@ -90,17 +96,17 @@ namespace BPMDetect
 
         }
 
-        void listItemBpmDetect(ListViewItem item, BpmDetector bpmDetector)
+        void listItemBpmDetect(BpmListItem item, BpmDetector bpmDetector)
         {
-            IITFileOrCDTrack track = item.Tag as IITFileOrCDTrack;
+            IITFileOrCDTrack track = item.track as IITFileOrCDTrack;
             lbTitle.Text = track.Name;
-            int bpm = bpmDetector.detect(track.Location);
-            item.SubItems[4].Text = bpm.ToString();
+            item.detectBPM = bpmDetector.detect(track.Location);
 
-            txConsole.AppendText(item.Name + Environment.NewLine);
+            txConsole.AppendText(item.track.Name + Environment.NewLine);
             showSourceFormat(bpmDetector.WaveSource);
-            writeConsole("bpm", bpm);
+            writeConsole("bpm", item.detectBPM);
             showBpmChart(bpmDetector);
+            lviTuneTracks.Refresh();
 
         }
         BpmDetector createDetector()
@@ -129,15 +135,16 @@ namespace BPMDetect
         {
             if (lviTuneTracks.SelectedItems != null)
             {
-                ListViewItem item = lviTuneTracks.SelectedItems[0];
-                IITFileOrCDTrack track = item.Tag as IITFileOrCDTrack;
+                BpmListItem item = list[lviTuneTracks.SelectedIndices[0]];
+                IITFileOrCDTrack track = item.track as IITFileOrCDTrack;
                 lbTitle.Text = track.Name;
                 BpmDetector bpmDetector = createDetector();
                 int bpm = bpmDetector.detect(track.Location);
-                item.SubItems[4].Text = bpm.ToString();
+                item.detectBPM = bpm;
                 showSourceFormat(bpmDetector.WaveSource);
                 writeConsole("bpm", bpm);
                 showBpmChart(bpmDetector);
+                lviTuneTracks.Refresh();
             }
         }
         bool bstop = false;
@@ -149,20 +156,22 @@ namespace BPMDetect
             btListStop.Enabled = true;
             bstop = false;
             toolStripProgressBar1.Maximum = lviTuneTracks.Items.Count;
-            foreach (ListViewItem item in lviTuneTracks.Items)
+            foreach (var bpmObj in list.Select((value, index) => new { value, index }))
             {
                 if (bstop) { break; }
-                try
+                if (bpmObj.value.detectBPM == 0)
                 {
-                    item.EnsureVisible();
-
-                    listItemBpmDetect(item, bpmDetector);
-                    toolStripProgressBar1.PerformStep();
-                    Application.DoEvents();
-                }
-                catch (Exception ex)
-                {
-                    Console.Write(ex.StackTrace);
+                    try
+                    {
+                        listItemBpmDetect(bpmObj.value, bpmDetector);
+                        toolStripProgressBar1.PerformStep();
+                        lviTuneTracks.Items[bpmObj.index].EnsureVisible();
+                        Application.DoEvents();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Write(ex.StackTrace);
+                    }
                 }
             }
             toolStripButton1.Enabled = true;
@@ -181,19 +190,18 @@ namespace BPMDetect
                     lviTuneTracks.BeginUpdate();
                     try
                     {
-                        lviTuneTracks.Items.Clear();
+                        list.Clear();
                         foreach (IITTrack track in pl.Tracks)
                         {
-                            ListViewItem item = lviTuneTracks.Items.Add(track.Name);
-                            item.SubItems.Add(track.Artist);
-                            item.SubItems.Add(track.Album);
-                            item.SubItems.Add(track.BPM.ToString());
-                            item.SubItems.Add("-");
-                            item.Tag = track;
+                            BpmListItem item = new BpmListItem();
+                            item.track = track;
+                            item.detectBPM = 0;
+                            list.Add(item);
                         }
                     }
                     finally
                     {
+                        lviTuneTracks.VirtualListSize = list.Count;
                         lviTuneTracks.EndUpdate();
                     }
                 }
@@ -207,23 +215,18 @@ namespace BPMDetect
 
         private void btWrite_Click(object sender, EventArgs e)
         {
-            foreach (ListViewItem item in lviTuneTracks.Items)
+            foreach (BpmListItem item in list)
             {
-                int bpm;
-                if (int.TryParse(item.SubItems[4].Text, out bpm))
+                if (item.detectBPM > 0 && item.detectBPM != item.track.BPM)
                 {
-                    IITTrack track = item.Tag as IITTrack;
-                    if (track != null)
+                    try
                     {
-                        try
-                        {
-                            track.BPM = bpm;
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.Message);
-                            Console.WriteLine(ex.StackTrace);
-                        }
+                        item.track.BPM = item.detectBPM;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        Console.WriteLine(ex.StackTrace);
                     }
                 }
 
@@ -231,6 +234,92 @@ namespace BPMDetect
 
         }
 
+        private void lviTuneTracks_RetrieveVirtualItem(object sender, RetrieveVirtualItemEventArgs e)
+        {
+            if (e.ItemIndex < list.Count)
+            {
+                BpmListItem bpmItem = list[e.ItemIndex];
+                e.Item = new ListViewItem(bpmItem.track.Name);
+                e.Item.SubItems.Add(bpmItem.track.Artist);
+                e.Item.SubItems.Add(bpmItem.track.Album);
+                e.Item.SubItems.Add(bpmItem.track.BPM.ToString());
+                if (bpmItem.detectBPM == 0)
+                {
+                    e.Item.SubItems.Add("-");
+                }
+                else
+                {
+                    e.Item.SubItems.Add(bpmItem.detectBPM.ToString());
+                }
+            }
+        }
+        Random _random = null;
+
+        List<IITTrack> createRandomList(List<IITTrack> trackList, int min, int max)
+        {
+            if (_random == null)
+            {
+                _random = new Random();
+            }
+            List<IITTrack> list = new List<IITTrack>();
+            int du = 0;
+            while (du < min * 60 || du > max * 60)
+            {
+                list.Clear();
+                du = 0;
+                while (du < min)
+                {
+                    IITTrack track = trackList[_random.Next(trackList.Count)];
+                    if (!list.Exists(x => x.Equals(track)))
+                    {
+                        list.Add(track);
+                        du += track.Duration;
+                    }
+                }
+            }
+            return list;
+
+        }
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            IITLibraryPlaylist mainPlayList = _itunesApp.LibraryPlaylist;
+            List<IITTrack> trackList = new List<IITTrack>();
+            foreach (string line in textBox1.Lines)
+            {
+                if (line.StartsWith("#") || line.StartsWith("\\")) { continue; }
+                else
+                {
+                    string[] args = line.Split(' ');
+                    try
+                    {
+                        int bpmFrom = int.Parse(args[0]);
+                        int bpmTo = int.Parse(args[1]);
+                        int minuteMin = int.Parse(args[2]);
+                        int minuteMax = int.Parse(args[3]);
+                        foreach (IITTrack track in mainPlayList.Tracks)
+                        {
+                            if (track.BPM >= bpmFrom && track.BPM <= bpmTo)
+                            {
+                                trackList.Add(track);
+                            }
+                        }
+                        foreach (IITTrack track in createRandomList(trackList, minuteMin, minuteMax))
+                        {
+                            ListViewItem listViewItem = listView1.Items.Add(track.Name);
+                            listViewItem.SubItems.Add(track.Artist);
+                            listViewItem.SubItems.Add(track.Album);
+                            listViewItem.SubItems.Add(track.BPM.ToString());
+                            listViewItem.SubItems.Add(track.Time);
+
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
 
     }
 }
