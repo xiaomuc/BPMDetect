@@ -28,14 +28,14 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint1 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(60D, 0D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint2 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(240D, 0D);
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint3 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(60D, 0D);
-            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint4 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(240D, 0D);
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint5 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(60D, 0D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint6 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(240D, 0D);
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint7 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(60D, 0D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint8 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(240D, 0D);
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.toolStripContainer1 = new System.Windows.Forms.ToolStripContainer();
             this.statusStrip1 = new System.Windows.Forms.StatusStrip();
@@ -60,7 +60,7 @@
             this.columnHeader8 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader9 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
             this.columnHeader10 = ((System.Windows.Forms.ColumnHeader)(new System.Windows.Forms.ColumnHeader()));
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.txPlaylistSettings = new System.Windows.Forms.TextBox();
             this.tbpConsole = new System.Windows.Forms.TabPage();
             this.txConsole = new System.Windows.Forms.TextBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
@@ -69,7 +69,8 @@
             this.btDoDetect = new System.Windows.Forms.ToolStripButton();
             this.btListStop = new System.Windows.Forms.ToolStripButton();
             this.btWrite = new System.Windows.Forms.ToolStripButton();
-            this.btCreatePlaylist = new System.Windows.Forms.ToolStripButton();
+            this.btGeneratePlaylist = new System.Windows.Forms.ToolStripButton();
+            this.btWritePlaylistToiTunes = new System.Windows.Forms.ToolStripButton();
             this.toolStripContainer1.BottomToolStripPanel.SuspendLayout();
             this.toolStripContainer1.ContentPanel.SuspendLayout();
             this.toolStripContainer1.TopToolStripPanel.SuspendLayout();
@@ -237,31 +238,31 @@
             // 
             // charBPM
             // 
-            chartArea1.AxisX.Interval = 10D;
-            chartArea1.AxisX.Maximum = 220D;
-            chartArea1.AxisX.Minimum = 80D;
-            chartArea1.Name = "ChartArea1";
-            this.charBPM.ChartAreas.Add(chartArea1);
+            chartArea2.AxisX.Interval = 10D;
+            chartArea2.AxisX.Maximum = 220D;
+            chartArea2.AxisX.Minimum = 80D;
+            chartArea2.Name = "ChartArea1";
+            this.charBPM.ChartAreas.Add(chartArea2);
             this.charBPM.Dock = System.Windows.Forms.DockStyle.Bottom;
-            legend1.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
-            legend1.Name = "Legend1";
-            this.charBPM.Legends.Add(legend1);
+            legend2.Docking = System.Windows.Forms.DataVisualization.Charting.Docking.Top;
+            legend2.Name = "Legend1";
+            this.charBPM.Legends.Add(legend2);
             this.charBPM.Location = new System.Drawing.Point(0, 98);
             this.charBPM.Name = "charBPM";
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "bpm";
-            series1.Points.Add(dataPoint1);
-            series1.Points.Add(dataPoint2);
-            series1.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int32;
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "peak";
-            series2.Points.Add(dataPoint3);
-            series2.Points.Add(dataPoint4);
-            series2.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int32;
-            this.charBPM.Series.Add(series1);
-            this.charBPM.Series.Add(series2);
+            series3.ChartArea = "ChartArea1";
+            series3.Legend = "Legend1";
+            series3.Name = "bpm";
+            series3.Points.Add(dataPoint5);
+            series3.Points.Add(dataPoint6);
+            series3.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int32;
+            series4.ChartArea = "ChartArea1";
+            series4.Legend = "Legend1";
+            series4.Name = "peak";
+            series4.Points.Add(dataPoint7);
+            series4.Points.Add(dataPoint8);
+            series4.XValueType = System.Windows.Forms.DataVisualization.Charting.ChartValueType.Int32;
+            this.charBPM.Series.Add(series3);
+            this.charBPM.Series.Add(series4);
             this.charBPM.Size = new System.Drawing.Size(630, 127);
             this.charBPM.TabIndex = 0;
             this.charBPM.Text = "chart2";
@@ -269,7 +270,7 @@
             // tbpPlaylist
             // 
             this.tbpPlaylist.Controls.Add(this.lvPlayList);
-            this.tbpPlaylist.Controls.Add(this.textBox1);
+            this.tbpPlaylist.Controls.Add(this.txPlaylistSettings);
             this.tbpPlaylist.Location = new System.Drawing.Point(4, 22);
             this.tbpPlaylist.Name = "tbpPlaylist";
             this.tbpPlaylist.Size = new System.Drawing.Size(785, 231);
@@ -296,41 +297,40 @@
             // columnHeader6
             // 
             this.columnHeader6.Text = "Name";
-            this.columnHeader6.Width = 25;
+            this.columnHeader6.Width = 41;
             // 
             // columnHeader7
             // 
             this.columnHeader7.Text = "Artist";
-            this.columnHeader7.Width = 25;
+            this.columnHeader7.Width = 41;
             // 
             // columnHeader8
             // 
             this.columnHeader8.Text = "Album";
-            this.columnHeader8.Width = 25;
+            this.columnHeader8.Width = 44;
             // 
             // columnHeader9
             // 
             this.columnHeader9.Text = "BPM";
             this.columnHeader9.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
-            this.columnHeader9.Width = 25;
+            this.columnHeader9.Width = 36;
             // 
             // columnHeader10
             // 
             this.columnHeader10.Text = "Time";
-            this.columnHeader10.Width = 456;
+            this.columnHeader10.Width = 394;
             // 
-            // textBox1
+            // txPlaylistSettings
             // 
-            this.textBox1.Dock = System.Windows.Forms.DockStyle.Left;
-            this.textBox1.Location = new System.Drawing.Point(0, 0);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox1.Size = new System.Drawing.Size(225, 231);
-            this.textBox1.TabIndex = 0;
-            this.textBox1.Text = "#bpm-from to minute-min max\r\n110 112 4 6\r\n119 121 4 6\r\n128 130 19 21\r\n119 121 9 1" +
-    "1\r\n\\次郎\\walk";
-            this.textBox1.WordWrap = false;
+            this.txPlaylistSettings.Dock = System.Windows.Forms.DockStyle.Left;
+            this.txPlaylistSettings.Location = new System.Drawing.Point(0, 0);
+            this.txPlaylistSettings.Multiline = true;
+            this.txPlaylistSettings.Name = "txPlaylistSettings";
+            this.txPlaylistSettings.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txPlaylistSettings.Size = new System.Drawing.Size(225, 231);
+            this.txPlaylistSettings.TabIndex = 0;
+            this.txPlaylistSettings.Text = "#playlist min max\r\nbpm110 3 6\r\nbpm120 4 6\r\nbpm130 19 21\r\nbpm120 9 11\r\n\\次郎\\walk";
+            this.txPlaylistSettings.WordWrap = false;
             // 
             // tbpConsole
             // 
@@ -363,10 +363,11 @@
             this.btDoDetect,
             this.btListStop,
             this.btWrite,
-            this.btCreatePlaylist});
+            this.btGeneratePlaylist,
+            this.btWritePlaylistToiTunes});
             this.toolStrip1.Location = new System.Drawing.Point(3, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(342, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(485, 25);
             this.toolStrip1.TabIndex = 0;
             // 
             // btOpen
@@ -421,15 +422,25 @@
             this.btWrite.Text = "WriteBpm";
             this.btWrite.Click += new System.EventHandler(this.btWrite_Click);
             // 
-            // btCreatePlaylist
+            // btGeneratePlaylist
             // 
-            this.btCreatePlaylist.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btCreatePlaylist.Image = ((System.Drawing.Image)(resources.GetObject("btCreatePlaylist.Image")));
-            this.btCreatePlaylist.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btCreatePlaylist.Name = "btCreatePlaylist";
-            this.btCreatePlaylist.Size = new System.Drawing.Size(53, 22);
-            this.btCreatePlaylist.Text = "playlist";
-            this.btCreatePlaylist.Click += new System.EventHandler(this.btCreatePlayList_Click);
+            this.btGeneratePlaylist.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btGeneratePlaylist.Image = ((System.Drawing.Image)(resources.GetObject("btGeneratePlaylist.Image")));
+            this.btGeneratePlaylist.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btGeneratePlaylist.Name = "btGeneratePlaylist";
+            this.btGeneratePlaylist.Size = new System.Drawing.Size(109, 22);
+            this.btGeneratePlaylist.Text = "generate playlist";
+            this.btGeneratePlaylist.Click += new System.EventHandler(this.btGeneratePlayList_Click);
+            // 
+            // btWritePlaylistToiTunes
+            // 
+            this.btWritePlaylistToiTunes.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btWritePlaylistToiTunes.Image = ((System.Drawing.Image)(resources.GetObject("btWritePlaylistToiTunes.Image")));
+            this.btWritePlaylistToiTunes.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btWritePlaylistToiTunes.Name = "btWritePlaylistToiTunes";
+            this.btWritePlaylistToiTunes.Size = new System.Drawing.Size(87, 22);
+            this.btWritePlaylistToiTunes.Text = "write playlist";
+            this.btWritePlaylistToiTunes.Click += new System.EventHandler(this.btWritePlaylistToiTunes_Click);
             // 
             // Form1
             // 
@@ -499,8 +510,9 @@
         private System.Windows.Forms.ColumnHeader columnHeader8;
         private System.Windows.Forms.ColumnHeader columnHeader9;
         private System.Windows.Forms.ColumnHeader columnHeader10;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.ToolStripButton btCreatePlaylist;
+        private System.Windows.Forms.TextBox txPlaylistSettings;
+        private System.Windows.Forms.ToolStripButton btGeneratePlaylist;
+        private System.Windows.Forms.ToolStripButton btWritePlaylistToiTunes;
     }
 }
 
