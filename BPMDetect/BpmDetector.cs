@@ -9,6 +9,9 @@ using CSCore.Streams;
 
 namespace BPMDetect
 {
+    /// <summary>
+    /// 楽曲ファイルからテンポ（BPM)を検出するクラス
+    /// </summary>
     class BpmDetector
     {
         //fields
@@ -34,26 +37,52 @@ namespace BPMDetect
         public List<int> Peaks { get { return _peaks; } }
 
         int _windowSize = 512;
+        /// <summary>
+        /// テンポ計算する際に使用する、音量計算に使用するサンプル数
+        /// </summary>
         public int WindowSize { get { return _windowSize; } set { _windowSize = value; } }
 
         int _bpmLow = 80;
+        /// <summary>
+        /// 検出するテンポの下限
+        /// </summary>
         public int BpmLow { get { return _bpmLow; } set { _bpmLow = value; } }
 
         int _bpmHigh = 210;
+        /// <summary>
+        /// 検出するテンポの上限
+        /// </summary>
         public int BpmHigh { get { return _bpmHigh; } set { _bpmHigh = value; } }
 
         int _priorityBpmLow = 110;
+        /// <summary>
+        /// 優先するテンポの小さい側
+        /// </summary>
         public int BriorityBpmLow { get { return _priorityBpmLow; } set { _priorityBpmLow = value; } }
 
         int _priorityBpmHigh = 150;
+        /// <summary>
+        /// 優先するテンポの大きい側
+        /// </summary>
         public int BriorityBpmHigh { get { return _priorityBpmHigh; } set { _priorityBpmHigh = value; } }
 
         double _threshold = 0.75;
+        /// <summary>
+        /// 優先するテンポ計算に使用する閾値
+        /// </summary>
         public double Threshold { get { return _threshold; } set { _threshold = value; } }
 
         int _peakWidth = 3;
+        /// <summary>
+        /// ピーク計算に使用するデータ幅
+        /// </summary>
         public int PeakWidth { get { return _peakWidth; } set { _peakWidth = value; } }
 
+        /// <summary>
+        /// BPM計算後、引数のBPMでの距離Rを返す
+        /// </summary>
+        /// <param name="bpm"></param>
+        /// <returns></returns>
         public double getBpmValue(int bpm)
         {
             if (bpm < _bpmLow || bpm > _bpmHigh)
@@ -64,7 +93,11 @@ namespace BPMDetect
         }
 
         
-
+        /// <summary>
+        /// BPM検出
+        /// </summary>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public int detect(String fileName)
         {
             _source = CodecFactory.Instance.GetCodec(fileName);

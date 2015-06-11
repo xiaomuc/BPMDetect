@@ -48,25 +48,26 @@ namespace BPMDetect
         }
         void showBpmChart(BpmDetector bpmDetector)
         {
-            chart2.Series["bpm"].Points.Clear();
-            chart2.ChartAreas["ChartArea1"].AxisX.Minimum = bpmDetector.BpmLow;
-            chart2.ChartAreas["ChartArea1"].AxisX.Maximum = bpmDetector.BpmHigh;
+            charBPM.Series["bpm"].Points.Clear();
+            charBPM.ChartAreas["ChartArea1"].AxisX.Minimum = bpmDetector.BpmLow;
+            charBPM.ChartAreas["ChartArea1"].AxisX.Maximum = bpmDetector.BpmHigh;
             for (int bpm = bpmDetector.BpmLow; bpm <= bpmDetector.BpmHigh; bpm++)
             {
-                chart2.Series["bpm"].Points.AddXY(bpm, bpmDetector.getBpmValue(bpm));
+                charBPM.Series["bpm"].Points.AddXY(bpm, bpmDetector.getBpmValue(bpm));
                 bpm++;
             }
 
-            chart2.Series["peak"].Points.Clear();
+            charBPM.Series["peak"].Points.Clear();
             for (int i = 0; i < 3 & i < bpmDetector.Peaks.Count; i++)
             {
                 int bpm = bpmDetector.Peaks[i];
                 double val = bpmDetector.getBpmValue(bpm);
                 double pc = val / bpmDetector.getBpmValue(bpmDetector.Peaks[0]);
                 txConsole.AppendText(String.Format("{0}:{1}({2})", bpm, val, pc) + Environment.NewLine);
-                chart2.Series["peak"].Points.AddXY(bpm, val);
+                charBPM.Series["peak"].Points.AddXY(bpm, val);
             }
         }
+
         private void btOpen_Click(object sender, EventArgs e)
         {
             var openFileDialog = new OpenFileDialog()
@@ -77,12 +78,13 @@ namespace BPMDetect
 
             if (openFileDialog.ShowDialog() == DialogResult.OK)
             {
-                BpmDetector bpmDetector = new BpmDetector();
-                showSourceFormat(bpmDetector.WaveSource);
+                BpmDetector bpmDetector = createDetector();
                 writeConsole("bpm", bpmDetector.detect(openFileDialog.FileName));
+                showSourceFormat(bpmDetector.WaveSource);
                 showBpmChart(bpmDetector);
             }
         }
+
         iTunesApp _itunesApp;
         private void btiTunes_Click(object sender, EventArgs e)
         {
@@ -148,11 +150,11 @@ namespace BPMDetect
             }
         }
         bool bstop = false;
-        private void toolStripButton1_Click(object sender, EventArgs e)
+        private void btDoDetect_Click(object sender, EventArgs e)
         {
             BpmDetector bpmDetector = createDetector();
 
-            toolStripButton1.Enabled = false;
+            btDoDetect.Enabled = false;
             btListStop.Enabled = true;
             bstop = false;
             toolStripProgressBar1.Maximum = lviTuneTracks.Items.Count;
@@ -174,7 +176,7 @@ namespace BPMDetect
                     }
                 }
             }
-            toolStripButton1.Enabled = true;
+            btDoDetect.Enabled = true;
             btListStop.Enabled = false;
             toolStripProgressBar1.Value = 0;
         }
@@ -280,7 +282,7 @@ namespace BPMDetect
             return list;
 
         }
-        private void toolStripButton2_Click(object sender, EventArgs e)
+        private void btCreatePlayList_Click(object sender, EventArgs e)
         {
             IITLibraryPlaylist mainPlayList = _itunesApp.LibraryPlaylist;
             List<IITTrack> trackList = new List<IITTrack>();
@@ -305,7 +307,7 @@ namespace BPMDetect
                         }
                         foreach (IITTrack track in createRandomList(trackList, minuteMin, minuteMax))
                         {
-                            ListViewItem listViewItem = listView1.Items.Add(track.Name);
+                            ListViewItem listViewItem = lvPlayList.Items.Add(track.Name);
                             listViewItem.SubItems.Add(track.Artist);
                             listViewItem.SubItems.Add(track.Album);
                             listViewItem.SubItems.Add(track.BPM.ToString());
