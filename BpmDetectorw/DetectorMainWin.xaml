@@ -1,0 +1,71 @@
+﻿<Window x:Class="BpmDetectorw.DetectorMainWin"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:self="clr-namespace:BpmDetectorw"
+        Title="MainWindow">
+    <Window.Resources>
+        <self:TrackToImageSourceConverter x:Key="TrackToImageSourceConverter" />
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        <StatusBar DockPanel.Dock="Bottom" HorizontalAlignment="Center">
+            <StatusBarItem Content="{Binding Path=SelectedItem.iTunesPlaylist.Tracks.Count,ElementName=trvPlayList,Mode=OneWay}"/>
+            <StatusBarItem>Songs,</StatusBarItem>
+            <StatusBarItem Content="{Binding Path=SelectedItem.iTunesPlaylist.Time,ElementName=trvPlayList,Mode=OneWay}"/>
+        </StatusBar>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="120"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <TreeView Name="trvPlayList">
+                <TreeView.ItemTemplate>
+                    <HierarchicalDataTemplate DataType="{x:Type self:PlaylistTreeItem}" ItemsSource="{Binding Items}">
+                        <TextBlock Text="{Binding Title}" />
+                    </HierarchicalDataTemplate>
+                </TreeView.ItemTemplate>
+            </TreeView>
+            <GridSplitter Width="5"/>
+           
+            <DockPanel Grid.Column="1" LastChildFill="True">
+                <DockPanel DockPanel.Dock="Bottom" Height="100" Width="auto" >
+                    <Image DockPanel.Dock="Left" Source="{Binding Path=SelectedItem ,ElementName=lvTracks, Converter={StaticResource TrackToImageSourceConverter}}"/>
+                    <StackPanel>
+                        <TextBlock Text="{Binding SelectedItem.Name,ElementName=lvTracks}" FontWeight="Bold" FontSize="16"  TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding SelectedItem.Artist,ElementName=lvTracks}"  TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding SelectedItem.Album,ElementName=lvTracks}" FontSize="14" FontStyle="Italic" TextTrimming="CharacterEllipsis"/>
+                    </StackPanel>
+                </DockPanel>
+                <ListView Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True"
+                    ItemsSource="{Binding Path=SelectedItem.iTunesPlaylist.Tracks,ElementName=trvPlayList,Mode=OneWay}">
+                    <ListView.Resources>
+                        <Style TargetType="{x:Type GridViewColumnHeader}">
+                            <Setter Property="HorizontalContentAlignment" Value="Left" />
+                            <Setter Property="Margin" Value="5,1,1,0" />
+                        </Style>
+                    </ListView.Resources>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.View>
+                        <GridView AllowsColumnReorder="True">
+                            <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" />
+                            <GridViewColumn DisplayMemberBinding="{Binding Artist}" Header="Artist"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding Album}" Header="Album"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding Time}" Header="Time"/>
+                            <GridViewColumn Header="BPM" >
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding BPM}" TextAlignment="Right"  />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </DockPanel>
+        </Grid>
+    </DockPanel>
+</Window>

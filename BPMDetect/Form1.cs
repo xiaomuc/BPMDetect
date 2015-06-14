@@ -95,6 +95,32 @@ namespace BPMDetect
             {
                 TreeNode node = tvPlayList.Nodes.Add(playList.Name);
                 node.Tag = playList;
+                IITUserPlaylist upl = playList as IITUserPlaylist;
+                if (upl != null ){
+                    IITUserPlaylist parent =upl.get_Parent();
+                    if (parent != null)
+                    {
+                        foreach (TreeNode n in tvPlayList.Nodes)
+                        {
+                            IITPlaylist ppl = n.Tag as IITPlaylist;
+                            
+                            if (ppl!=null && ppl.playlistID.Equals(parent.playlistID))
+                            {
+                                if (node.Level == 0)
+                                {
+                                    tvPlayList.Nodes.Remove(node);
+                                }
+                                else
+                                {
+                                    node.Parent.Nodes.Remove(node);
+                                }
+                                n.Nodes.Add(node);
+                                break;
+                            }
+                        }
+                    }
+
+                }
             }
 
         }
