@@ -9,21 +9,63 @@ using iTunesLib;
 
 namespace BpmDetectorw
 {
-    class TrackToImageSourceConverter:IValueConverter
+    class TrackToImageSourceConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             IITFileOrCDTrack track = value as IITFileOrCDTrack;
             if (track != null)
             {
-                string albumSmall = Path.Combine(Path.GetDirectoryName(track.Location), "AlbumArtSmall.jpg");
-                if (File.Exists(albumSmall))
+                if (File.Exists(track.Location))
                 {
-                    return albumSmall;
+                    string dir = Path.GetDirectoryName(track.Location);
+                    string albumSmall = Path.Combine(dir, "AlbumArtSmall.jpg");
+                    if (File.Exists(albumSmall))
+                    {
+                        return albumSmall;
+                    }
+                    String[] files = Directory.GetFiles(dir, "*.jpg");
+                    if (files != null && files.Length > 0)
+                    {
+                        return files.First();
+                    }
+                }
+                if (track.Artwork != null && track.Artwork.Count > 0)
+                {
+
+                    string dir = Path.Combine(Path.GetTempPath(), Properties.Resources.tempImageFolderName);
+                    string fileBody;
+                    if (string.IsNullOrEmpty(track.AlbumArtist) && string.IsNullOrEmpty(track.Album))
+                    {
+                        fileBody = track.Name;
+                    }
+                    else
+                    {
+                        fileBody = track.Artist + "_" + track.Album;
+                    }
+                    fileBody = Path.GetInvalidFileNameChars().Aggregate(fileBody, (current, c) => current.Replace(c.ToString(), string.Empty));
+                    string fileName = Path.Combine(dir, fileBody);
+                    switch (track.Artwork[1].Format)
+                    {
+                        case ITArtworkFormat.ITArtworkFormatBMP:
+                            fileName = Path.ChangeExtension(fileName, "bmp");
+                            break;
+                        case ITArtworkFormat.ITArtworkFormatJPEG:
+                            fileName = Path.ChangeExtension(fileName, "jpg");
+                            break;
+                        case ITArtworkFormat.ITArtworkFormatPNG:
+                            fileName = Path.ChangeExtension(fileName, "png");
+                            break;
+                    }
+                    if (!File.Exists(fileName))
+                    {
+                        track.Artwork[1].SaveArtworkToFile(fileName);
+                    }
+                    return fileName;
                 }
             }
 
-            return "pack://siteoforigin:,,,/Resources/noimage.png";
+            return "pack://siteoforigin:,,,/Resources/m_e_others_501.png";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

@@ -2,7 +2,7 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:self="clr-namespace:BpmDetectorw"
-        Title="MainWindow">
+        Title="BpmDetector" FontFamily="Meiryo UI" Closed="Window_Closed">
     <Window.Resources>
         <self:TrackToImageSourceConverter x:Key="TrackToImageSourceConverter" />
     </Window.Resources>
@@ -26,27 +26,57 @@
                 </TreeView.ItemTemplate>
             </TreeView>
             <GridSplitter Width="5"/>
-           
+
             <DockPanel Grid.Column="1" LastChildFill="True">
-                <DockPanel DockPanel.Dock="Bottom" Height="100" Width="auto" >
+                <DockPanel DockPanel.Dock="Bottom"  Height="150" Width="Auto" >
                     <Image DockPanel.Dock="Left" Source="{Binding Path=SelectedItem ,ElementName=lvTracks, Converter={StaticResource TrackToImageSourceConverter}}"/>
-                    <StackPanel>
-                        <TextBlock Text="{Binding SelectedItem.Name,ElementName=lvTracks}" FontWeight="Bold" FontSize="16"  TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding SelectedItem.Artist,ElementName=lvTracks}"  TextTrimming="CharacterEllipsis"/>
-                        <TextBlock Text="{Binding SelectedItem.Album,ElementName=lvTracks}" FontSize="14" FontStyle="Italic" TextTrimming="CharacterEllipsis"/>
-                    </StackPanel>
+                    <Grid DockPanel.Dock="Left">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Margin="1" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">Name</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="0" Text="{Binding SelectedItem.Name,ElementName=lvTracks}" FontWeight="Bold" FontSize="16"  TextTrimming="CharacterEllipsis"/>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="1" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">Artist</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="1" Text="{Binding SelectedItem.Artist,ElementName=lvTracks}"  TextTrimming="CharacterEllipsis"/>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="2" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" >Album</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="2" Text="{Binding SelectedItem.Album,ElementName=lvTracks}" FontSize="14" FontStyle="Italic" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="3" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">Time</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="3" Text="{Binding SelectedItem.Time,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="4" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">BPM</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="4"  Text="{Binding SelectedItem.BPM,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                    </Grid>
                 </DockPanel>
-                <ListView Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True"
+                <ListView Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2"
                     ItemsSource="{Binding Path=SelectedItem.iTunesPlaylist.Tracks,ElementName=trvPlayList,Mode=OneWay}">
                     <ListView.Resources>
                         <Style TargetType="{x:Type GridViewColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Left" />
                             <Setter Property="Margin" Value="5,1,1,0" />
                         </Style>
+                       
                     </ListView.Resources>
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                            <Style.Triggers>
+                                <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                                    <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowColor}}"></Setter>
+                                </Trigger>
+                                <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                    <Setter Property="Background" Value="LightGray"></Setter>
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="Orange"/>
+                                </Trigger>
+                            </Style.Triggers>
                         </Style>
                     </ListView.ItemContainerStyle>
                     <ListView.View>

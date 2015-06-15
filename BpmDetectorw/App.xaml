@@ -1,7 +1,7 @@
 ﻿<Application x:Class="BpmDetectorw.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="DetectorMainWin.xaml">
+             StartupUri="DetectorMainWin.xaml" Exit="Application_Exit">
     <Application.Resources>
          
     </Application.Resources>
