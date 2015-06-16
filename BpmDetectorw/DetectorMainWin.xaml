@@ -1,8 +1,9 @@
 ﻿<Window x:Class="BpmDetectorw.DetectorMainWin"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:wfc="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
         xmlns:self="clr-namespace:BpmDetectorw"
-        Title="BpmDetector" FontFamily="Meiryo UI" Closed="Window_Closed">
+        Title="BpmDetector" FontFamily="Source Code Pro" Closed="Window_Closed">
     <Window.Resources>
         <self:TrackToImageSourceConverter x:Key="TrackToImageSourceConverter" />
     </Window.Resources>
@@ -33,7 +34,8 @@
                     <Grid DockPanel.Dock="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="2*"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition/>
@@ -41,30 +43,45 @@
                             <RowDefinition/>
                             <RowDefinition/>
                             <RowDefinition/>
+                            <RowDefinition/>
                         </Grid.RowDefinitions>
-                        <TextBlock Margin="1" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">Name</TextBlock>
+                        <TextBlock Margin="1" Grid.Column="0" Grid.Row="0" VerticalAlignment="Center" Background="LightGray">Name</TextBlock>
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="0" Text="{Binding SelectedItem.Name,ElementName=lvTracks}" FontWeight="Bold" FontSize="16"  TextTrimming="CharacterEllipsis"/>
-                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="1" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">Artist</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="1" Background="LightGray">Artist</TextBlock>
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="1" Text="{Binding SelectedItem.Artist,ElementName=lvTracks}"  TextTrimming="CharacterEllipsis"/>
-                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="2" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" >Album</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="2" Background="LightGray">Album</TextBlock>
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="2" Text="{Binding SelectedItem.Album,ElementName=lvTracks}" FontSize="14" FontStyle="Italic" TextTrimming="CharacterEllipsis"/>
-                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="3" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">Time</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="3" Background="LightGray">Time</TextBlock>
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="3" Text="{Binding SelectedItem.Time,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
-                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="4" Background="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}">BPM</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="4" Background="LightGray">BPM</TextBlock>
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="4"  Text="{Binding SelectedItem.BPM,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="5" Background="LightGray">Kind</TextBlock>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="5"  Text="{Binding SelectedItem.KindAsString,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                        <WindowsFormsHost Name="HostChart" Grid.Column="2" Grid.RowSpan="6">
+                            <wfc:Chart Name="chartBPM">
+                                <wfc:Chart.Series>
+                                    <wfc:Series ChartArea="ChartAreaBPM" Name="seriesBPM" ChartType="Line"/>
+                                    <wfc:Series ChartType="Point" ChartArea="ChartAreaBPM" Name="seriesPeak"/>
+                                </wfc:Chart.Series>
+                                <wfc:Chart.ChartAreas>
+                                    <wfc:ChartArea Name="ChartAreaBPM" />
+                                </wfc:Chart.ChartAreas>
+                            </wfc:Chart>
+                        </WindowsFormsHost>
                     </Grid>
                 </DockPanel>
                 <ListView Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2"
-                    ItemsSource="{Binding Path=SelectedItem.iTunesPlaylist.Tracks,ElementName=trvPlayList,Mode=OneWay}">
+                    ItemsSource="{Binding Path=SelectedItem.iTunesPlaylist.Tracks,ElementName=trvPlayList,Mode=OneWay}" >
                     <ListView.Resources>
                         <Style TargetType="{x:Type GridViewColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Left" />
                             <Setter Property="Margin" Value="5,1,1,0" />
                         </Style>
-                       
+
                     </ListView.Resources>
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
+                            <EventSetter Event="MouseDoubleClick" Handler="lvTracks_MouseDoubleClick"/>
                             <Setter Property="HorizontalContentAlignment" Value="Stretch" />
                             <Style.Triggers>
                                 <Trigger Property="ItemsControl.AlternationIndex" Value="0">
