@@ -1,7 +1,7 @@
 ﻿<Window x:Class="BpmDetectorw.DetectorMainWin"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:wfc="clr-namespace:System.Windows.Forms.DataVisualization.Charting;assembly=System.Windows.Forms.DataVisualization"
+        xmlns:my="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:self="clr-namespace:BpmDetectorw"
         Title="BpmDetector" FontFamily="Source Code Pro" Closed="Window_Closed">
     <Window.Resources>
@@ -57,7 +57,13 @@
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="4"  Text="{Binding SelectedItem.BPM,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis" />
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="5" Background="LightGray">Kind</TextBlock>
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="5"  Text="{Binding SelectedItem.KindAsString,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis" />
-                        <WindowsFormsHost Name="HostChart" Grid.Column="2" Grid.RowSpan="6">
+                        <my:Chart Name="chartBPM" Grid.Column="2" Grid.RowSpan="6">
+                            <my:LineSeries Name="lineSeries1" DependentValuePath="Value" 
+                                IndependentValuePath="Key" ItemsSource="{Binding}" 
+                                           DataContext="{Binding}"
+                                IsSelectionEnabled="True"/>
+                        </my:Chart>
+                        <!--WindowsFormsHost Name="HostChart" Grid.Column="2" Grid.RowSpan="6">
                             <wfc:Chart Name="chartBPM">
                                 <wfc:Chart.Series>
                                     <wfc:Series ChartArea="ChartAreaBPM" Name="seriesBPM" ChartType="Line"/>
@@ -67,7 +73,7 @@
                                     <wfc:ChartArea Name="ChartAreaBPM" />
                                 </wfc:Chart.ChartAreas>
                             </wfc:Chart>
-                        </WindowsFormsHost>
+                        </-->
                     </Grid>
                 </DockPanel>
                 <ListView Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2"

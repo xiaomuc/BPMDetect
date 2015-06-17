@@ -15,7 +15,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using System.Windows.Forms.DataVisualization.Charting;
 using SoundAnalyzeLib;
 
 namespace BpmDetectorw
@@ -27,7 +26,6 @@ namespace BpmDetectorw
     {
         iTunesApp _itunesApp;
         string _imagePath;
-        Chart _chartBPM;
 
         public DetectorMainWin()
         {
@@ -39,8 +37,8 @@ namespace BpmDetectorw
             deleteImageDir();
             Directory.CreateDirectory(_imagePath);
 
-            _chartBPM = (Chart)HostChart.Child;
-            _chartBPM.ChartAreas[0].AxisX.Interval = 10D;
+            //_chartBPM = (Chart)HostChart.Child;
+            //_chartBPM.ChartAreas[0].AxisX.Interval = 10D;
         }
         void deleteImageDir()
         {
@@ -73,7 +71,8 @@ namespace BpmDetectorw
                 {
                     BPMDetectorConfig config = new BPMDetectorConfig()
                     {
-                        BPMLow=80,BPMHigh=200
+                        BPMLow = 80,
+                        BPMHigh = 200
                     };
                     BpmDetector detector = new BpmDetector(config);
                     detector.detect(track.Location);
@@ -84,24 +83,27 @@ namespace BpmDetectorw
         }
         void showBPMChart(BpmDetector detector)
         {
-            Series seriesBPM = _chartBPM.Series["seriesBPM"];
-            seriesBPM.Points.Clear();
-            Series seriesPeak=_chartBPM.Series["seriesPeak"];
-            seriesPeak.Points.Clear();
-            if (detector != null)
-            {
-                ChartArea charAreaBPM = _chartBPM.ChartAreas[0];
-                charAreaBPM.AxisX.Minimum = detector.BpmLow;
-                charAreaBPM.AxisX.Maximum = detector.BpmHigh;
-                for (int bpm = detector.BpmLow; bpm <= detector.BpmHigh; bpm++)
-                {
-                    seriesBPM.Points.AddXY(bpm, detector.getBpmValue(bpm));
-                }
-                foreach (int peak in detector.Peaks)
-                {
-                    seriesPeak.Points.AddXY(peak, detector.getBpmValue(peak));
-                }
-            }
+            chartBPM.DataContext = detector.BPM;
+            /* 
+             * Series seriesBPM = _chartBPM.Series["seriesBPM"];
+                        seriesBPM.Points.Clear();
+                        Series seriesPeak=_chartBPM.Series["seriesPeak"];
+                        seriesPeak.Points.Clear();
+                        if (detector != null)
+                        {
+                            ChartArea charAreaBPM = _chartBPM.ChartAreas[0];
+                            charAreaBPM.AxisX.Minimum = detector.BpmLow;
+                            charAreaBPM.AxisX.Maximum = detector.BpmHigh;
+                            for (int bpm = detector.BpmLow; bpm <= detector.BpmHigh; bpm++)
+                            {
+                                seriesBPM.Points.AddXY(bpm, detector.getBpmValue(bpm));
+                            }
+                            foreach (int peak in detector.Peaks)
+                            {
+                                seriesPeak.Points.AddXY(peak, detector.getBpmValue(peak));
+                            }
+                        }
+             */
         }
     }
 

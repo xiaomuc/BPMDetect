@@ -15,26 +15,15 @@ namespace SoundAnalyzeLib
     public class BpmDetector
     {
         //fields
-        private List<double> _bpm;
+        private List<KeyValuePair<int, double>> _bpm;
+        public List<KeyValuePair<int, double>> BPM { get { return _bpm; } }
 
         //properties
         private string _fileName;
         public string FileName { get { return _fileName; } }
 
-        private IWaveSource _source;
-        public IWaveSource WaveSource { get { return _source; } }
-
-        private ISampleSource _sampleSource;
-        public ISampleSource SampleSource { get { return _sampleSource; } }
-
-        private List<double> _volume;
-        public List<double> Volume { get { return _volume; } }
-
-        private List<double> _diff;
-        public List<double> Diff { get { return _diff; } }
-
-        private List<int> _peaks;
-        public List<int> Peaks { get { return _peaks; } }
+        private List<KeyValuePair<int, double>> _peaks;
+        public List<KeyValuePair<int, double>> Peaks { get { return _peaks; } }
 
         int _frameSize = 512;
         /// <summary>
@@ -89,21 +78,6 @@ namespace SoundAnalyzeLib
             _peakWidth = config.PeakWidth;
         }
 
-        
-        /// <summary>
-        /// BPM計算後、引数のBPMでの距離Rを返す
-        /// </summary>
-        /// <param name="bpm"></param>
-        /// <returns></returns>
-        public double getBpmValue(int bpm)
-        {
-            if (bpm < _bpmLow || bpm > _bpmHigh)
-            {
-                return 0;
-            }
-            return _bpm[bpm - _bpmLow];
-        }
-
 
         /// <summary>
         /// BPM検出
@@ -112,29 +86,32 @@ namespace SoundAnalyzeLib
         /// <returns></returns>
         public int detect(String fileName)
         {
-            _source = CodecFactory.Instance.GetCodec(fileName);
+            IWaveSource _source = CodecFactory.Instance.GetCodec(fileName);
             _fileName = fileName;
 
-            _sampleSource = _source.ToMono().ToSampleSource();
-            getVolume();
-            getDiff();
-            calcBpm();
+            ISampleSource _sampleSource = _source.ToMono().ToSampleSource();
+            List<double> volumeList=getVolume(_sampleSource);
+            List<double> diffList=getDiff(volumeList);
+            calcBpm(diffList,_sampleSource.WaveFormat.SampleRate);
             findPeaks(_peakWidth);
 
             double peakMax = 0;
             int bMax = 0;
-            foreach (int bpm in _peaks)
+            foreach (KeyValuePair<int,double> bpm in _peaks)
             {
-                double p = getBpmValue(bpm);
+                double p = bpm.Value;
 
                 if (peakMax == 0)
                 {
                     peakMax = p;
-                    bMax = bpm;
+                    bMax = bpm.Key;
                 }
-                else if (p / peakMax > _peakThreshold && _priorityBpmLow <= bpm && bpm < _priorityBpmHigh && (bMax % bpm == 0 || bpm % bMax == 0))
+                else if (p / peakMax > _peakThreshold 
+                    && _priorityBpmLow <= bpm.Key 
+                    && bpm.Key < _priorityBpmHigh 
+                    && (bMax % bpm.Key == 0 || bpm.Key % bMax == 0))
                 {
-                    bMax = bpm;
+                    bMax = bpm.Key;
                 }
             }
             return bMax;
@@ -145,9 +122,9 @@ namespace SoundAnalyzeLib
         /// フレームごとの音量の取得
         /// </summary>
         /// <returns>フレーム数</returns>
-        public int getVolume()
+        private List<double> getVolume(ISampleSource _sampleSource)
         {
-            _volume = new List<double>();
+            List<double> _volume = new List<double>();
             int read;
             float[] buff = new float[_frameSize];
             while ((read = _sampleSource.Read(buff, 0, _frameSize)) == _frameSize)
@@ -159,16 +136,16 @@ namespace SoundAnalyzeLib
                 }
                 _volume.Add(v);
             }
-            return _volume.Count;
+            return _volume;
         }
 
         /// <summary>
         /// 音量差分の取得する。同時にハミングウィンドウもかけとく
         /// </summary>
         /// <returns>音量差分リストのサイズ</returns>
-        public int getDiff()
+        List<double> getDiff(List<double> _volume)
         {
-            _diff = new List<double>();
+            List<double> _diff = new List<double>();
             for (int i = 0; i < _volume.Count - 1; i++)
             {
                 if (_volume[i + 1] < _volume[i])
@@ -181,16 +158,17 @@ namespace SoundAnalyzeLib
                     _diff.Add((_volume[i + 1] - _volume[i]) * ham);
                 }
             }
-            return _diff.Count;
+            return _diff;
         }
 
+        
         /// <summary>
         /// BPM成分抽出
         /// </summary>
-        public void calcBpm()
+        public void calcBpm(List<double> _diff,int sampleRate)
         {
-            double s = (double)_sampleSource.WaveFormat.SampleRate / (double)_frameSize;
-            _bpm = new List<double>();
+            double s = (double)sampleRate / (double)_frameSize;
+            _bpm = new List<KeyValuePair<int, double>>();
             for (int bpm = _bpmLow; bpm <= _bpmHigh; bpm++)
             {
                 double a_sum = 0;
@@ -203,9 +181,10 @@ namespace SoundAnalyzeLib
                 }
                 double a_tmp = a_sum / (double)_diff.Count;
                 double b_tmp = b_sum / (double)_diff.Count;
-                _bpm.Add(Math.Sqrt(Math.Pow(a_tmp, 2) + Math.Pow(b_tmp, 2)));
+                _bpm.Add(new KeyValuePair<int,double>(bpm, Math.Sqrt(Math.Pow(a_tmp, 2) + Math.Pow(b_tmp, 2))));
             }
         }
+
 
         /// <summary>
         /// BPMピークを求め、ピーク値の大きい順にソートする
@@ -214,7 +193,7 @@ namespace SoundAnalyzeLib
         /// <returns>検出したピーク数</returns>
         public int findPeaks(int width)
         {
-            _peaks = new List<int>();
+            _peaks = new List<KeyValuePair<int, double>>();
             for (int i = 0; i < _bpm.Count; i++)
             {
                 bool isPeak = true;
@@ -228,9 +207,9 @@ namespace SoundAnalyzeLib
                     }
                     else
                     {
-                        val = _bpm[i - j];
+                        val = BPM[i - j].Value;
                     }
-                    if (val > _bpm[i])
+                    if (val > _bpm[i].Value)
                     {
                         isPeak = false;
                         break;
@@ -238,13 +217,13 @@ namespace SoundAnalyzeLib
                     //after
                     if (i + j < _bpm.Count)
                     {
-                        val = _bpm[i + j];
+                        val = _bpm[i + j].Value;
                     }
                     else
                     {
                         val = 0;
                     }
-                    if (val > _bpm[i])
+                    if (val > _bpm[i].Value)
                     {
                         isPeak = false;
                         break;
@@ -252,12 +231,12 @@ namespace SoundAnalyzeLib
                 }
                 if (isPeak)
                 {
-                    _peaks.Add(i + _bpmLow);
+                    _peaks.Add(_bpm[i]);
                 }
             }
-            _peaks.Sort(delegate(int x, int y)
+            _peaks.Sort(delegate(KeyValuePair<int,double> x, KeyValuePair<int,double> y)
             {
-                double d = getBpmValue(y) - getBpmValue(x);// _bpm[y] - _bpm[x];
+                double d = y.Value - x.Value;// _bpm[y] - _bpm[x];
                 if (d == 0) { return 0; }
                 else if (d > 0) { return 1; }
                 else return -1;
