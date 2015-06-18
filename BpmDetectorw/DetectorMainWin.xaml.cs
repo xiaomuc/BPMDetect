@@ -76,14 +76,20 @@ namespace BpmDetectorw
                     };
                     BpmDetector detector = new BpmDetector(config);
                     detector.detect(track.Location);
+                    TrackToBPMConverter.dictionary.Add(track.trackID, detector);
 
-                    showBPMChart(detector);
+                    BindingExpression be = bpmSeries1.GetBindingExpression(System.Windows.Controls.DataVisualization.Charting.Series.DataContextProperty);
+                    be.UpdateSource();
+                    
+                    //                    showBPMChart(detector);
                 }
             }
         }
         void showBPMChart(BpmDetector detector)
         {
-            chartBPM.DataContext = detector.BPM;
+            //            chartBPM.DataContext = detector.BPM;
+            bpmSeries1.DataContext = detector.BPM;
+            peakSeries.DataContext = detector.TopPeaks;
             /* 
              * Series seriesBPM = _chartBPM.Series["seriesBPM"];
                         seriesBPM.Points.Clear();

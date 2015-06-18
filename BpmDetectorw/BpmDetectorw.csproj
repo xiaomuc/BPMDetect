@@ -66,6 +66,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="TrackToBPMConverter.cs" />
     <Compile Include="TrackToImageSourceConverter.cs" />
     <Page Include="DetectorMainWin.xaml">
       <Generator>MSBuild:Compile</Generator>
