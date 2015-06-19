@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BpmDetectorw", "BpmDetector
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundAnalyzeLib", "SoundAnalyzeLib\SoundAnalyzeLib.csproj", "{B447F80A-A29D-4A5B-9A0B-2ACF7C3BB499}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Labo", "Labo\Labo.csproj", "{6D3BFF82-39AC-4743-B47F-528E28DE901F}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{B447F80A-A29D-4A5B-9A0B-2ACF7C3BB499}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B447F80A-A29D-4A5B-9A0B-2ACF7C3BB499}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B447F80A-A29D-4A5B-9A0B-2ACF7C3BB499}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D3BFF82-39AC-4743-B47F-528E28DE901F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D3BFF82-39AC-4743-B47F-528E28DE901F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D3BFF82-39AC-4743-B47F-528E28DE901F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D3BFF82-39AC-4743-B47F-528E28DE901F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
