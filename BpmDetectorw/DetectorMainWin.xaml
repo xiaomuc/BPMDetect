@@ -3,11 +3,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:charting="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:datavis="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
+        xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:self="clr-namespace:BpmDetectorw"
         Title="BpmDetector" FontFamily="Source Code Pro" Closed="Window_Closed">
     <Window.Resources>
         <self:TrackToImageSourceConverter x:Key="TrackToImageSourceConverter" />
-        <self:TrackToBPMConverter x:Key="TrackToBPMConverter" />
         <!-- データポイントを表示しないようにするスタイル（↓ の SimpleLineSeriesStyleで使用） -->
         <Style x:Key="EmptyPointsStyle" TargetType="{x:Type charting:DataPoint}">
             <Setter Property="Template" Value="{x:Null}"/>
@@ -35,8 +35,27 @@
         </Style>
     </Window.Resources>
     <DockPanel LastChildFill="True">
+        <ToolBar DockPanel.Dock="Top">
+            <Button Name="btnDetectAll" Click="btnDetectAll_Click">Detect All</Button>
+            <Separator/>
+            <TextBlock Margin="1,3,0,0">BPM:Lo:</TextBlock>
+            <toolkit:IntegerUpDown Name="iupBPMLo" Value="80" Minimum="60" Maximum="240" Increment="1"/>
+            <TextBlock Margin="1,3,0,0">Hi:</TextBlock>
+            <toolkit:IntegerUpDown Name="iupBPMHi" Value="200" Minimum="60" Maximum="240" Increment="1"/>
+            <Separator/>
+            <TextBlock Margin="1,3,0,0">Priority:Lo:</TextBlock>
+            <toolkit:IntegerUpDown Name="iupPrioLo" Value="100" Minimum="60" Maximum="240" Increment="1"/>
+            <TextBlock Margin="1,3,0,0">Hi:</TextBlock>
+            <toolkit:IntegerUpDown Name="iupPrioHi" Value="180" Minimum="60" Maximum="240" Increment="1"/>
+            <Separator/>
+            <TextBlock Margin="1,3,0,0">Threshold</TextBlock>
+            <toolkit:DoubleUpDown Name="dupThreshold" Value="0.5" Minimum="0" Maximum="1" Increment="0.1"/>
+            <Separator/>
+            <Button Name="btnTap" Click="btnTap_Click">Tap</Button>
+            <TextBlock Name="tblTap" Margin="1,3,0,0" />
+        </ToolBar>
         <StatusBar DockPanel.Dock="Bottom" HorizontalAlignment="Center">
-            <StatusBarItem Content="{Binding Path=SelectedItem.iTunesPlaylist.Tracks.Count,ElementName=trvPlayList,Mode=OneWay}"/>
+            <StatusBarItem Content="{Binding Path=SelectedItem.Tracks.Count,ElementName=trvPlayList,Mode=OneWay}"/>
             <StatusBarItem>Songs,</StatusBarItem>
             <StatusBarItem Content="{Binding Path=SelectedItem.iTunesPlaylist.Time,ElementName=trvPlayList,Mode=OneWay}"/>
         </StatusBar>
@@ -56,12 +75,13 @@
 
             <DockPanel Grid.Column="1" LastChildFill="True">
                 <DockPanel DockPanel.Dock="Bottom"  Height="150" Width="Auto" >
-                    <Image DockPanel.Dock="Left" Source="{Binding Path=SelectedItem ,ElementName=lvTracks, Converter={StaticResource TrackToImageSourceConverter}}"/>
+                    <Image DockPanel.Dock="Left" Source="{Binding Path=SelectedItem.Track ,ElementName=lvTracks, Converter={StaticResource TrackToImageSourceConverter}}"/>
                     <Grid DockPanel.Dock="Left">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="Auto" MinWidth="25"/>
                         </Grid.ColumnDefinitions>
                         <Grid.RowDefinitions>
                             <RowDefinition/>
@@ -72,17 +92,24 @@
                             <RowDefinition/>
                         </Grid.RowDefinitions>
                         <TextBlock Margin="1,5" Grid.Column="0" Grid.Row="0" Background="LightGray" HorizontalAlignment="Right">Name:</TextBlock>
-                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="0" Text="{Binding SelectedItem.Name,ElementName=lvTracks}" FontWeight="Bold" FontSize="16"  TextTrimming="CharacterEllipsis"/>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="0" Text="{Binding SelectedItem.Track.Name,ElementName=lvTracks}" FontWeight="Bold" FontSize="16"  TextTrimming="CharacterEllipsis"/>
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="1" Background="LightGray" HorizontalAlignment="Right">Artist:</TextBlock>
-                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="1" Text="{Binding SelectedItem.Artist,ElementName=lvTracks}"  TextTrimming="CharacterEllipsis"/>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="1" Text="{Binding SelectedItem.Track.Artist,ElementName=lvTracks}"  TextTrimming="CharacterEllipsis"/>
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="2" Background="LightGray" HorizontalAlignment="Right">Album:</TextBlock>
-                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="2" Text="{Binding SelectedItem.Album,ElementName=lvTracks}" FontSize="14" FontStyle="Italic" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="2" Text="{Binding SelectedItem.Track.Album,ElementName=lvTracks}" FontSize="14" FontStyle="Italic" TextTrimming="CharacterEllipsis"/>
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="3" Background="LightGray" HorizontalAlignment="Right">Time:</TextBlock>
-                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="3" Text="{Binding SelectedItem.Time,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="3" Text="{Binding SelectedItem.Track.Time,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis"/>
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="4" Background="LightGray" HorizontalAlignment="Right">BPM:</TextBlock>
-                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="4"  Text="{Binding SelectedItem.BPM,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="4"  Text="{Binding SelectedItem.Track.BPM,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis" />
                         <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="0" Grid.Row="5" Background="LightGray" HorizontalAlignment="Right">Kind:</TextBlock>
-                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="5"  Text="{Binding SelectedItem.KindAsString,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="5"  Text="{Binding SelectedItem.Track.KindAsString,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                        <ListBox Grid.Column="3"  Grid.RowSpan="6" ItemsSource="{Binding SelectedItem.Detector.TopPeaks,ElementName=lvTracks}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Key}"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
                         <charting:Chart Name="chartBPM" Grid.Column="2" Grid.RowSpan="6" Title="BPM">
                             <charting:Chart.LegendStyle>
                                 <Style TargetType="datavis:Legend">
@@ -96,16 +123,17 @@
                             </charting:Chart.TitleStyle>
                             <charting:LineSeries Name="bpmSeries1" DependentValuePath="Value" IndependentValuePath="Key" 
                                 ItemsSource="{Binding}" IsSelectionEnabled="True"
-                                DataContext="{Binding Path=SelectedItem ,ElementName=lvTracks, Converter={StaticResource TrackToBPMConverter},UpdateSourceTrigger=Explicit,Mode=OneWay}"
+                                DataContext="{Binding Path=SelectedItem.Detector.BPM ,ElementName=lvTracks, UpdateSourceTrigger=PropertyChanged,Mode=OneWay}"
                                 BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"/>
                             <charting:ScatterSeries Name="peakSeries" DependentValuePath="Value" IndependentValuePath="Key" 
-                                ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True"/>
+                                ItemsSource="{Binding}" IsSelectionEnabled="True"
+                                DataContext="{Binding Path=SelectedItem.Detector.TopPeaks,ElementName=lvTracks,UpdateSourceTrigger=PropertyChanged,Mode=OneWay}" />
 
                         </charting:Chart>
                     </Grid>
                 </DockPanel>
                 <ListView Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2" 
-                          ItemsSource="{Binding Path=SelectedItem.iTunesPlaylist.Tracks,ElementName=trvPlayList,Mode=OneWay}">
+                          ItemsSource="{Binding Path=SelectedItem.Tracks,ElementName=trvPlayList,Mode=OneWay}">
                     <ListView.Resources>
                         <Style TargetType="{x:Type GridViewColumnHeader}">
                             <Setter Property="HorizontalContentAlignment" Value="Left" />
@@ -132,14 +160,28 @@
                     </ListView.ItemContainerStyle>
                     <ListView.View>
                         <GridView AllowsColumnReorder="True">
-                            <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" />
-                            <GridViewColumn DisplayMemberBinding="{Binding Artist}" Header="Artist"/>
-                            <GridViewColumn DisplayMemberBinding="{Binding Album}" Header="Album"/>
-                            <GridViewColumn DisplayMemberBinding="{Binding Time}" Header="Time"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding Track.Name}" Header="Name" />
+                            <GridViewColumn DisplayMemberBinding="{Binding Track.Artist}" Header="Artist"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding Track.Album}" Header="Album"/>
+                            <GridViewColumn DisplayMemberBinding="{Binding Track.Time}" Header="Time"/>
                             <GridViewColumn Header="BPM" >
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding BPM}" TextAlignment="Right"  />
+                                        <TextBlock Text="{Binding Track.BPM}" TextAlignment="Right"  />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Detect" >
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding DetectedBPM}" TextAlignment="Right"  />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Header="Peaks" >
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding Detector.TopPeaks.Count}" TextAlignment="Right"  />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>

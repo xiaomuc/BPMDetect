@@ -4,7 +4,7 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid>
         <ListView Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2" 
-                          ItemsSource="{Binding}">
+                          ItemsSource="{Binding}" MouseDoubleClick="lvTracks_MouseDoubleClick">
             <ListView.Resources>
                 <Style TargetType="{x:Type GridViewColumnHeader}">
                     <Setter Property="HorizontalContentAlignment" Value="Left" />
@@ -31,14 +31,14 @@
             </ListView.ItemContainerStyle>
             <ListView.View>
                 <GridView AllowsColumnReorder="True">
-                    <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" />
-                    <GridViewColumn DisplayMemberBinding="{Binding Artist}" Header="Artist"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding Album}" Header="Album"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding Time}" Header="Time"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Track.Name}" Header="Name" />
+                    <GridViewColumn DisplayMemberBinding="{Binding Track.Artist}" Header="Artist"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Track.Album}" Header="Album"/>
+                    <GridViewColumn DisplayMemberBinding="{Binding Track.Time}" Header="Time"/>
                     <GridViewColumn Header="BPM" >
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding BPM}" TextAlignment="Right"  />
+                                <TextBlock Text="{Binding Track.BPM}" TextAlignment="Right"  />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

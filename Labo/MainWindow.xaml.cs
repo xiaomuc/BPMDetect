@@ -27,9 +27,15 @@ namespace Labo
         {
             InitializeComponent();
             _ituneApp = new iTunesApp();
-            TestCollection collection = new TestCollection(_ituneApp.LibraryPlaylist.Tracks);
+            WrapCollection collection = new WrapCollection(_ituneApp.LibraryPlaylist.Tracks);
             
             lvTracks.ItemsSource = collection;
+        }
+
+        private void lvTracks_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            WrapTrack wt= lvTracks.SelectedItem as WrapTrack;
+            wt.DetectedBPM = 100;
         }
     }
 }

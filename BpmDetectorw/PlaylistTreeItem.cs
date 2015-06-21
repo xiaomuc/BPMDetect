@@ -6,17 +6,23 @@ using System.Threading.Tasks;
 using System.Collections.ObjectModel;
 using System.Windows.Controls;
 using iTunesLib;
+using SoundAnalyzeLib;
 
 namespace BpmDetectorw
 {
     public class PlaylistTreeItem
     {
-        public static void createPlaylistTree(TreeView treeView,IITSource source)
+        public static void createPlaylistTree(TreeView treeView, IITSource source,Dictionary<int,BpmDetector> dictionary)
         {
             List<PlaylistTreeItem> list = new List<PlaylistTreeItem>();
             foreach (IITPlaylist p in source.Playlists)
             {
-                PlaylistTreeItem item = new PlaylistTreeItem() { Title = p.Name, iTunesPlaylist = p };
+                PlaylistTreeItem item = new PlaylistTreeItem()
+                {
+                    Title = p.Name,
+                    iTunesPlaylist = p,
+                    Tracks = new TrackCollectionWrapper(p.Tracks, dictionary)
+                };
                 list.Add(item);
             }
 
@@ -62,6 +68,8 @@ namespace BpmDetectorw
         }
         public string Title { get; set; }
         public IITPlaylist iTunesPlaylist { get; set; }
+//        public ObservableTrackCollection Tracks { get; set; }
         public ObservableCollection<PlaylistTreeItem> Items { get; set; }
+        public TrackCollectionWrapper Tracks { get; set; }
     }
 }

@@ -15,6 +15,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using SoundAnalyzeLib;
 
 namespace BpmDetectorw
@@ -26,12 +27,14 @@ namespace BpmDetectorw
     {
         iTunesApp _itunesApp;
         string _imagePath;
+        Dictionary<int, BpmDetector> _detectorDictionary;
 
         public DetectorMainWin()
         {
             InitializeComponent();
             _itunesApp = new iTunesApp();
-            PlaylistTreeItem.createPlaylistTree(trvPlayList, _itunesApp.LibrarySource);
+            _detectorDictionary = new Dictionary<int, BpmDetector>();
+            PlaylistTreeItem.createPlaylistTree(trvPlayList, _itunesApp.LibrarySource, _detectorDictionary);
 
             _imagePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Properties.Resources.tempImageFolderName);
             deleteImageDir();
@@ -61,57 +64,102 @@ namespace BpmDetectorw
             deleteImageDir();
         }
 
+        BPMDetectorConfig createConfig()
+        {
+            return new BPMDetectorConfig()
+            {
+                BPMLow = (int)iupBPMLo.Value,
+                BPMHigh = (int)iupBPMHi.Value,
+                PriorityBPMLow = (int)iupPrioLo.Value,
+                PriorityBPMHigh = (int)iupPrioHi.Value,
+                PeakThreshold = (double)dupThreshold.Value
+            };
+        }
+
         private void lvTracks_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ListViewItem item = sender as ListViewItem;
             if (item != null)
             {
-                IITFileOrCDTrack track = item.Content as IITFileOrCDTrack;
+                TrackWrapper tw = item.Content as TrackWrapper;
+                IITFileOrCDTrack track = tw.Track as IITFileOrCDTrack;
                 if (track != null)
                 {
-                    BPMDetectorConfig config = new BPMDetectorConfig()
-                    {
-                        BPMLow = 80,
-                        BPMHigh = 200
-                    };
-                    BpmDetector detector = new BpmDetector(config);
-                    detector.detect(track.Location);
-                    TrackToBPMConverter.dictionary.Add(track.trackID, detector);
-
-                    BindingExpression be = bpmSeries1.GetBindingExpression(System.Windows.Controls.DataVisualization.Charting.Series.DataContextProperty);
-                    be.UpdateSource();
+                    BPMDetectorConfig config = createConfig();
                     
-                    //                    showBPMChart(detector);
+                    try
+                    {
+                        BpmDetector detector = new BpmDetector(config);
+                        tw.DetectedBPM = detector.detect(track.Location);
+                        tw.Detector = detector;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
                 }
             }
         }
-        void showBPMChart(BpmDetector detector)
+        public void DoEvents()
         {
-            //            chartBPM.DataContext = detector.BPM;
-            bpmSeries1.DataContext = detector.BPM;
-            peakSeries.DataContext = detector.TopPeaks;
-            /* 
-             * Series seriesBPM = _chartBPM.Series["seriesBPM"];
-                        seriesBPM.Points.Clear();
-                        Series seriesPeak=_chartBPM.Series["seriesPeak"];
-                        seriesPeak.Points.Clear();
-                        if (detector != null)
+            DispatcherFrame frame = new DispatcherFrame();
+            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background,
+                new DispatcherOperationCallback(ExitFrames), frame);
+            Dispatcher.PushFrame(frame);
+        }
+
+        public object ExitFrames(object f)
+        {
+            ((DispatcherFrame)f).Continue = false;
+
+            return null;
+        }
+        bool bDetecting = false;
+        private void btnDetectAll_Click(object sender, RoutedEventArgs e)
+        {
+            bDetecting = !bDetecting;
+            if (bDetecting)
+            {
+                BPMDetectorConfig config = createConfig();
+                
+                foreach (TrackWrapper tw in lvTracks.Items)
+                {
+                    if (!bDetecting) break;
+
+                    IITFileOrCDTrack track = tw.Track as IITFileOrCDTrack;
+                    if (track != null)
+                    {
+                        try
                         {
-                            ChartArea charAreaBPM = _chartBPM.ChartAreas[0];
-                            charAreaBPM.AxisX.Minimum = detector.BpmLow;
-                            charAreaBPM.AxisX.Maximum = detector.BpmHigh;
-                            for (int bpm = detector.BpmLow; bpm <= detector.BpmHigh; bpm++)
-                            {
-                                seriesBPM.Points.AddXY(bpm, detector.getBpmValue(bpm));
-                            }
-                            foreach (int peak in detector.Peaks)
-                            {
-                                seriesPeak.Points.AddXY(peak, detector.getBpmValue(peak));
-                            }
+                            BpmDetector detector = new BpmDetector(config);
+                            tw.DetectedBPM = detector.detect(track.Location);
+                            tw.Detector = detector;
+                            lvTracks.SelectedItem = tw;
+                            lvTracks.ScrollIntoView(tw);
+                            DoEvents();
                         }
-             */
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine(ex.Message);
+                        }
+                    }
+                }
+
+            }
+            bDetecting = false;
+        }
+        long prev_tick = 0;
+        private void btnTap_Click(object sender, RoutedEventArgs e)
+        {
+            long now = DateTime.Now.Ticks;
+            long tapped = now - prev_tick;
+            prev_tick = now;
+            if (tapped < TimeSpan.TicksPerMinute)
+            {
+                long bpm = TimeSpan.TicksPerMinute / tapped;
+                tblTap.Text = bpm.ToString();
+            }
         }
     }
-
-
 }
+
