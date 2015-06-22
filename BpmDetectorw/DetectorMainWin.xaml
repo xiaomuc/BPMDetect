@@ -35,21 +35,38 @@
         </Style>
     </Window.Resources>
     <DockPanel LastChildFill="True">
+        <Grid DockPanel.Dock="Right" Width="Auto">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            <TextBlock Margin="1,3,0,0" Grid.Column="0" Grid.Row="0" Grid.ColumnSpan="2">BPM</TextBlock>
+            <TextBlock Margin="1,3,0,0" Grid.Column="0" Grid.Row="1" HorizontalAlignment="Right">Lo:</TextBlock>
+            <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="1" Name="iupBPMLo" Value="80" Minimum="60" Maximum="240" Increment="1"/>
+            <TextBlock Margin="1,3,0,0" Grid.Column="0" Grid.Row="2" HorizontalAlignment="Right" >Hi:</TextBlock>
+            <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="2" Name="iupBPMHi" Value="200" Minimum="60" Maximum="240" Increment="1"/>
+
+            <TextBlock Grid.Column="0" Grid.Row="3" Grid.ColumnSpan="2" Panel.ZIndex="-1" >Priority</TextBlock>
+            <TextBlock Grid.Column="0" Grid.Row="4" HorizontalAlignment="Right" VerticalAlignment="Center">Lo:</TextBlock>
+            <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="4" Name="iupPrioLo" Value="100" Minimum="60" Maximum="240" Increment="1" />
+            <TextBlock Grid.Column="0" Grid.Row="5" HorizontalAlignment="Right" VerticalAlignment="Center">Hi:</TextBlock>
+            <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="5" Name="iupPrioHi" Value="180" Minimum="60" Maximum="240" Increment="1" />
+
+            <TextBlock Grid.Column="0" Grid.Row="6" VerticalAlignment="Center" >Threshold</TextBlock>
+            <toolkit:DoubleUpDown Grid.Column="1" Grid.Row="6" Name="dupThreshold" Value="0.5" Minimum="0" Maximum="1" Increment="0.1"/>
+
+        </Grid>
         <ToolBar DockPanel.Dock="Top">
             <Button Name="btnDetectAll" Click="btnDetectAll_Click">Detect All</Button>
-            <Separator/>
-            <TextBlock Margin="1,3,0,0">BPM:Lo:</TextBlock>
-            <toolkit:IntegerUpDown Name="iupBPMLo" Value="80" Minimum="60" Maximum="240" Increment="1"/>
-            <TextBlock Margin="1,3,0,0">Hi:</TextBlock>
-            <toolkit:IntegerUpDown Name="iupBPMHi" Value="200" Minimum="60" Maximum="240" Increment="1"/>
-            <Separator/>
-            <TextBlock Margin="1,3,0,0">Priority:Lo:</TextBlock>
-            <toolkit:IntegerUpDown Name="iupPrioLo" Value="100" Minimum="60" Maximum="240" Increment="1"/>
-            <TextBlock Margin="1,3,0,0">Hi:</TextBlock>
-            <toolkit:IntegerUpDown Name="iupPrioHi" Value="180" Minimum="60" Maximum="240" Increment="1"/>
-            <Separator/>
-            <TextBlock Margin="1,3,0,0">Threshold</TextBlock>
-            <toolkit:DoubleUpDown Name="dupThreshold" Value="0.5" Minimum="0" Maximum="1" Increment="0.1"/>
             <Separator/>
             <Button Name="btnTap" Click="btnTap_Click">Tap</Button>
             <TextBlock Name="tblTap" Margin="1,3,0,0" />
@@ -106,7 +123,7 @@
                         <ListBox Grid.Column="3"  Grid.RowSpan="6" ItemsSource="{Binding SelectedItem.Detector.TopPeaks,ElementName=lvTracks}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Key}"/>
+                                    <Button Content="{Binding Key}"/>
                                 </DataTemplate>
                             </ListBox.ItemTemplate>
                         </ListBox>
