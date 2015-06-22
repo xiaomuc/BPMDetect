@@ -78,7 +78,7 @@ namespace BpmDetectorw
                 notifyPropertyChanged();
             }
         }
-        int detectedBPM = 1;
+        int detectedBPM;
         public int DetectedBPM
         {
             get

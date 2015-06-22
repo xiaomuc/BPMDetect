@@ -72,7 +72,8 @@ namespace BpmDetectorw
                 BPMHigh = (int)iupBPMHi.Value,
                 PriorityBPMLow = (int)iupPrioLo.Value,
                 PriorityBPMHigh = (int)iupPrioHi.Value,
-                PeakThreshold = (double)dupThreshold.Value
+                PeakThreshold = (double)dupThreshold.Value,
+                FrameSize=(int)iupFrameSize.Value
             };
         }
 
@@ -159,6 +160,20 @@ namespace BpmDetectorw
                 long bpm = TimeSpan.TicksPerMinute / tapped;
                 tblTap.Text = bpm.ToString();
             }
+        }
+
+        private void btnPlay_Click(object sender, RoutedEventArgs e)
+        {
+            TrackWrapper tw= lvTracks.SelectedItem as TrackWrapper;
+            if (tw != null)
+            {
+                tw.Track.Play();
+            }
+        }
+
+        private void btnStop_Click(object sender, RoutedEventArgs e)
+        {
+            _itunesApp.Stop();
         }
     }
 }
