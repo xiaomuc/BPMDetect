@@ -178,8 +178,8 @@ namespace SoundAnalyzeLib
                 for (int n = 0; n < diff.Count; n++)
                 {
                     double ham = diff[n] * 0.54 - 0.46 * Math.Cos(2 * Math.PI * (double)n / ((double)diff.Count - 1));
-                    a_sum += ham * Math.Cos(2 * Math.PI * f * (double)n / s);
-                    b_sum += ham * Math.Sin(2 * Math.PI * f * (double)n / s);
+                    a_sum += ham * Math.Cos(2.0 * Math.PI * f * (double)n / s);
+                    b_sum += ham * Math.Sin(2.0 * Math.PI * f * (double)n / s);
                 }
                 double a_tmp = a_sum / (double)diff.Count;
                 double b_tmp = b_sum / (double)diff.Count;

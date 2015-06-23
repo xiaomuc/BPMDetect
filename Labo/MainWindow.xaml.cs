@@ -14,6 +14,7 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 using iTunesLib;
+using SoundAnalyzeLib;
 
 namespace Labo
 {
@@ -36,6 +37,10 @@ namespace Labo
         {
             WrapTrack wt= lvTracks.SelectedItem as WrapTrack;
             wt.DetectedBPM = 100;
+
+            IITFileOrCDTrack track = wt.Track as IITFileOrCDTrack;
+            CsvWriter writer = CsvWriter.getInstance();
+            writer.WaveSourceToCsv(track.Location, @"C:\Users\9500268\Desktop\Music\test.csv");
         }
     }
 }
