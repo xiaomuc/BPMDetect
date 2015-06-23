@@ -100,7 +100,7 @@ namespace SoundAnalyzeLib
         {
             _fileName = fileName;
             IWaveSource waveSource = CodecFactory.Instance.GetCodec(fileName);
-            ISampleSource sampleSource = waveSource.ToMono().ToSampleSource();
+            ISampleSource sampleSource = waveSource.ToSampleSource();
             List<double> diff = getDiff(sampleSource);
             calcBpm(diff, sampleSource.WaveFormat.SampleRate);
             findPeaks(_peakWidth);
@@ -138,28 +138,47 @@ namespace SoundAnalyzeLib
         List<double> getDiff(ISampleSource sampleSource)
         {
             List<double> diff = new List<double>();
+            int ch = sampleSource.WaveFormat.Channels;
+            int bufferSize = _frameSize * ch;
             double p_vol = 0;
             int read;
-            float[] buff = new float[_frameSize];
-            while ((read = sampleSource.Read(buff, 0, _frameSize)) == _frameSize)
+            float[] buff = new float[bufferSize];
+            bool bStarted = false;
+            while ((read = sampleSource.Read(buff, 0, bufferSize)) == bufferSize)
             {
                 double v = 0;
-                foreach (float f in buff)
+                for (int i = 0; i < bufferSize; i += ch)
                 {
-                    v += f * f;
+                    v += Math.Pow(buff[i], 2); ;
+                    if (ch > 1)
+                    {
+                        v += Math.Pow(buff[i + 1], 2);
+                    }
                 }
-                double vol = Math.Sqrt(v);
-                if (vol > p_vol)
+                if (!bStarted && v > 0) { bStarted = true; }
+
+                if (bStarted)
                 {
-                    diff.Add(vol - p_vol);
+                    double vol = Math.Sqrt(v);
+                    if (vol > p_vol)
+                    {
+                        diff.Add(vol - p_vol);
+                    }
+                    else
+                    {
+                        diff.Add(0);
+                    }
+                    p_vol = vol;
                 }
-                else
-                {
-                    diff.Add(0);
-                }
-                p_vol = vol;
             }
-            return diff;
+            for (int i = diff.Count - 1; i > 0; i--)
+            {
+                if (diff[i] == 0)
+                {
+                    diff.RemoveAt(i);
+                }
+            }
+                return diff;
         }
 
 

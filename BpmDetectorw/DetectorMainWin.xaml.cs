@@ -175,6 +175,34 @@ namespace BpmDetectorw
         {
             _itunesApp.Stop();
         }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            int bpm = (int)(sender as Button).Content;
+            TrackWrapper tw = lvTracks.SelectedItem as TrackWrapper;
+            if (tw != null)
+            {
+                tw.DetectedBPM = bpm;
+            }
+        }
+
+        private void btWriteToiTunes_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (TrackWrapper tw in lvTracks.Items)
+            {
+                try
+                {
+                    if (tw.DetectedBPM != null)
+                    {
+                        tw.Track.BPM = tw.DetectedBPM;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
     }
 }
 
