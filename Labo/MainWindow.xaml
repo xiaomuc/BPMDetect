@@ -81,24 +81,22 @@
             </ListView.View>
         </ListView>
         <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="2*"/>
-            </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <WrapPanel Grid.RowSpan="2">
-                <Button Name="btnShowWave" Click="btnShowWave_Click" Width="auto">show wave</Button>
-                <TextBlock>Draw</TextBlock>
-                <toolkit:DoubleUpDown Name="iudFromSec" Value="10.0"/>
+            <WrapPanel >
+                <Button Name="btnShowWave" Click="btnShowWave_Click" Width="auto" IsEnabled="False">show wave</Button>
+                <TextBlock>Position:</TextBlock>
+                <TextBlock Name="txbPos"/>
+                <TextBlock> FrameSize:</TextBlock>
+                <toolkit:IntegerUpDown Name="iudFrameSize" Value="441" Increment="441" />
                 <TextBlock>[sec]~to</TextBlock>
-                <toolkit:DoubleUpDown Name="iudToSec" Value="10.5"/>
-                <TextBlock>[sec]</TextBlock>
+                <toolkit:IntegerUpDown Name="iudFrameCount" Value="10" Increment="1"/>
                 <TextBlock Name="txWaveInfo"/>
             </WrapPanel>
-            <charting:Chart Name="chartLeft" Grid.Column="1" Grid.Row="0" >
+            <charting:Chart Name="chartLeft" Grid.Row="1" >
                 <charting:Chart.LegendStyle>
                     <Style TargetType="datavis:Legend">
                         <Setter Property="Width" Value="0" />
@@ -113,7 +111,7 @@
                 <charting:LineSeries Name="seriesLeft" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
             </charting:Chart>
-            <charting:Chart Name="chartRight" Grid.Column="1" Grid.Row="1" >
+            <charting:Chart Name="chartRight" Grid.Row="2" >
                 <charting:Chart.LegendStyle>
                     <Style TargetType="datavis:Legend">
                         <Setter Property="Width" Value="0" />
