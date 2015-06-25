@@ -178,7 +178,7 @@ namespace SoundAnalyzeLib
                     diff.RemoveAt(i);
                 }
             }
-                return diff;
+            return diff;
         }
 
 
@@ -205,7 +205,23 @@ namespace SoundAnalyzeLib
                 _bpm.Add(new KeyValuePair<int, double>(bpm, Math.Sqrt(Math.Pow(a_tmp, 2) + Math.Pow(b_tmp, 2))));
             }
         }
-
+        public List<double> setHammingWindow(List<double> list)
+        {
+            return list.Select((x, i) => 0.54 - 0.46 * Math.Cos(2 * Math.PI * (double)i / ((double)list.Count - 1))).ToList();
+        }
+        public Dictionary<int, double> calculateBPM(Dictionary<double,double> diff, int sampleRate, int frameSize, int bpmLow = 60, int bpmHigh = 240)
+        {
+            double s = (double)sampleRate / (double)frameSize;
+            Dictionary<int, double> bpmList = new Dictionary<int, double>();
+            for (int bpm = bpmLow; bpm <= bpmHigh; bpm++)
+            {
+                double f = (double)bpm / 60;
+                double a_sum = diff.Select((x, i) => Math.Cos(2.0 * Math.PI * f * x.Value * (double)i / s)).Sum();
+                double b_sum = diff.Select((x, i) => Math.Sin(2.0 * Math.PI * f * x.Value * (double)i / s)).Sum();
+                bpmList.Add(bpm, Math.Sqrt(Math.Pow(a_sum / (double)diff.Count, 2) + Math.Pow(b_sum / (double)diff.Count, 2)));
+            }
+            return bpmList;
+        }
         /// <summary>
         /// BPMピークを求め、ピーク値の大きい順にソートする
         /// </summary>

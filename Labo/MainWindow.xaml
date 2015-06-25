@@ -33,10 +33,10 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
         <ListView Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2" 
                           ItemsSource="{Binding}" MouseDoubleClick="lvTracks_MouseDoubleClick">
             <ListView.Resources>
@@ -80,9 +80,10 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Grid Grid.Row="1">
+        <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
@@ -124,6 +125,21 @@
                 </charting:Chart.TitleStyle>
 
                 <charting:LineSeries Name="seriesRight" DependentValuePath="Value" IndependentValuePath="Key" 
+                ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
+            </charting:Chart>
+            <charting:Chart Name="chartBpm" Grid.Row="3" >
+                <charting:Chart.LegendStyle>
+                    <Style TargetType="datavis:Legend">
+                        <Setter Property="Width" Value="0" />
+                    </Style>
+                </charting:Chart.LegendStyle>
+                <charting:Chart.TitleStyle>
+                    <Style TargetType="datavis:Title">
+                        <Setter Property="Height" Value="0"/>
+                    </Style>
+                </charting:Chart.TitleStyle>
+
+                <charting:LineSeries Name="seriesBPM" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
             </charting:Chart>
         </Grid>

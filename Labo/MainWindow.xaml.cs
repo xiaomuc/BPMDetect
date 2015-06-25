@@ -100,6 +100,9 @@ namespace Labo
                 acDict.Add(tm, inp/norm);
             }
             seriesRight.ItemsSource = acDict;
+            BpmDetector detector = new BpmDetector(new BPMDetectorConfig());
+            Dictionary<int,double>bpmList= detector.calculateBPM(acDict, _sampleSource.WaveFormat.SampleRate, frameSize);
+            seriesBPM.ItemsSource = bpmList;
         }
 
         private void btnShowWave_Click(object sender, RoutedEventArgs e)
