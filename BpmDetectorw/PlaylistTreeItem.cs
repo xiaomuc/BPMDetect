@@ -12,7 +12,7 @@ namespace BpmDetectorw
 {
     public class PlaylistTreeItem
     {
-        public static void createPlaylistTree(TreeView treeView, IITSource source,Dictionary<int,BpmDetector> dictionary)
+        public static void createPlaylistTree(TreeView treeView, IITSource source,Dictionary<int,IBpmDetector> dictionary)
         {
             List<PlaylistTreeItem> list = new List<PlaylistTreeItem>();
             foreach (IITPlaylist p in source.Playlists)

@@ -4,7 +4,7 @@
         xmlns:charting="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:datavis="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="Auto" Width="Auto">
     <Window.Resources>
         <!-- データポイントを表示しないようにするスタイル（↓ の SimpleLineSeriesStyleで使用） -->
         <Style x:Key="EmptyPointsStyle" TargetType="{x:Type charting:DataPoint}">
@@ -35,11 +35,10 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
-            <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
             <RowDefinition/>
@@ -87,17 +86,55 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <WrapPanel Grid.Row="3" >
-            <Button Name="btnShowWave" Click="btnShowWave_Click" Width="auto" IsEnabled="False">show wave</Button>
-            <TextBlock>Position:</TextBlock>
-            <TextBlock Name="txbPos"/>
+        <Grid Grid.Row="2" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
             <TextBlock> FrameSize:</TextBlock>
-            <toolkit:IntegerUpDown Name="iudFrameSize" Value="441" Increment="441" />
-            <TextBlock>[sec]~to</TextBlock>
-            <toolkit:IntegerUpDown Name="iudFrameCount" Value="10" Increment="1"/>
-            <TextBlock Name="txWaveInfo"/>
-        </WrapPanel>
-        <charting:Chart Grid.Column="1" Grid.Row="0" Title="音量">
+            <toolkit:IntegerUpDown Grid.Column="1" Name="iudFrameSize" Value="441" Increment="441" />
+            <TextBlock Grid.Row="1">AutoCorrelation Size:</TextBlock>
+            <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="1" Name="iudFrameCount" Value="500" Increment="1"/>
+            <TextBlock Grid.Row="2">BPM Lo:</TextBlock>
+            <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="2" Name="iudBpmLo" Value="50" Increment="1"/>
+            <TextBlock Grid.Row="3">BPM Hi:</TextBlock>
+            <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="3" Name="iudBpmHi" Value="200" Increment="1"/>
+            <TextBlock Grid.Row="4">Volume Peaks</TextBlock>
+            <TextBlock Grid.Column="1" Grid.Row="4">Diff Peaks</TextBlock>
+            <ListBox Name="volumePeakList" ItemsSource="{Binding}" Grid.Row="5">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="{Binding Key}" />
+                            <TextBlock xml:space="preserve"></TextBlock>
+                            <Label Content="{Binding Value}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+            <ListBox Name="diffPeakList" ItemsSource="{Binding}" Grid.Column="1" Grid.Row="5">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="{Binding Key}" />
+                            <TextBlock xml:space="preserve"></TextBlock>
+                            <Label Content="{Binding Value}" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+        <charting:Chart Grid.Column="1" Grid.Row="2" Title="Volueme Auto-Correlation BPM">
             <charting:Chart.LegendStyle>
                 <Style TargetType="datavis:Legend">
                     <Setter Property="Width" Value="0" />
@@ -109,10 +146,10 @@
                 </Style>
             </charting:Chart.TitleStyle>
 
-            <charting:LineSeries Name="seriesVolume" DependentValuePath="Value" IndependentValuePath="Key" 
+            <charting:LineSeries Name="seriesBpmNoHamming" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
         </charting:Chart>
-        <charting:Chart Grid.Column="1" Grid.Row="1" Title="音量自己相関" >
+        <charting:Chart Grid.Column="1" Title="音量自己相関" >
             <charting:Chart.LegendStyle>
                 <Style TargetType="datavis:Legend">
                     <Setter Property="Width" Value="0" />
@@ -129,7 +166,7 @@
             <charting:LineSeries Name="seriesVolLinear" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Brown" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
         </charting:Chart>
-        <charting:Chart Grid.Column="1" Grid.Row="2" Title="音量自己相関－一次近似">
+        <charting:Chart Grid.Column="1" Grid.Row="1" Title="音量自己相関－一次近似で正規化">
             <charting:Chart.LegendStyle>
                 <Style TargetType="datavis:Legend">
                     <Setter Property="Width" Value="0" />
@@ -143,7 +180,7 @@
             <charting:LineSeries Name="seriesVolAcNorm" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
         </charting:Chart>
-        <charting:Chart Grid.Column="1" Grid.Row="3" Title="音量自己相関ハミング窓">
+        <charting:Chart Grid.Column="2" Grid.Row="1" Title="差分自己相関－一次近似で正規化">
             <charting:Chart.LegendStyle>
                 <Style TargetType="datavis:Legend">
                     <Setter Property="Width" Value="0" />
@@ -154,7 +191,66 @@
                     <Setter Property="FontSize" Value="10"/>
                 </Style>
             </charting:Chart.TitleStyle>
-            <charting:LineSeries Name="seriesVolAcHam" DependentValuePath="Value" IndependentValuePath="Key" 
+            <charting:LineSeries Name="seriesDiffAcNorm" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
-        </charting:Chart>    </Grid>
+        </charting:Chart>
+        <!--<charting:Chart Grid.Column="2" Grid.Row="0" Title="差分">
+            <charting:Chart.LegendStyle>
+                <Style TargetType="datavis:Legend">
+                    <Setter Property="Width" Value="0" />
+                </Style>
+            </charting:Chart.LegendStyle>
+            <charting:Chart.TitleStyle>
+                <Style TargetType="datavis:Title">
+                    <Setter Property="FontSize" Value="10"/>
+                </Style>
+            </charting:Chart.TitleStyle>
+            <charting:LineSeries Name="seriesDiff" DependentValuePath="Value" IndependentValuePath="Key" 
+                ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
+         </charting:Chart>
+        <charting:Chart Grid.Column="1" Grid.Row="0" Title="音量" >
+            <charting:Chart.LegendStyle>
+                <Style TargetType="datavis:Legend">
+                    <Setter Property="Width" Value="0" />
+                </Style>
+            </charting:Chart.LegendStyle>
+            <charting:Chart.TitleStyle>
+                <Style TargetType="datavis:Title">
+                    <Setter Property="FontSize" Value="10"/>
+                </Style>
+            </charting:Chart.TitleStyle>
+            <charting:LineSeries Name="seriesVolume" DependentValuePath="Value" IndependentValuePath="Key" 
+                ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
+        </charting:Chart>-->
+        <charting:Chart Grid.Column="2" Title="差分自己相関">
+            <charting:Chart.LegendStyle>
+                <Style TargetType="datavis:Legend">
+                    <Setter Property="Width" Value="0" />
+                </Style>
+            </charting:Chart.LegendStyle>
+            <charting:Chart.TitleStyle>
+                <Style TargetType="datavis:Title">
+                    <Setter Property="FontSize" Value="10"/>
+                </Style>
+            </charting:Chart.TitleStyle>
+            <charting:LineSeries Name="seriesDiffAutoCorrelation" DependentValuePath="Value" IndependentValuePath="Key" 
+                ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
+            <charting:LineSeries Name="seriesDiffLinear" DependentValuePath="Value" IndependentValuePath="Key" 
+                ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Brown" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
+        </charting:Chart>
+        <charting:Chart Grid.Column="2" Grid.Row="2" Title="差分BPM">
+            <charting:Chart.LegendStyle>
+                <Style TargetType="datavis:Legend">
+                    <Setter Property="Width" Value="0" />
+                </Style>
+            </charting:Chart.LegendStyle>
+            <charting:Chart.TitleStyle>
+                <Style TargetType="datavis:Title">
+                    <Setter Property="FontSize" Value="10"/>
+                </Style>
+            </charting:Chart.TitleStyle>
+            <charting:LineSeries Name="seriesDiffBpm" DependentValuePath="Value" IndependentValuePath="Key" 
+                ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
+        </charting:Chart>
+    </Grid>
 </Window>

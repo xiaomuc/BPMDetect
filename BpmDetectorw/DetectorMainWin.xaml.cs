@@ -27,13 +27,13 @@ namespace BpmDetectorw
     {
         iTunesApp _itunesApp;
         string _imagePath;
-        Dictionary<int, BpmDetector> _detectorDictionary;
+        Dictionary<int, IBpmDetector> _detectorDictionary;
 
         public DetectorMainWin()
         {
             InitializeComponent();
             _itunesApp = new iTunesApp();
-            _detectorDictionary = new Dictionary<int, BpmDetector>();
+            _detectorDictionary = new Dictionary<int, IBpmDetector>();
             PlaylistTreeItem.createPlaylistTree(trvPlayList, _itunesApp.LibrarySource, _detectorDictionary);
 
             _imagePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Properties.Resources.tempImageFolderName);
@@ -73,7 +73,8 @@ namespace BpmDetectorw
                 PriorityBPMLow = (int)iupPrioLo.Value,
                 PriorityBPMHigh = (int)iupPrioHi.Value,
                 PeakThreshold = (double)dupThreshold.Value,
-                FrameSize=(int)iupFrameSize.Value
+                FrameSize=(int)iupFrameSize.Value,
+                AutoCorrelationSize=(int)iupCorrelationSize.Value
             };
         }
 
@@ -90,7 +91,8 @@ namespace BpmDetectorw
                     
                     try
                     {
-                        BpmDetector detector = new BpmDetector(config);
+                        //IBpmDetector detector = new BpmDetector(config);
+                        IBpmDetector detector = new BPMVolumeAutoCorrelation(config);
                         tw.DetectedBPM = detector.detect(track.Location);
                         tw.Detector = detector;
                     }
@@ -132,7 +134,8 @@ namespace BpmDetectorw
                     {
                         try
                         {
-                            BpmDetector detector = new BpmDetector(config);
+//                            BpmDetector detector = new BpmDetector(config);
+                            IBpmDetector detector = new BPMVolumeAutoCorrelation(config);
                             tw.DetectedBPM = detector.detect(track.Location);
                             tw.Detector = detector;
                             lvTracks.SelectedItem = tw;
@@ -192,7 +195,7 @@ namespace BpmDetectorw
             {
                 try
                 {
-                    if (tw.DetectedBPM != null)
+                    if (tw.DetectedBPM != 0)
                     {
                         tw.Track.BPM = tw.DetectedBPM;
                     }

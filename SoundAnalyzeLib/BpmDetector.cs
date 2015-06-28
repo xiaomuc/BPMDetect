@@ -12,27 +12,53 @@ namespace SoundAnalyzeLib
     /// <summary>
     /// 楽曲ファイルからテンポ（BPM)を検出するクラス
     /// </summary>
-    public class BpmDetector
+    public class BpmDetector : IBpmDetector
     {
         /// <summary>ファイル名</summary>
         private string _fileName;
         /// <summary>ファイル名</summary>
         public string FileName { get { return _fileName; } }
 
+        public BPMDetectorConfig _config;
+        public BPMDetectorConfig Config { get { return _config; } }
+
         /// <summary>各BPMでの一致度リスト</summary>
         private List<KeyValuePair<int, double>> _bpm;
         /// <summary>各BPMでの一致度リスト</summary>
-        public List<KeyValuePair<int, double>> BPM { get { return _bpm; } }
-
+        //        public List<KeyValuePair<int, double>> BPM { get { return _bpm; } }
+        public Dictionary<int, double> BPM
+        {
+            get
+            {
+                return _bpm
+                    .ToDictionary(x => x.Key, x => x.Value);
+            }
+        }
         /// <summary>BPMのピークリスト</summary>
         private List<KeyValuePair<int, double>> _peaks;
         /// <summary>BPMのピークリスト</summary>
-        public List<KeyValuePair<int, double>> Peaks { get { return _peaks; } }
+        //public List<KeyValuePair<int, double>> Peaks { get { return _peaks; } }
+        public Dictionary<int, double> Peaks
+        {
+            get
+            {
+                return _peaks
+                    .ToDictionary(x => x.Key, x => x.Value);
+            }
+        }
 
         /// <summary>閾値を超えたピーク値を持つBPMのリスト</summary>
         private List<KeyValuePair<int, double>> _topPeaks;
         /// <summary>閾値を超えたピーク値を持つBPMのリスト</summary>
-        public List<KeyValuePair<int, double>> TopPeaks { get { return _topPeaks; } }
+        //public List<KeyValuePair<int, double>> TopPeaks { get { return _topPeaks; } }
+        public Dictionary<int, double> TopPeaks
+        {
+            get
+            {
+                return _topPeaks
+                    .ToDictionary(x => x.Key, x => x.Value);
+            }
+        }
 
         /// <summary>テンポ計算する際に使用する、音量計算に使用するサンプル数</summary>
         int _frameSize = 512;
@@ -209,7 +235,7 @@ namespace SoundAnalyzeLib
         {
             return list.Select((x, i) => 0.54 - 0.46 * Math.Cos(2 * Math.PI * (double)i / ((double)list.Count - 1))).ToList();
         }
-        public Dictionary<int, double> calculateBPM(Dictionary<double,double> diff, int sampleRate, int frameSize, int bpmLow = 60, int bpmHigh = 240)
+        public Dictionary<int, double> calculateBPM(Dictionary<double, double> diff, int sampleRate, int frameSize, int bpmLow = 60, int bpmHigh = 240)
         {
             double s = (double)sampleRate / (double)frameSize;
             Dictionary<int, double> bpmList = new Dictionary<int, double>();
@@ -243,7 +269,7 @@ namespace SoundAnalyzeLib
                     }
                     else
                     {
-                        val = BPM[i - j].Value;
+                        val = _bpm[i - j].Value;
                     }
                     if (val > _bpm[i].Value)
                     {

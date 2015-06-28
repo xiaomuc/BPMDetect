@@ -15,6 +15,7 @@ namespace SoundAnalyzeLib
         public int PriorityBPMHigh { get; set; }
         public double PeakThreshold { get; set; }
         public int PeakWidth { get; set; }
+        public int AutoCorrelationSize { get; set; }
 
         public BPMDetectorConfig()
         {
@@ -25,6 +26,7 @@ namespace SoundAnalyzeLib
             PriorityBPMHigh = 180;
             PeakThreshold = 0.5;
             PeakWidth = 3;
+            AutoCorrelationSize = 500;
         }
     }
 }

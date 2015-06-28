@@ -26,16 +26,21 @@ namespace Labo
     /// </summary>
     public partial class MainWindow : Window
     {
-        int MAX_SIZE = 33554432;
         iTunesApp _ituneApp;
-        List<float> leftList;
-        List<float> rightList;
         ISampleSource _sampleSource;
         public MainWindow()
         {
             InitializeComponent();
             _ituneApp = new iTunesApp();
-            WrapCollection collection = new WrapCollection(_ituneApp.LibraryPlaylist.Tracks);
+            IITTrackCollection trackCollection = _ituneApp.LibraryPlaylist.Tracks;
+
+            IITPlaylist p = _ituneApp.LibrarySource.Playlists.get_ItemByName("次郎");
+            if (p != null)
+            {
+                trackCollection = p.Tracks;
+            }
+
+            WrapCollection collection = new WrapCollection(trackCollection);
 
             lvTracks.ItemsSource = collection;
         }
@@ -45,104 +50,205 @@ namespace Labo
             WrapTrack wt = lvTracks.SelectedItem as WrapTrack;
 
             IITFileOrCDTrack track = wt.Track as IITFileOrCDTrack;
-            IWaveSource waveSource = CodecFactory.Instance.GetCodec(track.Location);
-            _sampleSource = waveSource.ToSampleSource();
-            txWaveInfo.Text = string.Format("{0}[Hz] Ch:{1}",
-                     waveSource.WaveFormat.SampleRate,
-                     waveSource.WaveFormat.Channels);
-            iudFrameCount.Value = (int)_sampleSource.Length / (int)iudFrameSize.Value;
-            btnShowWave.IsEnabled = true;
-            showVolume();
-        }
-        void showWave()
-        {
-            int frameSize = (int)iudFrameSize.Value;
-            int frameCount = (int)iudFrameCount.Value * 2;
-            float[] buffer = new float[frameSize * frameCount];
-            float fromSec = (float)_sampleSource.GetPosition().TotalSeconds;
-            int read;
-            if ((read = _sampleSource.Read(buffer, 0, frameSize * frameCount)) > 0)
+            try
             {
-                Dictionary<float, float> left = buffer.Where((value, index) => index % 2 == 0)
-                    .Select((x, i) => new { x, i }).ToDictionary(a => fromSec + (float)a.i / (float)_sampleSource.WaveFormat.SampleRate, a => a.x);
-                seriesVolume.ItemsSource = left;
-                Dictionary<float, float> right = buffer.Where((value, index) => index % 2 == 1)
-                    .Select((x, i) => new { x, i }).ToDictionary(a => fromSec + (float)a.i / (float)_sampleSource.WaveFormat.SampleRate, a => a.x);
-                seriesVolAc.ItemsSource = right;
+                IWaveSource waveSource = CodecFactory.Instance.GetCodec(track.Location);
+                _sampleSource = waveSource.ToSampleSource();
+
+                showVolume(track.BPM);
+                wt.DetectedBPM= showVolByDetector(track.Location);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
-        void showVolume()
+
+        void showVolume(int b)
         {
             int frameSize = (int)iudFrameSize.Value;
-            int frameCount = (int)iudFrameCount.Value * 2;
-            float[] buffer = new float[frameSize];
-            Dictionary<double, double> vol = new Dictionary<double, double>();
-            Dictionary<double, double> diff = new Dictionary<double, double>();
+            int autoCoSize = (int)iudFrameCount.Value;
+            int bpmLo = (int)iudBpmLo.Value;
+            int bpmHi = (int)iudBpmHi.Value;
+            Console.WriteLine("ShowVolume:FrameSize={0},AutoCorretationSize={1}", frameSize, autoCoSize);
+            float[] buffer = new float[frameSize*2];
+            Dictionary<double, double> volume = new Dictionary<double, double>();
+            //Dictionary<double, double> diff = new Dictionary<double, double>();
             double s = (double)_sampleSource.WaveFormat.SampleRate / (double)frameSize;
             double volPrev = 0;
-            for (int f = 0; f < frameCount; f++)
+            int read;
+            int frameCounter = 0;
+            Console.WriteLine("Read start:");
+            //音量と音量差分の検出
+            double tm = _sampleSource.GetPosition().TotalSeconds;
+            while ((read = _sampleSource.Read(buffer, 0, frameSize * 2)) == frameSize * 2)
             {
-                int read;
-                double tm = (double)f / s;
-                if ((read = _sampleSource.Read(buffer, 0, frameSize)) > 0)
-                {
-                    float[] left = buffer.Where((v, i) => i % 2 == 0).ToArray();
-                    float[] right = buffer.Where((v, i) => i % 2 == 1).ToArray();
+                //                double tm = (double)frameCounter / s;
+                float[] left = buffer.Where((v, i) => i % 2 == 0).ToArray();
+                float[] right = buffer.Where((v, i) => i % 2 == 1).ToArray();
 
-                    double normL = Math.Sqrt(left.Zip(left, (i, j) => i * j).Sum() / (double)frameSize);
-                    double normR = Math.Sqrt(right.Zip(right, (i, j) => i * j).Sum() / (double)frameSize);
-                    double volNow = normL + normR;
-                    vol.Add(tm, volNow);
-                    if (volNow > volPrev)
-                    {
-                        diff.Add(tm, volNow - volPrev);
-                    }
-                    else
-                    {
-                        diff.Add(tm, 0);
-                    }
-                    volPrev = volNow;
+                double normL = Math.Sqrt(left.Zip(left, (i, j) => i * j).Sum() / (double)frameSize);
+                double normR = Math.Sqrt(right.Zip(right, (i, j) => i * j).Sum() / (double)frameSize);
+                double volNow = normL + normR;
+                //volume.Add(tm, volNow);
+                if (volNow > volPrev)
+                {
+                    volume.Add(tm, volNow - volPrev);
+                }
+                else
+                {
+                    volume.Add(tm, 0);
+                }
+                volPrev = volNow;
+                frameCounter++;
+                tm = _sampleSource.GetPosition().TotalSeconds;
+            }
+            Console.WriteLine("show volume chart.");
+            //seriesVolume.ItemsSource = vol;
+
+            //音量の自己相関
+            Console.WriteLine("calc volume auto-correlation.");
+            Dictionary<double, double> volAutoCorrelation = calcAutoCorrelation(volume, autoCoSize, _sampleSource.WaveFormat.SampleRate, frameSize);
+            //音量の一次近似
+            Console.WriteLine("calc volume linear.");
+            Dictionary<double, double> volAutoCorrelationLinear = calcAB(volAutoCorrelation);
+            Console.WriteLine("show volume auto-correlation and linear chart.");
+            seriesVolAc.ItemsSource = volAutoCorrelation;
+            seriesVolLinear.ItemsSource = volAutoCorrelationLinear;
+            //音量自己相関を一次近似直線により正規化
+            Console.WriteLine("calc volume auto-correlation normalized.");
+            Dictionary<double, double> volAutoCorrelationNorm
+                = volAutoCorrelation.Zip(volAutoCorrelationLinear, (i, j) => new { Key = i.Key, Value = i.Value - j.Value })
+                //.Select((x, i) => new { x.Key, Value = x.Value * (0.54 - 0.46 * Math.Cos(2 * Math.PI * (double)i / (double)volAutoCorrelation.Count)) })
+                .ToDictionary(x => x.Key, x => x.Value);
+            Console.WriteLine("show volume auto-correlation normalized chart.");
+            seriesVolAcNorm.ItemsSource = volAutoCorrelationNorm;
+
+            //音量を使ったBPM算出
+            Console.WriteLine("calc bpm by no hamming.");
+            Dictionary<int, double> volBPM = calculateBPM(volAutoCorrelationNorm, _sampleSource.WaveFormat.SampleRate, frameSize, bpmLo, bpmHi);
+            Console.WriteLine("show BPM-No-hamming chart.");
+            seriesBpmNoHamming.ItemsSource = volBPM;
+
+            #region Diffs
+            /*
+            //音量差分を使った計算
+            //Console.WriteLine("show diff chart");
+            //seriesDiff.ItemsSource = diff;
+            //音量差分での自己相関
+            Console.WriteLine("calc diff auto-correlation");
+            Dictionary<double, double> diffAutoCorrelation = calcAutoCorrelation(diff, autoCoSize, _sampleSource.WaveFormat.SampleRate, frameSize);
+            Console.WriteLine("show diff auto-correlation chart");
+            seriesDiffAutoCorrelation.ItemsSource = diffAutoCorrelation;
+
+            //差分の一次近似
+            Console.WriteLine("calc Diff linear.");
+            Dictionary<double, double> diffAutoCorrelationLinear = calcAB(diffAutoCorrelation);
+            Console.WriteLine("show diff linear chart.");
+            seriesDiffLinear.ItemsSource = diffAutoCorrelationLinear;
+            //音量自己相関を一次近似直線により正規化
+            Console.WriteLine("calc volume auto-correlation normalized.");
+            Dictionary<double, double> diffAutoCorrelationNorm
+                = diffAutoCorrelation.Zip(diffAutoCorrelationLinear, (i, j) => new { Key = i.Key, Value = i.Value - j.Value })
+                //.Select((x, i) => new { x.Key, Value = x.Value * (0.54 - 0.46 * Math.Cos(2 * Math.PI * (double)i / (double)diffAutoCorrelation.Count)) })
+                .ToDictionary(x => x.Key, x => x.Value);
+            Console.WriteLine("show volume auto-correlation normalized chart.");
+            seriesDiffAcNorm.ItemsSource = diffAutoCorrelationNorm;
+
+
+            Console.WriteLine("calc diff bpm");
+            Dictionary<int, double> diffBpm = calculateBPM(diffAutoCorrelationNorm, _sampleSource.WaveFormat.SampleRate, frameSize, bpmLo, bpmHi);
+            Console.WriteLine("show diff bpm");
+            seriesDiffBpm.ItemsSource = diffBpm;
+            */
+            #endregion
+
+            Console.WriteLine("Volume BPM Peaks");
+            Dictionary<int, double> volBpmPeaks = getPeaks(volBPM);
+            volumePeakList.ItemsSource = volBpmPeaks;
+            //Dictionary<int, double> sortedVolBpm = bpmVolACNoHarmBPM.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+            Console.WriteLine("Volume BPM Peaks");
+            foreach (KeyValuePair<int, double> x in volBpmPeaks)
+            {
+                if (x.Value > 0)
+                {
+                    Console.WriteLine("[{0}]:{1}", x.Key, x.Value);
                 }
             }
-            seriesVolume.ItemsSource = vol;
-            Dictionary<double, double> volAc = new Dictionary<double, double>();
-            double norm = vol.Zip(vol, (i, j) => i.Value * j.Value).Sum();
-            for (int n = 1; n < 1000; n++)
-            {
-                double inp = vol.Zip(vol.Skip(n), (i, j) => i.Value * j.Value).Sum();
-                double tm = (double)n * (double)frameSize / (double)_sampleSource.WaveFormat.SampleRate;
-                volAc.Add(tm, inp / norm);
-            }
-            Dictionary<double, double> volAcLinear = calcAB(volAc);
-            seriesVolAc.ItemsSource = volAc;
-            //            BpmDetector detector = new BpmDetector(new BPMDetectorConfig());
-            //            Dictionary<int, double> bpmList = detector.calculateBPM(diff, _sampleSource.WaveFormat.SampleRate, frameSize);
-            seriesVolLinear.ItemsSource = volAcLinear;
-            Dictionary<double, double> volAcNorm = volAc.Zip(volAcLinear, (i, j) => new { Key = i.Key, Value = i.Value - j.Value }).ToDictionary(x => x.Key, x => x.Value);
-            seriesVolAcNorm.ItemsSource = volAcNorm;
 
-            //            Dictionary<double, double> volHam = volAc.Zip(getHamming(volAc.Count), (i, j) => new { Key = i.Key, Value = i.Value * j }).ToDictionary(x => x.Key, x => x.Value);
-            Dictionary<double, double> volHam = volAc.Select((x, i) => new { x, i }).ToDictionary(y => y.x.Key, y => getHamming(y.x.Value, y.i, volAc.Count));
-            seriesVolAcHam.ItemsSource = volHam;
-        }
-        double getHamming(double value, int index, int count)
-        {
-            double h = getHamming(index, count);
-            double ret = value * h;
-            return ret;
-        }
-        double getHamming(int index, int count)
-        {
-            return 0.54 - 0.46 * Math.Cos(2 * Math.PI * (double)index / (double)(count - 1));
-        }
-        List<double> getHamming(int count)
-        {
-            List<double> list = new List<double>();
-            for (int i = 0; i < count; i++)
+            /*
+            Console.WriteLine("Diff BPM Peaks");
+            Dictionary<int, double> diffBpmPeaks = getPeaks(diffBpm);
+            diffPeakList.ItemsSource = diffBpmPeaks;
+            //Dictionary<int, double> sortedDiffBpm = diffBpm.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+            Console.WriteLine("Diff BPM Peaks");
+            foreach (KeyValuePair<int, double> x in diffBpmPeaks)
             {
-                list.Add(0.54 - 0.46 * Math.Cos(2 * Math.PI * (double)i / (double)(count - 1)));
+                if (x.Value > 0)
+                {
+                    Console.WriteLine("[{0}]:{1}", x.Key, x.Value);
+                }
             }
-            return list;
+            */
+        }
+        int showVolByDetector(string fileName)
+        {
+            int frameSize = (int)iudFrameSize.Value;
+            int autoCoSize = (int)iudFrameCount.Value;
+            int bpmLo = (int)iudBpmLo.Value;
+            int bpmHi = (int)iudBpmHi.Value;
+            BPMVolumeAutoCorrelation detector =
+                new BPMVolumeAutoCorrelation(
+                    new BPMDetectorConfig()
+                        {
+                            FrameSize = frameSize,
+                            BPMLow = bpmLo,
+                            BPMHigh = bpmHi,
+                            AutoCorrelationSize = autoCoSize
+                        });
+            int bpm=detector.detect(fileName);
+            seriesDiffAutoCorrelation.ItemsSource = detector.AutoCorrelation;
+            seriesDiffAcNorm.ItemsSource = detector.Normalized;
+            seriesDiffBpm.ItemsSource = detector.BPM;
+            diffPeakList.ItemsSource = detector.TopPeaks;
+            return bpm;
+        }
+        Dictionary<int, double> getPeaks(Dictionary<int, double> data)
+        {
+
+            return data.Skip(1).Take(data.Count - 2).Where(x => data[x.Key - 1] < x.Value && data[x.Key + 1] < x.Value).OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+        }
+
+        Dictionary<double, double> calcAutoCorrelation(Dictionary<double, double> data, int autoCoSize, int sampleRate, int frameSize)
+        {
+            Dictionary<double, double> autoCorrelation = new Dictionary<double, double>();
+            double norm = data.Zip(data, (i, j) => i.Value * j.Value).Sum() / (double)data.Count;
+            double ts = (double)frameSize / (double)sampleRate;
+            for (int n = 0; n < autoCoSize; n++)
+            {
+                double inp = data.Zip(data.Skip(n), (i, j) => i.Value * j.Value).Sum() / (double)(data.Count - n);
+                //                double tm = (double)n * ts;
+                double tm = data.ElementAt(n).Key;
+                autoCorrelation.Add(tm, inp / norm);
+            }
+            return autoCorrelation;
+        }
+
+        public Dictionary<int, double> calculateBPM(Dictionary<double, double> diff, int sampleRate, int frameSize, int bpmLow = 60, int bpmHigh = 200)
+        {
+            double s = (double)sampleRate / (double)frameSize;
+            Dictionary<int, double> bpmList = new Dictionary<int, double>();
+            for (int bpm = bpmLow; bpm <= bpmHigh; bpm++)
+            {
+                double f = (double)bpm / 60;
+                double a_sum =
+                    //diff.Select((x, i) => x.Value * Math.Cos(2.0 * Math.PI * f * (double)i / s)).Sum();
+                    diff.Select((x, i) => x.Value * Math.Cos(2.0 * Math.PI * f * x.Key)).Sum();
+                Console.WriteLine("{0}BPM:{1}", bpm, a_sum);
+                bpmList.Add(bpm, a_sum);
+            }
+            double m = bpmList.Max(x => x.Value);
+            return bpmList.ToDictionary(x => x.Key, x => x.Value / m);
         }
 
         Dictionary<double, double> calcAB(Dictionary<double, double> data)
@@ -162,15 +268,11 @@ namespace Labo
         private void btnShowWave_Click(object sender, RoutedEventArgs e)
         {
             //            showWave();
-            showVolume();
         }
 
         private void iudFromSec_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
-            if (this.IsInitialized)
-            {
-                showWave();
-            }
+
         }
 
         private void iudToSec_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)

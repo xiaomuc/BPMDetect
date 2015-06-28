@@ -15,8 +15,8 @@ namespace BpmDetectorw
     {
         IITTrackCollection _trackCollection;
         EneumeratorWrapper _enumerator;
-        Dictionary<int, BpmDetector> _detectorDictionary;
-        public TrackCollectionWrapper(IITTrackCollection trackCollection, Dictionary<int, BpmDetector> detectorDictionary)
+        Dictionary<int, IBpmDetector> _detectorDictionary;
+        public TrackCollectionWrapper(IITTrackCollection trackCollection, Dictionary<int, IBpmDetector> detectorDictionary)
         {
             this._trackCollection = trackCollection;
             this._enumerator = new EneumeratorWrapper(trackCollection.GetEnumerator(), this);
@@ -27,7 +27,7 @@ namespace BpmDetectorw
         {
             return this._enumerator;
         }
-        public Dictionary<int, BpmDetector> DetectorDictionary
+        public Dictionary<int, IBpmDetector> DetectorDictionary
         {
             get { return this._detectorDictionary; }
         }
@@ -52,7 +52,7 @@ namespace BpmDetectorw
         {
             get { return _track; }
         }
-        public BpmDetector Detector
+        public IBpmDetector Detector
         {
             get
             {
