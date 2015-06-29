@@ -9,7 +9,7 @@
     <Window.Resources>
         <self:TrackToImageSourceConverter x:Key="TrackToImageSourceConverter" />
         <self:BPMToIntervalConverter x:Key="BPMToIntervalConverter" />
-        
+
         <!-- データポイントを表示しないようにするスタイル（↓ の SimpleLineSeriesStyleで使用） -->
         <Style x:Key="EmptyPointsStyle" TargetType="{x:Type charting:DataPoint}">
             <Setter Property="Template" Value="{x:Null}"/>
@@ -48,7 +48,7 @@
             <Separator/>
             <Button Name="btWriteToiTunes" Click="btWriteToiTunes_Click">Write to iTunes</Button>
         </ToolBar>
-        <StatusBar DockPanel.Dock="Bottom" HorizontalAlignment="Center">
+        <StatusBar DockPanel.Dock="Bottom" >
             <StatusBarItem Content="{Binding Path=SelectedItem.Tracks.Count,ElementName=trvPlayList,Mode=OneWay}"/>
             <StatusBarItem>Songs,</StatusBarItem>
             <StatusBarItem Content="{Binding Path=SelectedItem.iTunesPlaylist.Time,ElementName=trvPlayList,Mode=OneWay}"/>
@@ -72,7 +72,13 @@
             </TreeView>
             <GridSplitter Width="5"/>
 
-            <StackPanel Name="dplBPM" Grid.Column="2" Grid.Row="0" Width="Auto" >
+            <Grid Name="dplBPM" Grid.Column="2" Grid.Row="0" Width="Auto" >
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -105,7 +111,7 @@
                     <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="1" Grid.Row="6" Background="LightGray" HorizontalAlignment="Right">Detected:</TextBlock>
                     <TextBlock VerticalAlignment="Center" Margin="1" Grid.Column="2" Grid.Row="6"  Text="{Binding SelectedItem.DetectedBPM,ElementName=lvTracks}"  FontWeight="Bold" TextTrimming="CharacterEllipsis" />
                 </Grid>
-                <charting:Chart Title="Auto-Correlation">
+                <charting:Chart Title="Auto-Correlation" Grid.Row="1">
                     <charting:Chart.Axes>
                         <charting:LinearAxis Name="autoCorrelationAxis" Orientation="X" ShowGridLines="True" 
                                              Interval="{Binding Path=SelectedItem.DetectedBPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
@@ -123,14 +129,14 @@
                     </charting:Chart.TitleStyle>
                     <charting:LineSeries Name="seriesAutoCorrelation" DependentValuePath="Value" IndependentValuePath="Key" 
                                 ItemsSource="{Binding}" IsSelectionEnabled="True"
-                                DataContext="{Binding Path=SelectedItem.Detector.AutoCorrelation ,ElementName=lvTracks, UpdateSourceTrigger=PropertyChanged,Mode=OneWay}"
+                                DataContext="{Binding Path=SelectedItem.Detector.Normalized ,ElementName=lvTracks, UpdateSourceTrigger=PropertyChanged,Mode=OneWay}"
                                 BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"/>
-                    <charting:LineSeries Name="seriesLiner" DependentValuePath="Value" IndependentValuePath="Key" 
+                    <!--charting:LineSeries Name="seriesLiner" DependentValuePath="Value" IndependentValuePath="Key" 
                                 ItemsSource="{Binding}" IsSelectionEnabled="True"
-                                DataContext="{Binding Path=SelectedItem.Detector.Linear ,ElementName=lvTracks, UpdateSourceTrigger=PropertyChanged,Mode=OneWay}"
-                                BorderBrush="Red" Style="{StaticResource SimpleLineSeriesStyle}"/>
+                                DataContext="{Binding Path=SelectedItem.Detector.Normalized ,ElementName=lvTracks, UpdateSourceTrigger=PropertyChanged,Mode=OneWay}"
+                                BorderBrush="Red" Style="{StaticResource SimpleLineSeriesStyle}"/-->
                 </charting:Chart>
-                <charting:Chart Name="chartBPM" Title="BPM">
+                <charting:Chart Name="chartBPM" Title="BPM" Grid.Row="2">
                     <charting:Chart.LegendStyle>
                         <Style TargetType="datavis:Legend">
                             <Setter Property="Width" Value="0" />
@@ -151,50 +157,52 @@
                                 DataContext="{Binding Path=SelectedItem.Detector.TopPeaks,ElementName=lvTracks,UpdateSourceTrigger=PropertyChanged,Mode=OneWay}" />
 
                 </charting:Chart>
-                <Grid Name="grdSettings" Width="Auto" Grid.Column="2" Grid.Row="1" >
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="auto"/>
-                        <ColumnDefinition Width="auto"/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center">Settings</TextBlock>
-                    <TextBlock Margin="1,3,0,0" Grid.Row="1" Grid.RowSpan="2" VerticalAlignment="Center" ><Run Text="BPM"/></TextBlock>
-                    <TextBlock Margin="1,3,0,0" Grid.Column="1" Grid.Row="1" ><Run Text="Lo:"/></TextBlock>
-                    <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="1" x:Name="iupBPMLo" Value="50" Minimum="40" Maximum="240" Increment="1"/>
-                    <TextBlock Margin="1,3,0,0" Grid.Column="1" Grid.Row="2" ><Run Text="Hi:"/></TextBlock>
-                    <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="2" x:Name="iupBPMHi" Value="220" Minimum="60" Maximum="240" Increment="1"/>
-                    <TextBlock Grid.Row="3" Panel.ZIndex="-1" Grid.RowSpan="2" VerticalAlignment="Center" ><Run Text="Priority"/></TextBlock>
-                    <TextBlock Grid.Column="1" Grid.Row="3" VerticalAlignment="Center"><Run Text="Lo:"/></TextBlock>
-                    <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="3" x:Name="iupPrioLo" Value="100" Minimum="60" Maximum="240" Increment="1" />
-                    <TextBlock Grid.Column="1" Grid.Row="4" VerticalAlignment="Center"><Run Text="Hi:"/></TextBlock>
-                    <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="4" x:Name="iupPrioHi" Value="180" Minimum="60" Maximum="240" Increment="1" />
-                    <TextBlock Grid.Row="5" Grid.ColumnSpan="2" VerticalAlignment="Center" ><Run Text="Threshold:"/></TextBlock>
-                    <toolkit:DoubleUpDown Grid.Column="2" Grid.Row="5" x:Name="dupThreshold" Value="0.5" Minimum="0" Maximum="1" Increment="0.1"/>
-                    <TextBlock Grid.Row="6" VerticalAlignment="Center" Grid.ColumnSpan="2"><Run Text="Frame Size:"/></TextBlock>
-                    <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="6" x:Name="iupFrameSize" Value="441" Increment="1" />
-                    <TextBlock Grid.Row="7" VerticalAlignment="Center" Grid.ColumnSpan="2"><Run Text="Correlation Size:"/></TextBlock>
-                    <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="7" x:Name="iupCorrelationSize" Value="500" Increment="1" />
-                    <ListBox Grid.Column="3"  Grid.RowSpan="8" ItemsSource="{Binding SelectedItem.Detector.TopPeaks,ElementName=lvTracks}">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <Button Content="{Binding Key}" Width="50" Click="Button_Click"/>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
-            </StackPanel>
+                <ScrollViewer Grid.Row="3" >
+                    <Grid Name="grdSettings" Width="Auto" ScrollViewer.CanContentScroll="True" >
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.ColumnSpan="3" HorizontalAlignment="Center" VerticalAlignment="Center">Settings</TextBlock>
+                        <TextBlock Margin="1,3,0,0" Grid.Row="1" Grid.RowSpan="2" VerticalAlignment="Center" ><Run Text="BPM"/></TextBlock>
+                        <TextBlock Margin="1,3,0,0" Grid.Column="1" Grid.Row="1" ><Run Text="Lo:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="1" x:Name="iupBPMLo" Value="50" Minimum="40" Maximum="240" Increment="1"/>
+                        <TextBlock Margin="1,3,0,0" Grid.Column="1" Grid.Row="2" ><Run Text="Hi:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="2" x:Name="iupBPMHi" Value="240" Minimum="60" Maximum="240" Increment="1"/>
+                        <TextBlock Grid.Row="3" Panel.ZIndex="-1" Grid.RowSpan="2" VerticalAlignment="Center" ><Run Text="Priority"/></TextBlock>
+                        <TextBlock Grid.Column="1" Grid.Row="3" VerticalAlignment="Center"><Run Text="Lo:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="3" x:Name="iupPrioLo" Value="80" Minimum="60" Maximum="240" Increment="1" />
+                        <TextBlock Grid.Column="1" Grid.Row="4" VerticalAlignment="Center"><Run Text="Hi:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="4" x:Name="iupPrioHi" Value="159" Minimum="60" Maximum="240" Increment="1" />
+                        <TextBlock Grid.Row="5" Grid.ColumnSpan="2" VerticalAlignment="Center" ><Run Text="Threshold:"/></TextBlock>
+                        <toolkit:DoubleUpDown Grid.Column="2" Grid.Row="5" x:Name="dupThreshold" Value="0.6" Minimum="0" Maximum="1" Increment="0.1"/>
+                        <TextBlock Grid.Row="6" VerticalAlignment="Center" Grid.ColumnSpan="2"><Run Text="Frame Size:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="6" x:Name="iupFrameSize" Value="441" Increment="1" />
+                        <TextBlock Grid.Row="7" VerticalAlignment="Center" Grid.ColumnSpan="2"><Run Text="Correlation Size:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="7" x:Name="iupCorrelationSize" Value="500" Increment="1" />
+                        <ListBox Grid.Column="3"  Grid.RowSpan="8" ItemsSource="{Binding SelectedItem.Detector.TopPeaks,ElementName=lvTracks}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Key}" Width="50" Click="Button_Click"/>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </ScrollViewer>
+            </Grid>
             <ListView Grid.Column="1" Grid.Row="0"  Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2" 
                           ItemsSource="{Binding Path=SelectedItem.Tracks,ElementName=trvPlayList,Mode=OneWay}">
                 <ListView.Resources>

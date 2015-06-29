@@ -139,10 +139,11 @@ namespace SoundAnalyzeLib
         int selectPeak(Dictionary<int, double> topPeaks)
         {
             int firstBPM = topPeaks.First().Key;
-            //foreach (KeyValuePair<int, double> p in topPeaks)
-            //{
-            //    if (p.Key >= _config.PriorityBPMLow && _config.PriorityBPMHigh >= p.Key)
-            //    {
+            foreach (KeyValuePair<int, double> p in topPeaks)
+            {
+                if (p.Key >= _config.PriorityBPMLow && _config.PriorityBPMHigh >= p.Key)
+                {
+                    return p.Key;
             //        if (p.Key % firstBPM < 2 || firstBPM % p.Key < 2)
             //        {
             //            return p.Key;
@@ -155,8 +156,8 @@ namespace SoundAnalyzeLib
             //        {
             //            return p.Key;
             //        }
-            //    }
-            //}
+                }
+            }
             return firstBPM;
         }
 
