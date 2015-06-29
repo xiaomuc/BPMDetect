@@ -35,6 +35,7 @@ namespace SoundAnalyzeLib
         Dictionary<double, double> _normalized;
         public Dictionary<double, double> Normalized { get { return _normalized; } }
 
+        double _2Pi = 2.0 * Math.PI;
 
         public BPMVolumeAutoCorrelation(BPMDetectorConfig config)
         {
@@ -54,8 +55,6 @@ namespace SoundAnalyzeLib
         Dictionary<double, double> getVolume(ISampleSource sampleSource, int frameSize)
         {
             int channels = sampleSource.WaveFormat.Channels;
-            //フレームの秒間隔
-            double secPerFrame = (double)_config.FrameSize / (double)sampleSource.WaveFormat.SampleRate;
             //フレームごとの読み込みサンプル数（フレームサイズ×チャネル数）
             int readSize = frameSize * channels;
             //バッファ
@@ -75,7 +74,6 @@ namespace SoundAnalyzeLib
                     float[] volChannel = buffer.Where((v, i) => i % channels == ch).ToArray();
                     vol += Math.Sqrt(volChannel.Zip(volChannel, (i, j) => i * j).Sum() / (double)frameSize);
                 }
-                double tm = (double)frameCounter * secPerFrame;
                 volume.Add(pos, vol);
                 frameCounter++;
                 pos = sampleSource.GetPosition().TotalSeconds;
@@ -121,7 +119,7 @@ namespace SoundAnalyzeLib
             {
                 double f = (double)bpm / 60;
                 double a_sum = data
-                    .Select((x, i) => x.Value * Math.Cos(2.0 * Math.PI * f * x.Key))
+                    .Select((x, i) => x.Value * bpmFuncCos2(x.Key, f))
                     .Sum();
                 bpmList.Add(bpm, a_sum);
             }
@@ -129,27 +127,36 @@ namespace SoundAnalyzeLib
             return bpmList.ToDictionary(x => x.Key, x => x.Value / m);
         }
 
-        int selectPeak(Dictionary<int,double> topPeaks)
+        double bpmFuncCos(double t, double f)
         {
-            int firstBPM=topPeaks.First().Key;
-            foreach (KeyValuePair<int, double> p in topPeaks)
-            {
-                if (p.Key >= _config.PriorityBPMLow && _config.PriorityBPMHigh >= p.Key)
-                {
-                    if (p.Key % firstBPM < 2 || firstBPM % p.Key < 2)
-                    {
-                        return p.Key;
-                    }
-                    if (p.Key % (firstBPM-1) < 2 || firstBPM % (p.Key-1) < 2)
-                    {
-                        return p.Key;
-                    }
-                    if (p.Key % (firstBPM + 1) < 2 || firstBPM % (p.Key + 1) < 2)
-                    {
-                        return p.Key;
-                    }
-                }
-            }
+            return Math.Cos(_2Pi* f * t);
+        }
+        double bpmFuncCos2(double t, double f)
+        {
+            return 0.4 * Math.Cos(_2Pi * f * t) + 0.6 * Math.Cos(_2Pi * f * t * 2);
+        }
+
+        int selectPeak(Dictionary<int, double> topPeaks)
+        {
+            int firstBPM = topPeaks.First().Key;
+            //foreach (KeyValuePair<int, double> p in topPeaks)
+            //{
+            //    if (p.Key >= _config.PriorityBPMLow && _config.PriorityBPMHigh >= p.Key)
+            //    {
+            //        if (p.Key % firstBPM < 2 || firstBPM % p.Key < 2)
+            //        {
+            //            return p.Key;
+            //        }
+            //        if (p.Key % (firstBPM - 1) < 2 || firstBPM % (p.Key - 1) < 2)
+            //        {
+            //            return p.Key;
+            //        }
+            //        if (p.Key % (firstBPM + 1) < 2 || firstBPM % (p.Key + 1) < 2)
+            //        {
+            //            return p.Key;
+            //        }
+            //    }
+            //}
             return firstBPM;
         }
 
@@ -181,7 +188,7 @@ namespace SoundAnalyzeLib
                 .ToDictionary(x => x.Key, x => x.Value);
 
             //しきい値以上のピークに絞り込む
-            double max = _peaks.Max(x=>x.Value);
+            double max = _peaks.Max(x => x.Value);
             _topPeaks = _peaks
                 .Where(x => x.Value / max > _config.PeakThreshold)
                 .ToDictionary(x => x.Key, x => x.Value);
