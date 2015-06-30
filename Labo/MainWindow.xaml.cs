@@ -30,46 +30,36 @@ namespace Labo
         iTunesApp _ituneApp;
         ISampleSource _sampleSource;
         BackgroundWorker _backgroundWorker;
-        
+        TrackCollectionWrapper _collection;
+        Dictionary<int, IBpmDetector> detectorDictionary;
         public MainWindow()
         {
             InitializeComponent();
             _ituneApp = new iTunesApp();
             IITTrackCollection trackCollection = _ituneApp.LibraryPlaylist.Tracks;
 
-            IITPlaylist p = _ituneApp.LibrarySource.Playlists.get_ItemByName("次郎");
+            IITPlaylist p = _ituneApp.LibrarySource.Playlists.get_ItemByName("トップ 100");
             if (p != null)
             {
                 trackCollection = p.Tracks;
             }
+            detectorDictionary = new Dictionary<int, IBpmDetector>();
+            _collection = new TrackCollectionWrapper(trackCollection, detectorDictionary);
 
-            WrapCollection collection = new WrapCollection(trackCollection);
-
-            lvTracks.ItemsSource = collection;
+            lvTracks.ItemsSource = _collection;
             _backgroundWorker = new BackgroundWorker();
+            _backgroundWorker.WorkerReportsProgress = true;
+            _backgroundWorker.WorkerSupportsCancellation = true;
             _backgroundWorker.DoWork += _backgroundWorker_DoWork;
             _backgroundWorker.ProgressChanged += _backgroundWorker_ProgressChanged;
             _backgroundWorker.RunWorkerCompleted += _backgroundWorker_RunWorkerCompleted;
         }
 
-        void _backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
 
-        void _backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
-
-        void _backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
-        {
-            throw new NotImplementedException();
-        }
 
         private void lvTracks_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            WrapTrack wt = lvTracks.SelectedItem as WrapTrack;
+            TrackWrapper wt = lvTracks.SelectedItem as TrackWrapper;
 
             IITFileOrCDTrack track = wt.Track as IITFileOrCDTrack;
             try
@@ -78,7 +68,7 @@ namespace Labo
                 _sampleSource = waveSource.ToSampleSource();
 
                 showVolume(track.BPM);
-                wt.DetectedBPM= showVolByDetector(track.Location);
+                wt.DetectedBPM = showVolByDetector(track.Location);
             }
             catch (Exception ex)
             {
@@ -93,7 +83,7 @@ namespace Labo
             int bpmLo = (int)iudBpmLo.Value;
             int bpmHi = (int)iudBpmHi.Value;
             Console.WriteLine("ShowVolume:FrameSize={0},AutoCorretationSize={1}", frameSize, autoCoSize);
-            float[] buffer = new float[frameSize*2];
+            float[] buffer = new float[frameSize * 2];
             Dictionary<double, double> volume = new Dictionary<double, double>();
             //Dictionary<double, double> diff = new Dictionary<double, double>();
             double s = (double)_sampleSource.WaveFormat.SampleRate / (double)frameSize;
@@ -228,7 +218,7 @@ namespace Labo
                             BPMHigh = bpmHi,
                             AutoCorrelationSize = autoCoSize
                         });
-            int bpm=detector.detect(fileName);
+            int bpm = detector.detect(fileName);
             seriesVolAc.ItemsSource = detector.AutoCorrelation;
             seriesVolAcNorm.ItemsSource = detector.Normalized;
             seriesVolAcBpm.ItemsSource = detector.BPM;
@@ -299,6 +289,84 @@ namespace Labo
 
         private void iudToSec_ValueChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
+        }
+
+        private void btnStart_Click(object sender, RoutedEventArgs e)
+        {
+            if (btnStart.Content.Equals("Start"))
+            {
+                int frameSize = (int)iudFrameSize.Value;
+                int autoCoSize = (int)iudFrameCount.Value;
+                int bpmLo = (int)iudBpmLo.Value;
+                int bpmHi = (int)iudBpmHi.Value;
+                BPMDetectorConfig config = new BPMDetectorConfig()
+                                {
+                                    FrameSize = frameSize,
+                                    BPMLow = bpmLo,
+                                    BPMHigh = bpmHi,
+                                    AutoCorrelationSize = autoCoSize
+                                };
+                TrackCollectionWrapper collection = lvTracks.ItemsSource as TrackCollectionWrapper;
+
+                object[] param = new object[2];
+                param[0] = collection;
+                param[1] = config;
+                progressBar.Maximum = collection.Count;
+                progressBar.Value = 0;
+                btnStart.Content = "Stop";
+                _backgroundWorker.RunWorkerAsync(param);
+            }else{
+                btnStart.IsEnabled=false;
+                _backgroundWorker.CancelAsync();
+            }
+        }
+        void _backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            btnStart.Content = "Start";
+            btnStart.IsEnabled = true;
+        }
+
+        void _backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            progressBar.Value = e.ProgressPercentage;
+           // IBpmDetector detector = e.UserState as IBpmDetector;
+            TrackWrapper tw = e.UserState as TrackWrapper;
+
+            foreach (TrackWrapper item in lvTracks.Items)
+            {
+                if (item.Track.trackID == tw.Track.trackID)
+                {
+                    item.DetectedBPM = tw.DetectedBPM;
+                }
+            }
+
+            //TrackCollectionWrapper collection = lvTracks.ItemsSource as TrackCollectionWrapper;
+            //foreach (TrackWrapper item in collection)
+            //{
+            //    if (item.Track.trackID.Equals(tw.Track.trackID))
+            //    {
+            //        item.Detector = detector;
+            //        item.DetectedBPM = detector.TopPeaks.First().Key;
+            //    }
+            //}
+        }
+
+        void _backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            object[] param = (object[])e.Argument;
+            TrackCollectionWrapper collection = param[0] as TrackCollectionWrapper;
+            BPMDetectorConfig config = param[1] as BPMDetectorConfig;
+            int i = 0;
+            foreach (TrackWrapper tw in collection)
+            {
+                if (worker.CancellationPending) break;
+                IITFileOrCDTrack track = tw.Track as IITFileOrCDTrack;
+                IBpmDetector detector = new BPMVolumeAutoCorrelation(config);
+                tw.DetectedBPM= detector.detect(track.Location);
+                detector.Source = tw;
+                worker.ReportProgress(++i, tw);
+            }
         }
     }
 }

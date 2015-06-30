@@ -45,6 +45,7 @@ namespace SoundAnalyzeLib
         {
             _config = new BPMDetectorConfig();
         }
+        public object Source { get; set; }
 
         /// <summary>
         /// 音量検出

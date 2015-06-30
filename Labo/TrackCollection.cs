@@ -13,28 +13,75 @@ using SoundAnalyzeLib;
 
 namespace Labo
 {
-    public class WrapTrack : INotifyPropertyChanged
+    public class TrackCollectionWrapper : IEnumerable
     {
-        IITTrack _track;
-        BpmDetector _detector;
-        public WrapTrack(IITTrack track)
+        IITTrackCollection _trackCollection;
+        EneumeratorWrapper _enumerator;
+        Dictionary<int, IBpmDetector> _detectorDictionary;
+        public TrackCollectionWrapper(IITTrackCollection trackCollection, Dictionary<int, IBpmDetector> detectorDictionary)
         {
+            this._trackCollection = trackCollection;
+            this._enumerator = new EneumeratorWrapper(trackCollection.GetEnumerator(), this);
+            this._detectorDictionary = detectorDictionary;
+        }
+
+        public IEnumerator GetEnumerator()
+        {
+            return new EneumeratorWrapper(_trackCollection.GetEnumerator(), this);
+            ;
+        }
+        public Dictionary<int, IBpmDetector> DetectorDictionary
+        {
+            get { return this._detectorDictionary; }
+        }
+        public int Count { get { return _trackCollection.Count; } }
+
+        public TrackWrapper this[int index]
+        {
+            get { return new TrackWrapper(_trackCollection[index], this); }
+        }
+    }
+
+    public class TrackWrapper : INotifyPropertyChanged
+    {
+        TrackCollectionWrapper _owner;
+        IITTrack _track;
+        public TrackWrapper(IITTrack track, TrackCollectionWrapper owner)
+        {
+            this._owner = owner;
             this._track = track;
         }
         public IITTrack Track
         {
             get { return _track; }
         }
-        public BpmDetector Detector
+        public IBpmDetector Detector
         {
-            get { return _detector; }
+            get
+            {
+                if (_owner.DetectorDictionary.ContainsKey(this.Track.trackID))
+                {
+                    return _owner.DetectorDictionary[this._track.trackID];
+                }
+                else
+                {
+                    return null;
+                }
+            }
             set
             {
-                this._detector = value;
+                if (_owner.DetectorDictionary.ContainsKey(this.Track.trackID))
+                {
+                    _owner.DetectorDictionary[this.Track.trackID] = value;
+                }
+                else
+                {
+                    _owner.DetectorDictionary.Add(this.Track.trackID, value);
+                }
                 notifyPropertyChanged();
             }
         }
-        int detectedBPM = 10;
+        int detectedBPM;
         public int DetectedBPM
         {
             get
@@ -57,32 +104,20 @@ namespace Labo
             }
         }
     }
-    public class WrapCollection : IEnumerable
-    {
-        IITTrackCollection _trackCollection;
-        WrapEneumerator _enumerator;
-        public WrapCollection(IITTrackCollection trackCollection)
-        {
-            this._trackCollection = trackCollection;
-            this._enumerator = new WrapEneumerator(trackCollection.GetEnumerator());
-        }
 
-        public IEnumerator GetEnumerator()
-        {
-            return this._enumerator;
-        }
-    }
-    class WrapEneumerator : IEnumerator
+    public class EneumeratorWrapper : IEnumerator
     {
         IEnumerator _enumerator;
-        public WrapEneumerator(IEnumerator enumerator)
+        TrackCollectionWrapper _owner;
+        public EneumeratorWrapper(IEnumerator enumerator, TrackCollectionWrapper owner)
         {
+            this._owner = owner;
             this._enumerator = enumerator;
         }
 
         public object Current
         {
-            get { return new WrapTrack(_enumerator.Current as IITTrack); }
+            get { return new TrackWrapper(_enumerator.Current as IITTrack, _owner); }
         }
 
         public bool MoveNext()
@@ -93,27 +128,6 @@ namespace Labo
         public void Reset()
         {
             _enumerator.Reset();
-        }
-    }
-    public class BPMToIntervalConverter : IValueConverter
-    {
-
-        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            int bpm = (int)value;
-            if (bpm == 0)
-            {
-                return 0.2;
-            }
-            else
-            {
-                return 60 / (double)bpm;
-            }
-        }
-
-        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
-        {
-            throw new NotImplementedException();
         }
     }
 }

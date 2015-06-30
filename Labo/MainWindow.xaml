@@ -35,204 +35,209 @@
             </Setter>
         </Style>
     </Window.Resources>
-    <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
-        <Grid.RowDefinitions>
-            <RowDefinition/>
-            <RowDefinition/>
-            <RowDefinition/>
-        </Grid.RowDefinitions>
-        <ListView Grid.RowSpan="2" Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2" 
+    <DockPanel LastChildFill="True">
+        <ToolBar DockPanel.Dock="Top">
+            <Button Name="btnStart" Content="Start" Click="btnStart_Click"/>
+            <ProgressBar Name="progressBar" HorizontalAlignment="Center" Width="100" Height="15" />
+        </ToolBar>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <ListView Grid.RowSpan="2" Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2" 
                           ItemsSource="{Binding}" MouseDoubleClick="lvTracks_MouseDoubleClick">
-            <ListView.Resources>
-                <Style TargetType="{x:Type GridViewColumnHeader}">
-                    <Setter Property="HorizontalContentAlignment" Value="Left" />
-                    <Setter Property="Margin" Value="5,1,1,0" />
-                </Style>
+                <ListView.Resources>
+                    <Style TargetType="{x:Type GridViewColumnHeader}">
+                        <Setter Property="HorizontalContentAlignment" Value="Left" />
+                        <Setter Property="Margin" Value="5,1,1,0" />
+                    </Style>
 
-            </ListView.Resources>
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <!--EventSetter Event="MouseDoubleClick" Handler="lvTracks_MouseDoubleClick"/-->
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    <Style.Triggers>
-                        <Trigger Property="ItemsControl.AlternationIndex" Value="0">
-                            <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowColor}}"></Setter>
-                        </Trigger>
-                        <Trigger Property="ItemsControl.AlternationIndex" Value="1">
-                            <Setter Property="Background" Value="#FFD3E4EA"></Setter>
-                        </Trigger>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="Orange"/>
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </ListView.ItemContainerStyle>
-            <ListView.View>
-                <GridView AllowsColumnReorder="True">
-                    <GridViewColumn DisplayMemberBinding="{Binding Track.Name}" Header="Name" />
-                    <GridViewColumn DisplayMemberBinding="{Binding Track.Artist}" Header="Artist"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding Track.Album}" Header="Album"/>
-                    <GridViewColumn DisplayMemberBinding="{Binding Track.Time}" Header="Time"/>
-                    <GridViewColumn Header="BPM" >
-                        <GridViewColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Track.BPM}" TextAlignment="Right"  />
-                            </DataTemplate>
-                        </GridViewColumn.CellTemplate>
-                    </GridViewColumn>
-                    <GridViewColumn DisplayMemberBinding="{Binding DetectedBPM}" Header="D-BPM"/>
-                </GridView>
-            </ListView.View>
-        </ListView>
-        <layout:Accordion Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <layout:AccordionItem Header="Settings">
-                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="White"  
+                </ListView.Resources>
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <!--EventSetter Event="MouseDoubleClick" Handler="lvTracks_MouseDoubleClick"/-->
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        <Style.Triggers>
+                            <Trigger Property="ItemsControl.AlternationIndex" Value="0">
+                                <Setter Property="Background" Value="{DynamicResource {x:Static SystemColors.WindowColor}}"></Setter>
+                            </Trigger>
+                            <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                <Setter Property="Background" Value="#FFD3E4EA"></Setter>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="Orange"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.View>
+                    <GridView AllowsColumnReorder="True">
+                        <GridViewColumn DisplayMemberBinding="{Binding Track.Name}" Header="Name" />
+                        <GridViewColumn DisplayMemberBinding="{Binding Track.Artist}" Header="Artist"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Track.Album}" Header="Album"/>
+                        <GridViewColumn DisplayMemberBinding="{Binding Track.Time}" Header="Time"/>
+                        <GridViewColumn Header="BPM" >
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Track.BPM}" TextAlignment="Right"  />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding DetectedBPM}" Header="D-BPM"/>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+            <layout:Accordion Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                <layout:AccordionItem Header="Settings">
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="White"  
                       Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}"      
                       Height="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Grid}}, Path=ActualHeight}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
-                    <TextBlock> FrameSize:</TextBlock>
-                    <toolkit:IntegerUpDown Grid.Column="1" Name="iudFrameSize" Value="441" Increment="441" />
-                    <TextBlock Grid.Row="1">AutoCorrelation Size:</TextBlock>
-                    <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="1" Name="iudFrameCount" Value="500" Increment="1"/>
-                    <TextBlock Grid.Row="2">BPM Lo:</TextBlock>
-                    <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="2" Name="iudBpmLo" Value="50" Increment="1"/>
-                    <TextBlock Grid.Row="3">BPM Hi:</TextBlock>
-                    <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="3" Name="iudBpmHi" Value="200" Increment="1"/>
-                </Grid>
-            </layout:AccordionItem>
-            <layout:AccordionItem Header="Peaks" IsSelected="True">
-                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="White" Grid.Row="2" 
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock> FrameSize:</TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="1" Name="iudFrameSize" Value="441" Increment="441" />
+                        <TextBlock Grid.Row="1">AutoCorrelation Size:</TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="1" Name="iudFrameCount" Value="500" Increment="1"/>
+                        <TextBlock Grid.Row="2">BPM Lo:</TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="2" Name="iudBpmLo" Value="50" Increment="1"/>
+                        <TextBlock Grid.Row="3">BPM Hi:</TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="3" Name="iudBpmHi" Value="200" Increment="1"/>
+                    </Grid>
+                </layout:AccordionItem>
+                <layout:AccordionItem Header="Peaks" IsSelected="True">
+                    <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="White" Grid.Row="2" 
                       Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}"      
                       Height="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Grid}}, Path=ActualHeight}">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition/>
-                        <ColumnDefinition/>
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
-                        <RowDefinition/>
-                    </Grid.RowDefinitions>
-                    <TextBlock>Volume Peaks</TextBlock>
-                    <TextBlock Grid.Column="1">Diff Peaks</TextBlock>
-                    <ListBox Name="volumePeakList" ItemsSource="{Binding}" Grid.Row="1">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="{Binding Key}" />
-                                    <TextBlock xml:space="preserve"></TextBlock>
-                                    <Label Content="{Binding Value}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                    <ListBox Name="diffPeakList" ItemsSource="{Binding}" Grid.Column="1" Grid.Row="1">
-                        <ListBox.ItemTemplate>
-                            <DataTemplate>
-                                <StackPanel Orientation="Horizontal">
-                                    <Label Content="{Binding Key}" />
-                                    <TextBlock xml:space="preserve"></TextBlock>
-                                    <Label Content="{Binding Value}" />
-                                </StackPanel>
-                            </DataTemplate>
-                        </ListBox.ItemTemplate>
-                    </ListBox>
-                </Grid>
-            </layout:AccordionItem>
-        </layout:Accordion>
-        <charting:Chart Grid.Column="1" Grid.Row="2" Title="Volueme Auto-Correlation BPM">
-            <charting:Chart.Axes>
-                <charting:LinearAxis Orientation="X" ShowGridLines="True" Interval="10" />
-            </charting:Chart.Axes>
-            <charting:Chart.LegendStyle>
-                <Style TargetType="datavis:Legend">
-                    <Setter Property="Width" Value="0" />
-                </Style>
-            </charting:Chart.LegendStyle>
-            <charting:Chart.TitleStyle>
-                <Style TargetType="datavis:Title">
-                    <Setter Property="FontSize" Value="10"/>
-                </Style>
-            </charting:Chart.TitleStyle>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition/>
+                        </Grid.RowDefinitions>
+                        <TextBlock>Volume Peaks</TextBlock>
+                        <TextBlock Grid.Column="1">Diff Peaks</TextBlock>
+                        <ListBox Name="volumePeakList" ItemsSource="{Binding}" Grid.Row="1">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="{Binding Key}" />
+                                        <TextBlock xml:space="preserve"></TextBlock>
+                                        <Label Content="{Binding Value}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <ListBox Name="diffPeakList" ItemsSource="{Binding}" Grid.Column="1" Grid.Row="1">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Label Content="{Binding Key}" />
+                                        <TextBlock xml:space="preserve"></TextBlock>
+                                        <Label Content="{Binding Value}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                </layout:AccordionItem>
+            </layout:Accordion>
+            <charting:Chart Grid.Column="1" Grid.Row="2" Title="Volueme Auto-Correlation BPM">
+                <charting:Chart.Axes>
+                    <charting:LinearAxis Orientation="X" ShowGridLines="True" Interval="10" />
+                </charting:Chart.Axes>
+                <charting:Chart.LegendStyle>
+                    <Style TargetType="datavis:Legend">
+                        <Setter Property="Width" Value="0" />
+                    </Style>
+                </charting:Chart.LegendStyle>
+                <charting:Chart.TitleStyle>
+                    <Style TargetType="datavis:Title">
+                        <Setter Property="FontSize" Value="10"/>
+                    </Style>
+                </charting:Chart.TitleStyle>
 
-            <charting:LineSeries Name="seriesVolAcBpm" DependentValuePath="Value" IndependentValuePath="Key" 
+                <charting:LineSeries Name="seriesVolAcBpm" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
-        </charting:Chart>
-        <charting:Chart Grid.Column="1" Title="音量自己相関" >
-            <charting:Chart.Axes>
-                <charting:LinearAxis Name="autoCorrelationAxis" Orientation="X" ShowGridLines="True" 
+            </charting:Chart>
+            <charting:Chart Grid.Column="1" Title="音量自己相関" >
+                <charting:Chart.Axes>
+                    <charting:LinearAxis Name="autoCorrelationAxis" Orientation="X" ShowGridLines="True" 
                                              Interval="{Binding Path=SelectedItem.DetectedBPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
-            </charting:Chart.Axes>
-            <charting:Chart.LegendStyle>
-                <Style TargetType="datavis:Legend">
-                    <Setter Property="Width" Value="0" />
-                </Style>
-            </charting:Chart.LegendStyle>
-            <charting:Chart.TitleStyle>
-                <Style TargetType="datavis:Title">
-                    <Setter Property="FontSize" Value="10"/>
-                </Style>
-            </charting:Chart.TitleStyle>
+                </charting:Chart.Axes>
+                <charting:Chart.LegendStyle>
+                    <Style TargetType="datavis:Legend">
+                        <Setter Property="Width" Value="0" />
+                    </Style>
+                </charting:Chart.LegendStyle>
+                <charting:Chart.TitleStyle>
+                    <Style TargetType="datavis:Title">
+                        <Setter Property="FontSize" Value="10"/>
+                    </Style>
+                </charting:Chart.TitleStyle>
 
-            <charting:LineSeries Name="seriesVolAc" DependentValuePath="Value" IndependentValuePath="Key" 
+                <charting:LineSeries Name="seriesVolAc" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
-            <charting:LineSeries Name="seriesVolLinear" DependentValuePath="Value" IndependentValuePath="Key" 
+                <charting:LineSeries Name="seriesVolLinear" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Brown" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
-        </charting:Chart>
-        <charting:Chart Grid.Column="1" Grid.Row="1" Title="音量自己相関－一次近似で正規化">
-            <charting:Chart.Axes>
-                <charting:LinearAxis Orientation="X" ShowGridLines="True" 
+            </charting:Chart>
+            <charting:Chart Grid.Column="1" Grid.Row="1" Title="音量自己相関－一次近似で正規化">
+                <charting:Chart.Axes>
+                    <charting:LinearAxis Orientation="X" ShowGridLines="True" 
                                              Interval="{Binding Path=SelectedItem.DetectedBPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
-            </charting:Chart.Axes>
-            <charting:Chart.LegendStyle>
-                <Style TargetType="datavis:Legend">
-                    <Setter Property="Width" Value="0" />
-                </Style>
-            </charting:Chart.LegendStyle>
-            <charting:Chart.TitleStyle>
-                <Style TargetType="datavis:Title">
-                    <Setter Property="FontSize" Value="10"/>
-                </Style>
-            </charting:Chart.TitleStyle>
-            <charting:LineSeries Name="seriesVolAcNorm" DependentValuePath="Value" IndependentValuePath="Key" 
+                </charting:Chart.Axes>
+                <charting:Chart.LegendStyle>
+                    <Style TargetType="datavis:Legend">
+                        <Setter Property="Width" Value="0" />
+                    </Style>
+                </charting:Chart.LegendStyle>
+                <charting:Chart.TitleStyle>
+                    <Style TargetType="datavis:Title">
+                        <Setter Property="FontSize" Value="10"/>
+                    </Style>
+                </charting:Chart.TitleStyle>
+                <charting:LineSeries Name="seriesVolAcNorm" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
-        </charting:Chart>
-        <charting:Chart Grid.Column="2" Grid.Row="1" Title="差分自己相関－一次近似で正規化">
-            <charting:Chart.Axes>
-                <charting:LinearAxis Orientation="X" ShowGridLines="True" 
+            </charting:Chart>
+            <charting:Chart Grid.Column="2" Grid.Row="1" Title="差分自己相関－一次近似で正規化">
+                <charting:Chart.Axes>
+                    <charting:LinearAxis Orientation="X" ShowGridLines="True" 
                                              Interval="{Binding Path=SelectedItem.DetectedBPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
-            </charting:Chart.Axes>
-            <charting:Chart.LegendStyle>
-                <Style TargetType="datavis:Legend">
-                    <Setter Property="Width" Value="0" />
-                </Style>
-            </charting:Chart.LegendStyle>
-            <charting:Chart.TitleStyle>
-                <Style TargetType="datavis:Title">
-                    <Setter Property="FontSize" Value="10"/>
-                </Style>
-            </charting:Chart.TitleStyle>
-            <charting:LineSeries Name="seriesDiffAcNorm" DependentValuePath="Value" IndependentValuePath="Key" 
+                </charting:Chart.Axes>
+                <charting:Chart.LegendStyle>
+                    <Style TargetType="datavis:Legend">
+                        <Setter Property="Width" Value="0" />
+                    </Style>
+                </charting:Chart.LegendStyle>
+                <charting:Chart.TitleStyle>
+                    <Style TargetType="datavis:Title">
+                        <Setter Property="FontSize" Value="10"/>
+                    </Style>
+                </charting:Chart.TitleStyle>
+                <charting:LineSeries Name="seriesDiffAcNorm" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
-        </charting:Chart>
-        <!--<charting:Chart Grid.Column="2" Grid.Row="0" Title="差分">
+            </charting:Chart>
+            <!--<charting:Chart Grid.Column="2" Grid.Row="0" Title="差分">
             <charting:Chart.LegendStyle>
                 <Style TargetType="datavis:Legend">
                     <Setter Property="Width" Value="0" />
@@ -260,42 +265,43 @@
             <charting:LineSeries Name="seriesVolume" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
         </charting:Chart>-->
-        <charting:Chart Grid.Column="2" Title="差分自己相関">
-            <charting:Chart.Axes>
-                <charting:LinearAxis Orientation="X" ShowGridLines="True" 
+            <charting:Chart Grid.Column="2" Title="差分自己相関">
+                <charting:Chart.Axes>
+                    <charting:LinearAxis Orientation="X" ShowGridLines="True" 
                                              Interval="{Binding Path=SelectedItem.DetectedBPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
-            </charting:Chart.Axes>
-            <charting:Chart.LegendStyle>
-                <Style TargetType="datavis:Legend">
-                    <Setter Property="Width" Value="0" />
-                </Style>
-            </charting:Chart.LegendStyle>
-            <charting:Chart.TitleStyle>
-                <Style TargetType="datavis:Title">
-                    <Setter Property="FontSize" Value="10"/>
-                </Style>
-            </charting:Chart.TitleStyle>
-            <charting:LineSeries Name="seriesDiffAutoCorrelation" DependentValuePath="Value" IndependentValuePath="Key" 
+                </charting:Chart.Axes>
+                <charting:Chart.LegendStyle>
+                    <Style TargetType="datavis:Legend">
+                        <Setter Property="Width" Value="0" />
+                    </Style>
+                </charting:Chart.LegendStyle>
+                <charting:Chart.TitleStyle>
+                    <Style TargetType="datavis:Title">
+                        <Setter Property="FontSize" Value="10"/>
+                    </Style>
+                </charting:Chart.TitleStyle>
+                <charting:LineSeries Name="seriesDiffAutoCorrelation" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
-            <charting:LineSeries Name="seriesDiffLinear" DependentValuePath="Value" IndependentValuePath="Key" 
+                <charting:LineSeries Name="seriesDiffLinear" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Brown" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
-        </charting:Chart>
-        <charting:Chart Grid.Column="2" Grid.Row="2" Title="差分BPM">
-            <charting:Chart.Axes>
-                <charting:LinearAxis Orientation="X" ShowGridLines="True" Interval="10" />
-            </charting:Chart.Axes>
-            <charting:Chart.LegendStyle>
-                <Style TargetType="datavis:Legend">
-                    <Setter Property="Width" Value="0" />
-                </Style>
-            </charting:Chart.LegendStyle>
-            <charting:Chart.TitleStyle>
-                <Style TargetType="datavis:Title">
-                    <Setter Property="FontSize" Value="10"/>
-                </Style>
-            </charting:Chart.TitleStyle>
-            <charting:LineSeries Name="seriesDiffBpm" DependentValuePath="Value" IndependentValuePath="Key" 
+            </charting:Chart>
+            <charting:Chart Grid.Column="2" Grid.Row="2" Title="差分BPM">
+                <charting:Chart.Axes>
+                    <charting:LinearAxis Orientation="X" ShowGridLines="True" Interval="10" />
+                </charting:Chart.Axes>
+                <charting:Chart.LegendStyle>
+                    <Style TargetType="datavis:Legend">
+                        <Setter Property="Width" Value="0" />
+                    </Style>
+                </charting:Chart.LegendStyle>
+                <charting:Chart.TitleStyle>
+                    <Style TargetType="datavis:Title">
+                        <Setter Property="FontSize" Value="10"/>
+                    </Style>
+                </charting:Chart.TitleStyle>
+                <charting:LineSeries Name="seriesDiffBpm" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
-        </charting:Chart>
-    </Grid>
+            </charting:Chart>
+        </Grid>
+    </DockPanel>
 </Window>

@@ -100,6 +100,8 @@ namespace SoundAnalyzeLib
         /// ピーク計算に使用するデータ幅
         /// </summary>
         public int PeakWidth { get { return _peakWidth; } }
+    
+        public object Source { get; set; }
 
         /// <summary>
         /// コンストラクタ

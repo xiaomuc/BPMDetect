@@ -13,5 +13,6 @@ namespace SoundAnalyzeLib
         Dictionary<int, double> Peaks { get; }
         Dictionary<int, double> TopPeaks { get; }
         BPMDetectorConfig Config { get; }
+        object Source { get; set; }
     }
 }

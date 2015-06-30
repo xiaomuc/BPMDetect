@@ -84,6 +84,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="BPMToIntervalConverter.cs" />
     <Compile Include="TrackCollectionWrapper.cs" />
     <Compile Include="TrackToImageSourceConverter.cs" />
     <Page Include="DetectorMainWin.xaml">
