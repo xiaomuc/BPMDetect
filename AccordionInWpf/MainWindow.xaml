@@ -1,0 +1,25 @@
+﻿<Window x:Class="AccordionInWpf.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:toolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Layout.Toolkit"
+        Title="MainWindow" Height="350" Width="525">
+    <toolkit:Accordion HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+        <toolkit:AccordionItem x:Name="accItemUInput" Header="user input" >
+            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                  Background="White"  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}"
+      Height="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Grid}}, Path=ActualHeight}">
+                <TextBlock Text="First Name: " Margin="0,5,0,-5" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                <TextBox x:Name="txtFN" Margin="84,5,0,0" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                <TextBlock Text="Last Name: " Margin="1,42,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                <TextBox x:Name="txtLN" Margin="84,39,0,0" HorizontalAlignment="Left" Width="150" VerticalAlignment="Top"/>
+                <Button x:Name="btnSubmit" Margin="84,84,0,0" Content="submit" Click="btnSubmit_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+            </Grid>
+        </toolkit:AccordionItem>
+        <toolkit:AccordionItem x:Name="accitemUInfo" Header="User Info">
+            <TextBlock x:Name="txtInfo" Text=""/>
+        </toolkit:AccordionItem>
+        <toolkit:AccordionItem Header="Settings">
+            <ProgressBar/>
+        </toolkit:AccordionItem>
+    </toolkit:Accordion>
+</Window>

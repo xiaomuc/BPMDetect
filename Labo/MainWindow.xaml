@@ -4,6 +4,7 @@
         xmlns:charting="clr-namespace:System.Windows.Controls.DataVisualization.Charting;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:datavis="clr-namespace:System.Windows.Controls.DataVisualization;assembly=System.Windows.Controls.DataVisualization.Toolkit"
         xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
+        xmlns:layout="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Layout.Toolkit"
         xmlns:self="clr-namespace:Labo"
         Title="MainWindow" Height="Auto" Width="Auto">
     <Window.Resources>
@@ -88,54 +89,74 @@
                 </GridView>
             </ListView.View>
         </ListView>
-        <Grid Grid.Row="2" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition/>
-                <ColumnDefinition/>
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="Auto"/>
-            </Grid.RowDefinitions>
-            <TextBlock> FrameSize:</TextBlock>
-            <toolkit:IntegerUpDown Grid.Column="1" Name="iudFrameSize" Value="441" Increment="441" />
-            <TextBlock Grid.Row="1">AutoCorrelation Size:</TextBlock>
-            <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="1" Name="iudFrameCount" Value="500" Increment="1"/>
-            <TextBlock Grid.Row="2">BPM Lo:</TextBlock>
-            <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="2" Name="iudBpmLo" Value="50" Increment="1"/>
-            <TextBlock Grid.Row="3">BPM Hi:</TextBlock>
-            <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="3" Name="iudBpmHi" Value="200" Increment="1"/>
-            <TextBlock Grid.Row="4">Volume Peaks</TextBlock>
-            <TextBlock Grid.Column="1" Grid.Row="4">Diff Peaks</TextBlock>
-            <ListBox Name="volumePeakList" ItemsSource="{Binding}" Grid.Row="5">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="{Binding Key}" />
-                            <TextBlock xml:space="preserve"></TextBlock>
-                            <Label Content="{Binding Value}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-            <ListBox Name="diffPeakList" ItemsSource="{Binding}" Grid.Column="1" Grid.Row="5">
-                <ListBox.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <Label Content="{Binding Key}" />
-                            <TextBlock xml:space="preserve"></TextBlock>
-                            <Label Content="{Binding Value}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </ListBox.ItemTemplate>
-            </ListBox>
-        </Grid>
+        <layout:Accordion Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <layout:AccordionItem Header="Settings">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="White"  
+                      Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}"      
+                      Height="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Grid}}, Path=ActualHeight}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock> FrameSize:</TextBlock>
+                    <toolkit:IntegerUpDown Grid.Column="1" Name="iudFrameSize" Value="441" Increment="441" />
+                    <TextBlock Grid.Row="1">AutoCorrelation Size:</TextBlock>
+                    <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="1" Name="iudFrameCount" Value="500" Increment="1"/>
+                    <TextBlock Grid.Row="2">BPM Lo:</TextBlock>
+                    <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="2" Name="iudBpmLo" Value="50" Increment="1"/>
+                    <TextBlock Grid.Row="3">BPM Hi:</TextBlock>
+                    <toolkit:IntegerUpDown Grid.Column="1" Grid.Row="3" Name="iudBpmHi" Value="200" Increment="1"/>
+                </Grid>
+            </layout:AccordionItem>
+            <layout:AccordionItem Header="Peaks" IsSelected="True">
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="White" Grid.Row="2" 
+                      Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}"      
+                      Height="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Grid}}, Path=ActualHeight}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock>Volume Peaks</TextBlock>
+                    <TextBlock Grid.Column="1">Diff Peaks</TextBlock>
+                    <ListBox Name="volumePeakList" ItemsSource="{Binding}" Grid.Row="1">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="{Binding Key}" />
+                                    <TextBlock xml:space="preserve"></TextBlock>
+                                    <Label Content="{Binding Value}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ListBox Name="diffPeakList" ItemsSource="{Binding}" Grid.Column="1" Grid.Row="1">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Label Content="{Binding Key}" />
+                                    <TextBlock xml:space="preserve"></TextBlock>
+                                    <Label Content="{Binding Value}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </layout:AccordionItem>
+        </layout:Accordion>
         <charting:Chart Grid.Column="1" Grid.Row="2" Title="Volueme Auto-Correlation BPM">
             <charting:Chart.Axes>
                 <charting:LinearAxis Orientation="X" ShowGridLines="True" Interval="10" />
@@ -151,7 +172,7 @@
                 </Style>
             </charting:Chart.TitleStyle>
 
-            <charting:LineSeries Name="seriesBpmNoHamming" DependentValuePath="Value" IndependentValuePath="Key" 
+            <charting:LineSeries Name="seriesVolAcBpm" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
         </charting:Chart>
         <charting:Chart Grid.Column="1" Title="音量自己相関" >

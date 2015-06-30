@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using iTunesLib;
 using SoundAnalyzeLib;
 using CSCore;
@@ -28,6 +29,8 @@ namespace Labo
     {
         iTunesApp _ituneApp;
         ISampleSource _sampleSource;
+        BackgroundWorker _backgroundWorker;
+        
         public MainWindow()
         {
             InitializeComponent();
@@ -43,6 +46,25 @@ namespace Labo
             WrapCollection collection = new WrapCollection(trackCollection);
 
             lvTracks.ItemsSource = collection;
+            _backgroundWorker = new BackgroundWorker();
+            _backgroundWorker.DoWork += _backgroundWorker_DoWork;
+            _backgroundWorker.ProgressChanged += _backgroundWorker_ProgressChanged;
+            _backgroundWorker.RunWorkerCompleted += _backgroundWorker_RunWorkerCompleted;
+        }
+
+        void _backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void _backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void _backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void lvTracks_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -79,7 +101,7 @@ namespace Labo
             int read;
             int frameCounter = 0;
             Console.WriteLine("Read start:");
-            //音量と音量差分の検出
+            //音量差分の検出
             double tm = _sampleSource.GetPosition().TotalSeconds;
             while ((read = _sampleSource.Read(buffer, 0, frameSize * 2)) == frameSize * 2)
             {
@@ -106,29 +128,29 @@ namespace Labo
             Console.WriteLine("show volume chart.");
             //seriesVolume.ItemsSource = vol;
 
-            //音量の自己相関
+            //音量差分の自己相関
             Console.WriteLine("calc volume auto-correlation.");
             Dictionary<double, double> volAutoCorrelation = calcAutoCorrelation(volume, autoCoSize, _sampleSource.WaveFormat.SampleRate, frameSize);
-            //音量の一次近似
+            //一次近似
             Console.WriteLine("calc volume linear.");
             Dictionary<double, double> volAutoCorrelationLinear = calcAB(volAutoCorrelation);
             Console.WriteLine("show volume auto-correlation and linear chart.");
-            seriesVolAc.ItemsSource = volAutoCorrelation;
-            seriesVolLinear.ItemsSource = volAutoCorrelationLinear;
-            //音量自己相関を一次近似直線により正規化
+            seriesDiffAutoCorrelation.ItemsSource = volAutoCorrelation;
+            seriesDiffLinear.ItemsSource = volAutoCorrelationLinear;
+            //自己相関を一次近似直線により正規化
             Console.WriteLine("calc volume auto-correlation normalized.");
             Dictionary<double, double> volAutoCorrelationNorm
                 = volAutoCorrelation.Zip(volAutoCorrelationLinear, (i, j) => new { Key = i.Key, Value = i.Value - j.Value })
                 //.Select((x, i) => new { x.Key, Value = x.Value * (0.54 - 0.46 * Math.Cos(2 * Math.PI * (double)i / (double)volAutoCorrelation.Count)) })
                 .ToDictionary(x => x.Key, x => x.Value);
             Console.WriteLine("show volume auto-correlation normalized chart.");
-            seriesVolAcNorm.ItemsSource = volAutoCorrelationNorm;
+            seriesDiffAcNorm.ItemsSource = volAutoCorrelationNorm;
 
-            //音量を使ったBPM算出
+            //差分を使ったBPM算出
             Console.WriteLine("calc bpm by no hamming.");
             Dictionary<int, double> volBPM = calculateBPM(volAutoCorrelationNorm, _sampleSource.WaveFormat.SampleRate, frameSize, bpmLo, bpmHi);
             Console.WriteLine("show BPM-No-hamming chart.");
-            seriesBpmNoHamming.ItemsSource = volBPM;
+            seriesDiffBpm.ItemsSource = volBPM;
 
             #region Diffs
             /*
@@ -165,7 +187,7 @@ namespace Labo
 
             Console.WriteLine("Volume BPM Peaks");
             Dictionary<int, double> volBpmPeaks = getPeaks(volBPM);
-            volumePeakList.ItemsSource = volBpmPeaks;
+            diffPeakList.ItemsSource = volBpmPeaks;
             //Dictionary<int, double> sortedVolBpm = bpmVolACNoHarmBPM.OrderByDescending(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
             Console.WriteLine("Volume BPM Peaks");
             foreach (KeyValuePair<int, double> x in volBpmPeaks)
@@ -207,10 +229,10 @@ namespace Labo
                             AutoCorrelationSize = autoCoSize
                         });
             int bpm=detector.detect(fileName);
-            seriesDiffAutoCorrelation.ItemsSource = detector.AutoCorrelation;
-            seriesDiffAcNorm.ItemsSource = detector.Normalized;
-            seriesDiffBpm.ItemsSource = detector.BPM;
-            diffPeakList.ItemsSource = detector.TopPeaks;
+            seriesVolAc.ItemsSource = detector.AutoCorrelation;
+            seriesVolAcNorm.ItemsSource = detector.Normalized;
+            seriesVolAcBpm.ItemsSource = detector.BPM;
+            volumePeakList.ItemsSource = detector.TopPeaks;
             return bpm;
         }
         Dictionary<int, double> getPeaks(Dictionary<int, double> data)

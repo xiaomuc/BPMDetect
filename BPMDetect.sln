@@ -11,6 +11,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SoundAnalyzeLib", "SoundAna
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Labo", "Labo\Labo.csproj", "{6D3BFF82-39AC-4743-B47F-528E28DE901F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AccordionInWpf", "AccordionInWpf\AccordionInWpf.csproj", "{FA814773-F19B-4C35-9707-C6CF60B63498}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{6D3BFF82-39AC-4743-B47F-528E28DE901F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D3BFF82-39AC-4743-B47F-528E28DE901F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D3BFF82-39AC-4743-B47F-528E28DE901F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA814773-F19B-4C35-9707-C6CF60B63498}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA814773-F19B-4C35-9707-C6CF60B63498}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA814773-F19B-4C35-9707-C6CF60B63498}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA814773-F19B-4C35-9707-C6CF60B63498}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
