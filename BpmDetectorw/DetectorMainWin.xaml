@@ -108,8 +108,8 @@
                         <Button Name="btPrev" Grid.Column="0">
                             <Image MaxWidth="50" Source="1435736051_rew.png"/>
                         </Button>
-                        <Button Name="btPlayback" Grid.Column="1">
-                            <Image MaxWidth="50" Source="1435735759_play.png"/>
+                        <Button Name="btPlayback" Grid.Column="1" Click="btnPlay_Click">
+                            <Image Name="imgPlayback" MaxWidth="50" Source="1435735759_play.png"/>
                         </Button>
                         <Button Name="btNext" Grid.Column="2">
                             <Image MaxWidth="50" Source="1435735800_ff.png"/>

@@ -6,7 +6,9 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Threading.Tasks;
 using System.Windows.Threading;
+using System.Windows.Media.Imaging;
 using SoundAnalyzeLib;
 
 namespace BpmDetectorw
@@ -20,6 +22,9 @@ namespace BpmDetectorw
         string _imagePath;
         Dictionary<int, IBpmDetector> _detectorDictionary;
         BackgroundWorker _backgroundWorker;
+        BitmapImage biPause;
+        BitmapImage biPlay;
+        DriveObject _driveObject;
 
         public DetectorMainWin()
         {
@@ -38,7 +43,13 @@ namespace BpmDetectorw
             _backgroundWorker.DoWork += _backgroundWorker_DoWork;
             _backgroundWorker.ProgressChanged += _backgroundWorker_ProgressChanged;
             _backgroundWorker.RunWorkerCompleted += _backgroundWorker_RunWorkerCompleted;
+
+            _driveObject = new DriveObject(imgPlayback, "1435735785_play.png", "1435735785_play.png");
+
+            _itunesApp.OnPlayerPlayEvent += _itunesApp_OnPlayerPlayEvent;
+            _itunesApp.OnPlayerStopEvent += _itunesApp_OnPlayerStopEvent;
         }
+
 
         void deleteImageDir()
         {
@@ -117,13 +128,22 @@ namespace BpmDetectorw
         bool bDetecting = false;
         private void btnDetectAll_Click(object sender, RoutedEventArgs e)
         {
-            PlaylistTreeItem item = trvPlayList.SelectedItem as PlaylistTreeItem;
-            BackgroundArgument ba = new BackgroundArgument()
+            if (btnDetectAll.Content.Equals("Detect All"))
             {
-                Config = createConfig(),
-                Tracks = item.Tracks
-            };
-            _backgroundWorker.RunWorkerAsync(ba);
+                btnDetectAll.Content = "Stop";
+                PlaylistTreeItem item = trvPlayList.SelectedItem as PlaylistTreeItem;
+                BackgroundArgument ba = new BackgroundArgument()
+                {
+                    Config = createConfig(),
+                    Tracks = item.Tracks
+                };
+                _backgroundWorker.RunWorkerAsync(ba);
+            }
+            else
+            {
+                btnDetectAll.IsEnabled = false;
+                _backgroundWorker.CancelAsync();
+            }
             /*
             bDetecting = !bDetecting;
             if (bDetecting)
@@ -215,27 +235,94 @@ namespace BpmDetectorw
 
         void _backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
-            throw new NotImplementedException();
+            btnDetectAll.Content = "Detect All";
+            btnDetectAll.IsEnabled = true;
         }
 
         void _backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            throw new NotImplementedException();
+            BackgroundUserState userState = e.UserState as BackgroundUserState;
+            foreach (TrackWrapper tw in lvTracks.Items)
+            {
+                if (tw.Track.trackID.Equals(userState.TrackID))
+                {
+                    tw.DetectedBPM = userState.DetectedBPM;
+                    tw.Detector = userState.Detector;
+                }
+            }
         }
 
         void _backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
             BackgroundArgument ba = e.Argument as BackgroundArgument;
-            foreach (IITFileOrCDTrack track in ba.Tracks)
+            foreach (TrackWrapper tw in ba.Tracks)
             {
-                BackgroundUserState userState = new BackgroundUserState();
-                userState.TrackID = track.trackID;
-                userState.Detector = new BPMVolumeAutoCorrelation(ba.Config);
-                userState.DetectedBPM = userState.Detector.detect(track.Location);
-                worker.ReportProgress(track.Index, userState);
+                if (_backgroundWorker.CancellationPending)
+                {
+                    break;
+                }
+                IITFileOrCDTrack track = tw.Track as IITFileOrCDTrack;
+                if (track != null)
+                {
+                    BackgroundUserState userState = new BackgroundUserState();
+                    userState.TrackID = track.trackID;
+                    userState.Detector = new BPMVolumeAutoCorrelation(ba.Config);
+                    userState.DetectedBPM = userState.Detector.detect(track.Location);
+                    worker.ReportProgress(track.Index, userState);
+                }
             }
         }
+        async void _itunesApp_OnPlayerStopEvent(object iTrack)
+        {
+            await System.Threading.Tasks.Task.Run(async () =>
+            {
+                if (!_driveObject.CheckAccess())
+                {
+                    await _driveObject.Dispatcher.InvokeAsync(() => _driveObject.setPlayImage());
+                }
+            });
+        }
+
+        private async void _itunesApp_OnPlayerPlayEvent(object iTrack)
+        {
+            await System.Threading.Tasks.Task.Run(async () => 
+            {
+                if (!_driveObject.CheckAccess())
+                {
+                    await _driveObject.Dispatcher.InvokeAsync(()=>_driveObject.setPauseImage());
+                }
+            });
+            //IITTrack track = iTrack as IITTrack;
+            //foreach (TrackWrapper tw in lvTracks.Items)
+            //{
+            //    if (tw.Track.Equals(iTrack))
+            //    {
+            //        lvTracks.SelectedItem = tw;
+            //        lvTracks.ScrollIntoView(tw);
+            //    }
+            //}
+        }
+    }
+    class DriveObject : DispatcherObject
+    {
+        BitmapImage _play;
+        BitmapImage _pause;
+        Image _img;
+        public DriveObject(Image img, string playImage, string pauseImage)
+        {
+            _img = img;
+            _play = new BitmapImage(new Uri(playImage,UriKind.Relative));
+            _pause = new BitmapImage(new Uri(pauseImage,UriKind.Relative));
+        }
+        public void setPlayImage(){
+            _img.Source=_play;
+        }
+        public void setPauseImage()
+        {
+            _img.Source = _pause;
+        }
+
     }
     class BackgroundArgument
     {
