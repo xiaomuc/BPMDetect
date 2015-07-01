@@ -39,6 +39,9 @@
         <ToolBar DockPanel.Dock="Top">
             <Button Name="btnStart" Content="Start" Click="btnStart_Click"/>
             <ProgressBar Name="progressBar" HorizontalAlignment="Center" Width="100" Height="15" />
+            <Button Height="26">
+                        <Image Source="1435735759_play.png" />  </Button>
+            
         </ToolBar>
         <Grid>
             <Grid.ColumnDefinitions>

@@ -1,20 +1,11 @@
 ﻿using iTunesLib;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 using SoundAnalyzeLib;
 
@@ -28,6 +19,7 @@ namespace BpmDetectorw
         iTunesApp _itunesApp;
         string _imagePath;
         Dictionary<int, IBpmDetector> _detectorDictionary;
+        BackgroundWorker _backgroundWorker;
 
         public DetectorMainWin()
         {
@@ -40,9 +32,14 @@ namespace BpmDetectorw
             deleteImageDir();
             Directory.CreateDirectory(_imagePath);
 
-            //_chartBPM = (Chart)HostChart.Child;
-            //_chartBPM.ChartAreas[0].AxisX.Interval = 10D;
+            _backgroundWorker = new BackgroundWorker();
+            _backgroundWorker.WorkerReportsProgress = true;
+            _backgroundWorker.WorkerSupportsCancellation = true;
+            _backgroundWorker.DoWork += _backgroundWorker_DoWork;
+            _backgroundWorker.ProgressChanged += _backgroundWorker_ProgressChanged;
+            _backgroundWorker.RunWorkerCompleted += _backgroundWorker_RunWorkerCompleted;
         }
+
         void deleteImageDir()
         {
             if (Directory.Exists(_imagePath))
@@ -73,8 +70,8 @@ namespace BpmDetectorw
                 PriorityBPMLow = (int)iupPrioLo.Value,
                 PriorityBPMHigh = (int)iupPrioHi.Value,
                 PeakThreshold = (double)dupThreshold.Value,
-                FrameSize=(int)iupFrameSize.Value,
-                AutoCorrelationSize=(int)iupCorrelationSize.Value
+                FrameSize = (int)iupFrameSize.Value,
+                AutoCorrelationSize = (int)iupCorrelationSize.Value
             };
         }
 
@@ -88,7 +85,7 @@ namespace BpmDetectorw
                 if (track != null)
                 {
                     BPMDetectorConfig config = createConfig();
-                    
+
                     try
                     {
                         //IBpmDetector detector = new BpmDetector(config);
@@ -120,11 +117,19 @@ namespace BpmDetectorw
         bool bDetecting = false;
         private void btnDetectAll_Click(object sender, RoutedEventArgs e)
         {
+            PlaylistTreeItem item = trvPlayList.SelectedItem as PlaylistTreeItem;
+            BackgroundArgument ba = new BackgroundArgument()
+            {
+                Config = createConfig(),
+                Tracks = item.Tracks
+            };
+            _backgroundWorker.RunWorkerAsync(ba);
+            /*
             bDetecting = !bDetecting;
             if (bDetecting)
             {
                 BPMDetectorConfig config = createConfig();
-                
+
                 foreach (TrackWrapper tw in lvTracks.Items)
                 {
                     if (!bDetecting) break;
@@ -134,7 +139,7 @@ namespace BpmDetectorw
                     {
                         try
                         {
-//                            BpmDetector detector = new BpmDetector(config);
+                            // BpmDetector detector = new BpmDetector(config);
                             IBpmDetector detector = new BPMVolumeAutoCorrelation(config);
                             tw.DetectedBPM = detector.detect(track.Location);
                             tw.Detector = detector;
@@ -151,6 +156,7 @@ namespace BpmDetectorw
 
             }
             bDetecting = false;
+            */
         }
         long prev_tick = 0;
         private void btnTap_Click(object sender, RoutedEventArgs e)
@@ -167,7 +173,7 @@ namespace BpmDetectorw
 
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
-            TrackWrapper tw= lvTracks.SelectedItem as TrackWrapper;
+            TrackWrapper tw = lvTracks.SelectedItem as TrackWrapper;
             if (tw != null)
             {
                 tw.Track.Play();
@@ -206,6 +212,41 @@ namespace BpmDetectorw
                 }
             }
         }
+
+        void _backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void _backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        {
+            throw new NotImplementedException();
+        }
+
+        void _backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+            BackgroundArgument ba = e.Argument as BackgroundArgument;
+            foreach (IITFileOrCDTrack track in ba.Tracks)
+            {
+                BackgroundUserState userState = new BackgroundUserState();
+                userState.TrackID = track.trackID;
+                userState.Detector = new BPMVolumeAutoCorrelation(ba.Config);
+                userState.DetectedBPM = userState.Detector.detect(track.Location);
+                worker.ReportProgress(track.Index, userState);
+            }
+        }
+    }
+    class BackgroundArgument
+    {
+        public BPMDetectorConfig Config { get; set; }
+        public TrackCollectionWrapper Tracks { get; set; }
+    }
+    class BackgroundUserState
+    {
+        public int DetectedBPM { get; set; }
+        public int TrackID { get; set; }
+        public IBpmDetector Detector { get; set; }
     }
 }
 

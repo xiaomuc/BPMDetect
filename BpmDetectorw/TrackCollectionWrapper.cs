@@ -19,13 +19,12 @@ namespace BpmDetectorw
         public TrackCollectionWrapper(IITTrackCollection trackCollection, Dictionary<int, IBpmDetector> detectorDictionary)
         {
             this._trackCollection = trackCollection;
-            this._enumerator = new EneumeratorWrapper(trackCollection.GetEnumerator(), this);
             this._detectorDictionary = detectorDictionary;
         }
 
         public IEnumerator GetEnumerator()
         {
-            return this._enumerator;
+            return new EneumeratorWrapper(_trackCollection.GetEnumerator(), this);
         }
         public Dictionary<int, IBpmDetector> DetectorDictionary
         {
