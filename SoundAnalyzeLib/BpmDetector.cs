@@ -26,7 +26,7 @@ namespace SoundAnalyzeLib
         private List<KeyValuePair<int, double>> _bpm;
         /// <summary>各BPMでの一致度リスト</summary>
         //        public List<KeyValuePair<int, double>> BPM { get { return _bpm; } }
-        public Dictionary<int, double> BPM
+        public Dictionary<int, double> BPMs
         {
             get
             {
@@ -100,9 +100,9 @@ namespace SoundAnalyzeLib
         /// ピーク計算に使用するデータ幅
         /// </summary>
         public int PeakWidth { get { return _peakWidth; } }
-    
-        public object Source { get; set; }
 
+        public int BPM { get; set; }
+        public int ID { get; set; }
         /// <summary>
         /// コンストラクタ
         /// </summary>

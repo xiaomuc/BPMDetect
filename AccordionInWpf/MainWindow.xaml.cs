@@ -24,6 +24,7 @@ namespace AccordionInWpf
         {
             InitializeComponent();
             accitemUInfo.IsEnabled = false;
+            listBox1.Items.Add("text");
         }
 
         private void btnSubmit_Click(object sender, RoutedEventArgs e)
@@ -36,6 +37,18 @@ namespace AccordionInWpf
                 accitemUInfo.IsEnabled = true;
                 accitemUInfo.IsSelected = true;
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            listBox1.Items.Clear();
+            
+            Parallel.For(0, 10000, (i) => {
+                listBox1.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    listBox1.Items.Add(i);
+                }));
+            });
         }
     }
 }

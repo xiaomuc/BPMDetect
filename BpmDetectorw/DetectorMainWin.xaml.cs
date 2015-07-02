@@ -18,6 +18,7 @@ namespace BpmDetectorw
     /// </summary>
     public partial class DetectorMainWin : Window
     {
+        #region Field
         iTunesApp _itunesApp;
         string _imagePath;
         Dictionary<int, IBpmDetector> _detectorDictionary;
@@ -25,18 +26,31 @@ namespace BpmDetectorw
         BitmapImage biPause;
         BitmapImage biPlay;
         DriveObject _driveObject;
+        #endregion
 
+        #region Contructor/Destructor
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public DetectorMainWin()
         {
             InitializeComponent();
+
+            //iTunes COM Interface
             _itunesApp = new iTunesApp();
+
+            //BPM検出オブジェクトを格納するリスト(ディクショナリ)
             _detectorDictionary = new Dictionary<int, IBpmDetector>();
+
+            //ツリー表示用にプレイリストを保持するオブジェクト
             PlaylistTreeItem.createPlaylistTree(trvPlayList, _itunesApp.LibrarySource, _detectorDictionary);
 
+            //アルバムアートワーク用の設定
             _imagePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Properties.Resources.tempImageFolderName);
             deleteImageDir();
             Directory.CreateDirectory(_imagePath);
 
+            //バックグラウンドスレッドの準備
             _backgroundWorker = new BackgroundWorker();
             _backgroundWorker.WorkerReportsProgress = true;
             _backgroundWorker.WorkerSupportsCancellation = true;
@@ -44,13 +58,28 @@ namespace BpmDetectorw
             _backgroundWorker.ProgressChanged += _backgroundWorker_ProgressChanged;
             _backgroundWorker.RunWorkerCompleted += _backgroundWorker_RunWorkerCompleted;
 
+            //iTunesイベント管理(未完成)
             _driveObject = new DriveObject(imgPlayback, "1435735785_play.png", "1435735785_play.png");
 
             _itunesApp.OnPlayerPlayEvent += _itunesApp_OnPlayerPlayEvent;
             _itunesApp.OnPlayerStopEvent += _itunesApp_OnPlayerStopEvent;
         }
 
+        /// <summary>
+        /// ウインドウが閉じる際にアルバムアートワーク用のテンポラリフォルダを削除しとく
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            deleteImageDir();
+        }
+        #endregion
 
+        #region Inner Method
+        /// <summary>
+        /// アルバムアートワーク用テンポラリフォルダの削除
+        /// </summary>
         void deleteImageDir()
         {
             if (Directory.Exists(_imagePath))
@@ -67,11 +96,10 @@ namespace BpmDetectorw
             }
         }
 
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            deleteImageDir();
-        }
-
+        /// <summary>
+        /// BPM分析に使用する設定オブジェクトの生成
+        /// </summary>
+        /// <returns><seealso cref="BPMDetectorConfig"/></returns>
         BPMDetectorConfig createConfig()
         {
             return new BPMDetectorConfig()
@@ -85,7 +113,14 @@ namespace BpmDetectorw
                 AutoCorrelationSize = (int)iupCorrelationSize.Value
             };
         }
+        #endregion
 
+        #region Event Handler
+        /// <summary>
+        /// リストビューダブルクリック時に選択された曲のBPMを算出する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void lvTracks_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             ListViewItem item = sender as ListViewItem;
@@ -101,7 +136,6 @@ namespace BpmDetectorw
                     {
                         //IBpmDetector detector = new BpmDetector(config);
                         IBpmDetector detector = new BPMVolumeAutoCorrelation(config);
-                        tw.DetectedBPM = detector.detect(track.Location);
                         tw.Detector = detector;
                     }
                     catch (Exception ex)
@@ -111,23 +145,15 @@ namespace BpmDetectorw
                 }
             }
         }
-        public void DoEvents()
-        {
-            DispatcherFrame frame = new DispatcherFrame();
-            Dispatcher.CurrentDispatcher.BeginInvoke(DispatcherPriority.Background,
-                new DispatcherOperationCallback(ExitFrames), frame);
-            Dispatcher.PushFrame(frame);
-        }
 
-        public object ExitFrames(object f)
-        {
-            ((DispatcherFrame)f).Continue = false;
-
-            return null;
-        }
-        bool bDetecting = false;
+        /// <summary>
+        /// 全トラックのBPM検出をバックグラウンドで実行する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnDetectAll_Click(object sender, RoutedEventArgs e)
         {
+            //実行中じゃなければ実行開始
             if (btnDetectAll.Content.Equals("Detect All"))
             {
                 btnDetectAll.Content = "Stop";
@@ -137,47 +163,21 @@ namespace BpmDetectorw
                     Config = createConfig(),
                     Tracks = item.Tracks
                 };
+                prbDetecting.Value = 0;
+                sbiProgress.Visibility = Visibility.Visible;
                 _backgroundWorker.RunWorkerAsync(ba);
             }
+            //実行中なら止める
             else
             {
                 btnDetectAll.IsEnabled = false;
                 _backgroundWorker.CancelAsync();
             }
-            /*
-            bDetecting = !bDetecting;
-            if (bDetecting)
-            {
-                BPMDetectorConfig config = createConfig();
-
-                foreach (TrackWrapper tw in lvTracks.Items)
-                {
-                    if (!bDetecting) break;
-
-                    IITFileOrCDTrack track = tw.Track as IITFileOrCDTrack;
-                    if (track != null)
-                    {
-                        try
-                        {
-                            // BpmDetector detector = new BpmDetector(config);
-                            IBpmDetector detector = new BPMVolumeAutoCorrelation(config);
-                            tw.DetectedBPM = detector.detect(track.Location);
-                            tw.Detector = detector;
-                            lvTracks.SelectedItem = tw;
-                            lvTracks.ScrollIntoView(tw);
-                            DoEvents();
-                        }
-                        catch (Exception ex)
-                        {
-                            Console.WriteLine(ex.Message);
-                        }
-                    }
-                }
-
-            }
-            bDetecting = false;
-            */
         }
+
+        /// <summary>
+        /// タップ(クリック)でBPM検出したいけど、いまいちなの
+        /// </summary>
         long prev_tick = 0;
         private void btnTap_Click(object sender, RoutedEventArgs e)
         {
@@ -191,6 +191,11 @@ namespace BpmDetectorw
             }
         }
 
+        /// <summary>
+        /// iTunesで選択した曲を再生する
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btnPlay_Click(object sender, RoutedEventArgs e)
         {
             TrackWrapper tw = lvTracks.SelectedItem as TrackWrapper;
@@ -205,25 +210,35 @@ namespace BpmDetectorw
             _itunesApp.Stop();
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// 候補になっているBPMを選択するボタン
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnSelectBPM_Click(object sender, RoutedEventArgs e)
         {
             int bpm = (int)(sender as Button).Content;
             TrackWrapper tw = lvTracks.SelectedItem as TrackWrapper;
             if (tw != null)
             {
-                tw.DetectedBPM = bpm;
+                tw.Detector.BPM = bpm;
             }
         }
 
+        /// <summary>
+        /// 検出したBPMをiTunesに書き込む処理
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void btWriteToiTunes_Click(object sender, RoutedEventArgs e)
         {
             foreach (TrackWrapper tw in lvTracks.Items)
             {
                 try
                 {
-                    if (tw.DetectedBPM != 0)
+                    if (tw.Detector != null && tw.Detector.BPM > 0)
                     {
-                        tw.Track.BPM = tw.DetectedBPM;
+                        tw.Track.BPM = tw.Detector.BPM;
                     }
                 }
                 catch (Exception ex)
@@ -233,25 +248,70 @@ namespace BpmDetectorw
             }
         }
 
+        #endregion
+
+        #region Background Worker
+
+        /// <summary>
+        /// バックグラウンド処理完了通知ハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void _backgroundWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
         {
             btnDetectAll.Content = "Detect All";
             btnDetectAll.IsEnabled = true;
+            sbiDetectorStatus.Content = string.Empty;
+            sbiProgress.Visibility = Visibility.Hidden;
         }
 
+        /// <summary>
+        /// バックグラウンド処理の途中経過ハンドラ
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void _backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
-            BackgroundUserState userState = e.UserState as BackgroundUserState;
-            foreach (TrackWrapper tw in lvTracks.Items)
+            //プログレスバーを更新しておく
+            prbDetecting.Value = e.ProgressPercentage;
+
+            //処理前の通知なので、曲名とかをステータスバーに表示
+            if (e.UserState is IITTrack)
             {
-                if (tw.Track.trackID.Equals(userState.TrackID))
+                IITTrack track = e.UserState as IITTrack;
+                sbiDetectorStatus.Content = string.Format("{0}:{1} by {2}", track.Index, track.Name, track.Artist);
+            }
+            //BPM検出完了の通知なので、リストに表示とかを行う
+            else if (e.UserState is BackgroundUserState)
+            {
+                BackgroundUserState userState = e.UserState as BackgroundUserState;
+                if (_detectorDictionary.ContainsKey(userState.Track.TrackDatabaseID))
                 {
-                    tw.DetectedBPM = userState.DetectedBPM;
-                    tw.Detector = userState.Detector;
+                    _detectorDictionary[userState.Track.TrackDatabaseID] = userState.Detector;
+                }
+                else
+                {
+                    _detectorDictionary.Add(userState.Track.TrackDatabaseID, userState.Detector);
+                }
+
+                foreach (TrackWrapper tw in lvTracks.Items)
+                {
+                    if (tw.Track.TrackDatabaseID.Equals(userState.Track.TrackDatabaseID))
+                    {
+                        tw.Detector = userState.Detector;
+                    }
                 }
             }
         }
 
+        /// <summary>
+        /// バックグラウンド処理の実装部
+        /// </summary>
+        /// <remarks>
+        /// １曲ずつ処理してBPM検出し、通知を投げる
+        /// </remarks>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         void _backgroundWorker_DoWork(object sender, DoWorkEventArgs e)
         {
             BackgroundWorker worker = sender as BackgroundWorker;
@@ -262,17 +322,27 @@ namespace BpmDetectorw
                 {
                     break;
                 }
+                int percent = (int)(100 * (double)tw.Index / (double)ba.Tracks.Count);
                 IITFileOrCDTrack track = tw.Track as IITFileOrCDTrack;
+
                 if (track != null)
                 {
+                    worker.ReportProgress(percent, track);
                     BackgroundUserState userState = new BackgroundUserState();
-                    userState.TrackID = track.trackID;
+                    userState.Track = tw.Track;
                     userState.Detector = new BPMVolumeAutoCorrelation(ba.Config);
-                    userState.DetectedBPM = userState.Detector.detect(track.Location);
-                    worker.ReportProgress(track.Index, userState);
+                    userState.Detector.detect(track.Location);
+                    worker.ReportProgress(percent, userState);
                 }
             }
         }
+        #endregion
+
+        #region iTunes Events
+        /// <summary>
+        /// iTunesからの再生停止イベントハンドラ。うまく動いてない
+        /// </summary>
+        /// <param name="iTrack"></param>
         async void _itunesApp_OnPlayerStopEvent(object iTrack)
         {
             await System.Threading.Tasks.Task.Run(async () =>
@@ -284,13 +354,17 @@ namespace BpmDetectorw
             });
         }
 
+        /// <summary>
+        /// iTunesからの再生開始イベントハンドラ
+        /// </summary>
+        /// <param name="iTrack"></param>
         private async void _itunesApp_OnPlayerPlayEvent(object iTrack)
         {
-            await System.Threading.Tasks.Task.Run(async () => 
+            await System.Threading.Tasks.Task.Run(async () =>
             {
                 if (!_driveObject.CheckAccess())
                 {
-                    await _driveObject.Dispatcher.InvokeAsync(()=>_driveObject.setPauseImage());
+                    await _driveObject.Dispatcher.InvokeAsync(() => _driveObject.setPauseImage());
                 }
             });
             //IITTrack track = iTrack as IITTrack;
@@ -303,6 +377,7 @@ namespace BpmDetectorw
             //    }
             //}
         }
+        #endregion
     }
     class DriveObject : DispatcherObject
     {
@@ -312,11 +387,12 @@ namespace BpmDetectorw
         public DriveObject(Image img, string playImage, string pauseImage)
         {
             _img = img;
-            _play = new BitmapImage(new Uri(playImage,UriKind.Relative));
-            _pause = new BitmapImage(new Uri(pauseImage,UriKind.Relative));
+            _play = new BitmapImage(new Uri(playImage, UriKind.Relative));
+            _pause = new BitmapImage(new Uri(pauseImage, UriKind.Relative));
         }
-        public void setPlayImage(){
-            _img.Source=_play;
+        public void setPlayImage()
+        {
+            _img.Source = _play;
         }
         public void setPauseImage()
         {
@@ -324,15 +400,22 @@ namespace BpmDetectorw
         }
 
     }
+
+    /// <summary>
+    /// バックグラウンド処理用の引数クラス
+    /// </summary>
     class BackgroundArgument
     {
         public BPMDetectorConfig Config { get; set; }
         public TrackCollectionWrapper Tracks { get; set; }
     }
+
+    /// <summary>
+    /// バックグラウンド処理の途中経過通知用クラス
+    /// </summary>
     class BackgroundUserState
     {
-        public int DetectedBPM { get; set; }
-        public int TrackID { get; set; }
+        public IITTrack Track { get; set; }
         public IBpmDetector Detector { get; set; }
     }
 }

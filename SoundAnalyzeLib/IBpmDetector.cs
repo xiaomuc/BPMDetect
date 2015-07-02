@@ -9,10 +9,11 @@ namespace SoundAnalyzeLib
     public interface IBpmDetector
     {
         int detect(string fileName);
-        Dictionary<int, double> BPM { get; }
+        Dictionary<int, double> BPMs { get; }
         Dictionary<int, double> Peaks { get; }
         Dictionary<int, double> TopPeaks { get; }
         BPMDetectorConfig Config { get; }
-        object Source { get; set; }
+        int ID { get; set; }
+        int BPM { get; set; }
     }
 }

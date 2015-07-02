@@ -10,10 +10,20 @@ using SoundAnalyzeLib;
 
 namespace BpmDetectorw
 {
+    /// <summary>
+    /// iTunesのプレイリストをツリー構造オブジェクトとして保持する
+    /// </summary>
     public class PlaylistTreeItem
     {
+        /// <summary>
+        /// ツリー構造を生成するスタティックメソッド
+        /// </summary>
+        /// <param name="treeView">親のツリーアイテム</param>
+        /// <param name="source">プレイリストが格納されているソース</param>
+        /// <param name="dictionary">BPM検出クラスを格納しておくリスト</param>
         public static void createPlaylistTree(TreeView treeView, IITSource source,Dictionary<int,IBpmDetector> dictionary)
         {
+            //まずはプレイリストの一覧を作る
             List<PlaylistTreeItem> list = new List<PlaylistTreeItem>();
             foreach (IITPlaylist p in source.Playlists)
             {
@@ -26,6 +36,7 @@ namespace BpmDetectorw
                 list.Add(item);
             }
 
+            //ツリー構造にする
             foreach (PlaylistTreeItem item in list)
             {
                 IITUserPlaylist userPlaylist = item.iTunesPlaylist as IITUserPlaylist;
@@ -47,10 +58,19 @@ namespace BpmDetectorw
             }
         }
 
+        /// <summary>
+        /// コンストラクタ
+        /// </summary>
         public PlaylistTreeItem()
         {
             this.Items = new ObservableCollection<PlaylistTreeItem>();
         }
+
+        /// <summary>
+        /// プレイリストが格納されているアイテムを検索する
+        /// </summary>
+        /// <param name="playlist"></param>
+        /// <returns></returns>
         public PlaylistTreeItem findItem(IITPlaylist playlist)
         {
             foreach (PlaylistTreeItem item in Items)
@@ -66,10 +86,26 @@ namespace BpmDetectorw
             }
             return null;
         }
+
+        /// <summary>
+        /// タイトル
+        /// </summary>
         public string Title { get; set; }
+
+        /// <summary>
+        /// プレイリスト
+        /// </summary>
         public IITPlaylist iTunesPlaylist { get; set; }
 //        public ObservableTrackCollection Tracks { get; set; }
+        
+        /// <summary>
+        /// 子要素はプロパティ変更が受け取れるやつで
+        /// </summary>
         public ObservableCollection<PlaylistTreeItem> Items { get; set; }
+
+        /// <summary>
+        /// リストビュー用のコレクション
+        /// </summary>
         public TrackCollectionWrapper Tracks { get; set; }
     }
 }

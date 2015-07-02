@@ -1,13 +1,14 @@
-﻿<Window x:Class="AccordionInWpf.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:toolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Layout.Toolkit"
+        xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="AccordionInWpf.MainWindow"
         Title="MainWindow" Height="350" Width="525">
     <toolkit:Accordion HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
         <toolkit:AccordionItem x:Name="accItemUInput" Header="user input" >
             <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
-                  Background="White"  Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}"
-      Height="{Binding RelativeSource={RelativeSource FindAncestor,AncestorType={x:Type Grid}}, Path=ActualHeight}">
+				Background="White"  Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}}"
+				Height="{Binding ActualHeight, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}}">
                 <TextBlock Text="First Name: " Margin="0,5,0,-5" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 <TextBox x:Name="txtFN" Margin="84,5,0,0" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left"/>
                 <TextBlock Text="Last Name: " Margin="1,42,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
@@ -18,8 +19,13 @@
         <toolkit:AccordionItem x:Name="accitemUInfo" Header="User Info">
             <TextBlock x:Name="txtInfo" Text=""/>
         </toolkit:AccordionItem>
-        <toolkit:AccordionItem Header="Settings">
-            <ProgressBar/>
+        <toolkit:AccordionItem Header="ListBox" IsSelected="true" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <StackPanel>
+                <Button Click="Button_Click" Content="threading"/>
+                <ListBox x:Name="listBox1" Height="100" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Visible">
+                    
+                </ListBox>
+            </StackPanel>
         </toolkit:AccordionItem>
     </toolkit:Accordion>
 </Window>

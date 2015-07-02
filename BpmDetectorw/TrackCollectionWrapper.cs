@@ -11,10 +11,12 @@ using SoundAnalyzeLib;
 
 namespace BpmDetectorw
 {
+    /// <summary>
+    /// リストビュー表示用にIITPlaylistCollectionのラッパークラス
+    /// </summary>
     public class TrackCollectionWrapper : IEnumerable
     {
         IITTrackCollection _trackCollection;
-        EneumeratorWrapper _enumerator;
         Dictionary<int, IBpmDetector> _detectorDictionary;
         public TrackCollectionWrapper(IITTrackCollection trackCollection, Dictionary<int, IBpmDetector> detectorDictionary)
         {
@@ -38,6 +40,9 @@ namespace BpmDetectorw
         }
     }
 
+    /// <summary>
+    /// IITTrackのラッパー
+    /// </summary>
     public class TrackWrapper : INotifyPropertyChanged
     {
         TrackCollectionWrapper _owner;
@@ -55,9 +60,9 @@ namespace BpmDetectorw
         {
             get
             {
-                if (_owner.DetectorDictionary.ContainsKey(this.Track.trackID))
+                if (_owner.DetectorDictionary.ContainsKey(this.Track.TrackDatabaseID))
                 {
-                    return _owner.DetectorDictionary[this._track.trackID];
+                    return _owner.DetectorDictionary[this._track.TrackDatabaseID];
                 }
                 else
                 {
@@ -66,28 +71,22 @@ namespace BpmDetectorw
             }
             set
             {
-                if (_owner.DetectorDictionary.ContainsKey(this.Track.trackID))
+                if (_owner.DetectorDictionary.ContainsKey(this.Track.TrackDatabaseID))
                 {
-                    _owner.DetectorDictionary[this.Track.trackID] = value;
+                    _owner.DetectorDictionary[this.Track.TrackDatabaseID] = value;
                 }
                 else
                 {
-                    _owner.DetectorDictionary.Add(this.Track.trackID, value);
+                    _owner.DetectorDictionary.Add(this.Track.TrackDatabaseID, value);
                 }
                 notifyPropertyChanged();
             }
         }
-        int detectedBPM;
-        public int DetectedBPM
+        public int Index
         {
             get
             {
-                return detectedBPM;
-            }
-            set
-            {
-                this.detectedBPM = value;
-                notifyPropertyChanged();
+                return _track.Index;
             }
         }
 

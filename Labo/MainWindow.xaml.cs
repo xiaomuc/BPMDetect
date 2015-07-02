@@ -221,7 +221,7 @@ namespace Labo
             int bpm = detector.detect(fileName);
             seriesVolAc.ItemsSource = detector.AutoCorrelation;
             seriesVolAcNorm.ItemsSource = detector.Normalized;
-            seriesVolAcBpm.ItemsSource = detector.BPM;
+            seriesVolAcBpm.ItemsSource = detector.BPMs;
             volumePeakList.ItemsSource = detector.TopPeaks;
             return bpm;
         }
@@ -364,7 +364,7 @@ namespace Labo
                 IITFileOrCDTrack track = tw.Track as IITFileOrCDTrack;
                 IBpmDetector detector = new BPMVolumeAutoCorrelation(config);
                 tw.DetectedBPM= detector.detect(track.Location);
-                detector.Source = tw;
+                detector.ID = tw.Track.trackID;
                 worker.ReportProgress(++i, tw);
             }
         }
