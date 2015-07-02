@@ -140,7 +140,7 @@
                 <charting:Chart Title="Auto-Correlation" Grid.Row="1">
                     <charting:Chart.Axes>
                         <charting:LinearAxis Name="autoCorrelationAxis" Orientation="X" ShowGridLines="True" 
-                                             Interval="{Binding Path=SelectedItem.DetectedBPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
+                                             Interval="{Binding Path=SelectedItem.Detector.BPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
                     </charting:Chart.Axes>
                     <charting:Chart.LegendStyle>
                         <Style TargetType="datavis:Legend">

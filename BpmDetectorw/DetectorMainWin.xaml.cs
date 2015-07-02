@@ -136,6 +136,7 @@ namespace BpmDetectorw
                     {
                         //IBpmDetector detector = new BpmDetector(config);
                         IBpmDetector detector = new BPMVolumeAutoCorrelation(config);
+                        detector.detect(track.Location);
                         tw.Detector = detector;
                     }
                     catch (Exception ex)
@@ -222,6 +223,7 @@ namespace BpmDetectorw
             if (tw != null)
             {
                 tw.Detector.BPM = bpm;
+                tw.notifyPropertyChanged("Detector");
             }
         }
 
@@ -330,9 +332,16 @@ namespace BpmDetectorw
                     worker.ReportProgress(percent, track);
                     BackgroundUserState userState = new BackgroundUserState();
                     userState.Track = tw.Track;
-                    userState.Detector = new BPMVolumeAutoCorrelation(ba.Config);
-                    userState.Detector.detect(track.Location);
-                    worker.ReportProgress(percent, userState);
+                    try
+                    {
+                        userState.Detector = new BPMVolumeAutoCorrelation(ba.Config);
+                        userState.Detector.detect(track.Location);
+                        worker.ReportProgress(percent, userState);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
                 }
             }
         }
