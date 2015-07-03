@@ -36,17 +36,20 @@ namespace Labo
         {
             InitializeComponent();
             _ituneApp = new iTunesApp();
-            IITTrackCollection trackCollection = _ituneApp.LibraryPlaylist.Tracks;
-
-            IITPlaylist p = _ituneApp.LibrarySource.Playlists.get_ItemByName("トップ 100");
-            if (p != null)
-            {
-                trackCollection = p.Tracks;
-            }
+            Dictionary<string, TrackCollectionWrapper> comboList = new Dictionary<string, TrackCollectionWrapper>();
             detectorDictionary = new Dictionary<int, IBpmDetector>();
-            _collection = new TrackCollectionWrapper(trackCollection, detectorDictionary);
+            foreach (IITPlaylist pl in _ituneApp.LibrarySource.Playlists)
+            {
+                TrackCollectionWrapper collection = new TrackCollectionWrapper(pl.Tracks, detectorDictionary);
+                if (!comboList.ContainsKey(pl.Name))
+                {
+                    comboList.Add(pl.Name, collection);
+                }
+            }
+            cmbPlaylist.ItemsSource = comboList;
 
-            lvTracks.ItemsSource = _collection;
+            //lvTracks.ItemsSource = _collection;
+            
             _backgroundWorker = new BackgroundWorker();
             _backgroundWorker.WorkerReportsProgress = true;
             _backgroundWorker.WorkerSupportsCancellation = true;

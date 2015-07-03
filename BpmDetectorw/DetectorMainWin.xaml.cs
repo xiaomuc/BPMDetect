@@ -162,7 +162,9 @@ namespace BpmDetectorw
                 BackgroundArgument ba = new BackgroundArgument()
                 {
                     Config = createConfig(),
-                    Tracks = item.Tracks
+                    Tracks = item.Tracks,
+                    Overwrite = (bool)chbOverwrite.IsChecked,
+                    WriteToiTunesImmediate = false
                 };
                 prbDetecting.Value = 0;
                 sbiProgress.Visibility = Visibility.Visible;
@@ -324,6 +326,10 @@ namespace BpmDetectorw
                 {
                     break;
                 }
+                if (!ba.Overwrite && tw.Detector != null)
+                {
+                    continue;
+                }
                 int percent = (int)(100 * (double)tw.Index / (double)ba.Tracks.Count);
                 IITFileOrCDTrack track = tw.Track as IITFileOrCDTrack;
 
@@ -387,6 +393,11 @@ namespace BpmDetectorw
             //}
         }
         #endregion
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
     class DriveObject : DispatcherObject
     {
@@ -417,6 +428,8 @@ namespace BpmDetectorw
     {
         public BPMDetectorConfig Config { get; set; }
         public TrackCollectionWrapper Tracks { get; set; }
+        public bool Overwrite { get; set; }
+        public bool WriteToiTunesImmediate { get; set; }
     }
 
     /// <summary>

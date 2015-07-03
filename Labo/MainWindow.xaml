@@ -37,17 +37,26 @@
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <ToolBar DockPanel.Dock="Top">
+            <ComboBox Name="cmbPlaylist" ItemsSource="{Binding}" IsEditable="False" HorizontalContentAlignment="Stretch">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding Key}"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
             <Button Name="btnStart" Content="Start" Click="btnStart_Click"/>
             <ProgressBar Name="progressBar" HorizontalAlignment="Center" Width="100" Height="15" />
             <Button Height="26">
-                        <Image Source="1435735759_play.png" />  </Button>
-            
+                <Image Source="1435735759_play.png" />
+            </Button>
+
         </ToolBar>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="19*"/>
+                <ColumnDefinition Width="234*"/>
+                <ColumnDefinition Width="254*"/>
+                <ColumnDefinition Width="253*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition/>
@@ -55,7 +64,7 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <ListView Grid.RowSpan="2" Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2" 
-                          ItemsSource="{Binding}" MouseDoubleClick="lvTracks_MouseDoubleClick">
+                          ItemsSource="{Binding Path=SelectedItem.Value,ElementName=cmbPlaylist,Mode=OneWay}" MouseDoubleClick="lvTracks_MouseDoubleClick" Grid.ColumnSpan="2">
                 <ListView.Resources>
                     <Style TargetType="{x:Type GridViewColumnHeader}">
                         <Setter Property="HorizontalContentAlignment" Value="Left" />
@@ -97,7 +106,7 @@
                     </GridView>
                 </ListView.View>
             </ListView>
-            <layout:Accordion Grid.Row="3" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+            <layout:Accordion Grid.Row="2" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.ColumnSpan="2">
                 <layout:AccordionItem Header="Settings">
                     <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="White"  
                       Width="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}, Path=ActualWidth}"      
@@ -165,7 +174,7 @@
                     </Grid>
                 </layout:AccordionItem>
             </layout:Accordion>
-            <charting:Chart Grid.Column="1" Grid.Row="2" Title="Volueme Auto-Correlation BPM">
+            <charting:Chart Grid.Column="2" Grid.Row="2" Title="Volueme Auto-Correlation BPM">
                 <charting:Chart.Axes>
                     <charting:LinearAxis Orientation="X" ShowGridLines="True" Interval="10" />
                 </charting:Chart.Axes>
@@ -183,7 +192,7 @@
                 <charting:LineSeries Name="seriesVolAcBpm" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
             </charting:Chart>
-            <charting:Chart Grid.Column="1" Title="音量自己相関" >
+            <charting:Chart Grid.Column="2" Title="音量自己相関" >
                 <charting:Chart.Axes>
                     <charting:LinearAxis Name="autoCorrelationAxis" Orientation="X" ShowGridLines="True" 
                                              Interval="{Binding Path=SelectedItem.DetectedBPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
@@ -204,7 +213,7 @@
                 <charting:LineSeries Name="seriesVolLinear" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Brown" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
             </charting:Chart>
-            <charting:Chart Grid.Column="1" Grid.Row="1" Title="音量自己相関－一次近似で正規化">
+            <charting:Chart Grid.Column="2" Grid.Row="1" Title="音量自己相関－一次近似で正規化">
                 <charting:Chart.Axes>
                     <charting:LinearAxis Orientation="X" ShowGridLines="True" 
                                              Interval="{Binding Path=SelectedItem.DetectedBPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
@@ -222,7 +231,7 @@
                 <charting:LineSeries Name="seriesVolAcNorm" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
             </charting:Chart>
-            <charting:Chart Grid.Column="2" Grid.Row="1" Title="差分自己相関－一次近似で正規化">
+            <charting:Chart Grid.Column="3" Grid.Row="1" Title="差分自己相関－一次近似で正規化">
                 <charting:Chart.Axes>
                     <charting:LinearAxis Orientation="X" ShowGridLines="True" 
                                              Interval="{Binding Path=SelectedItem.DetectedBPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
@@ -268,7 +277,7 @@
             <charting:LineSeries Name="seriesVolume" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
         </charting:Chart>-->
-            <charting:Chart Grid.Column="2" Title="差分自己相関">
+            <charting:Chart Grid.Column="3" Title="差分自己相関">
                 <charting:Chart.Axes>
                     <charting:LinearAxis Orientation="X" ShowGridLines="True" 
                                              Interval="{Binding Path=SelectedItem.DetectedBPM ,ElementName=lvTracks, Converter={StaticResource BPMToIntervalConverter}}" />
@@ -288,7 +297,7 @@
                 <charting:LineSeries Name="seriesDiffLinear" DependentValuePath="Value" IndependentValuePath="Key" 
                 ItemsSource="{Binding}" DataContext="{Binding}" IsSelectionEnabled="True" BorderBrush="Brown" Style="{StaticResource SimpleLineSeriesStyle}"></charting:LineSeries>
             </charting:Chart>
-            <charting:Chart Grid.Column="2" Grid.Row="2" Title="差分BPM">
+            <charting:Chart Grid.Column="3" Grid.Row="2" Title="差分BPM">
                 <charting:Chart.Axes>
                     <charting:LinearAxis Orientation="X" ShowGridLines="True" Interval="10" />
                 </charting:Chart.Axes>

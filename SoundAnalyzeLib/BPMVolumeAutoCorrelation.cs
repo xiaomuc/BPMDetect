@@ -14,6 +14,7 @@ namespace SoundAnalyzeLib
     /// </summary>
     public class BPMVolumeAutoCorrelation : IBpmDetector
     {
+        #region Properties
         /// <summary>
         /// BPM検出に使用する各種設定値格納用
         /// </summary>
@@ -69,20 +70,46 @@ namespace SoundAnalyzeLib
         public Dictionary<double, double> Normalized { get { return _normalized; } }
 
         /// <summary>
+        /// 一次近似直線
+        /// </summary>
+        public Dictionary<double, double> Liner
+        {
+            get
+            {
+                if (_autoCorrelation != null)
+                {
+                    return _autoCorrelation.ToDictionary(x => x.Key, x => _a * x.Key + _b);
+                }
+                else
+                {
+                    return null;
+                }
+            }
+        }
+
+        /// <summary>
         /// 検出したBPM
         /// </summary>
         public int BPM { get; set; }
- 
+
         /// <summary>
         /// iTunesのDatabaseIDを保持
         /// </summary>
         public int ID { get; set; }
 
+        #endregion
+
+        #region Const
+
         /// <summary>
         /// 2Π
         /// </summary>
-        double _2Pi = 2.0 * Math.PI;
+        const double _2Pi = 2.0 * Math.PI;
 
+        #endregion
+
+        #region constructor
+        
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -97,6 +124,10 @@ namespace SoundAnalyzeLib
             _config = new BPMDetectorConfig();
             BPM = 0;
         }
+
+        #endregion
+
+        #region private method
 
         /// <summary>
         /// フレーム毎に振幅の二乗和を計算しその平方根をリスト化する
@@ -229,6 +260,7 @@ namespace SoundAnalyzeLib
             }
             return firstBPM;
         }
+        #endregion
 
         public int detect(string fileName)
         {
@@ -241,7 +273,7 @@ namespace SoundAnalyzeLib
             //自己相関を求める
             _autoCorrelation = getAutoCorrelation(volume, _config.AutoCorrelationSize);
             //最小二乗法により一次近似直線(y=ax+b)のパラメータa,bを求める
-//            double a, b;
+            //            double a, b;
             getLinerParam(_autoCorrelation, out _a, out _b);
             //一次近似直線により正規化
             _normalized = _autoCorrelation
@@ -265,21 +297,6 @@ namespace SoundAnalyzeLib
 
             BPM = selectPeak(_topPeaks);
             return BPM;
-        }
-
-        public Dictionary<double, double> Liner
-        {
-            get
-            {
-                if (_autoCorrelation != null)
-                {
-                    return _autoCorrelation.ToDictionary(x => x.Key, x => _a * x.Key + _b);
-                }
-                else
-                {
-                    return null;
-                }
-            }
         }
     }
 }

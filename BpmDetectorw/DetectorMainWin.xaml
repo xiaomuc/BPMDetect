@@ -39,6 +39,7 @@
     <DockPanel LastChildFill="True">
         <ToolBar DockPanel.Dock="Top">
             <Button Name="btnDetectAll" Click="btnDetectAll_Click" VerticalAlignment="Bottom">Detect All</Button>
+            <CheckBox Name="chbOverwrite" >Overwrite</CheckBox>
             <Separator/>
             <Button Name="btnPlay" Click="btnPlay_Click">Play</Button>
             <Button Name="btnStop" Click="btnStop_Click">Stop</Button>
@@ -155,12 +156,22 @@
                     </charting:Chart.TitleStyle>
                     <charting:LineSeries Name="seriesAutoCorrelation" DependentValuePath="Value" IndependentValuePath="Key" 
                                 ItemsSource="{Binding}" IsSelectionEnabled="True"
-                                DataContext="{Binding Path=SelectedItem.Detector.Normalized ,ElementName=lvTracks, UpdateSourceTrigger=PropertyChanged,Mode=OneWay}"
-                                BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}"/>
-                    <!--charting:LineSeries Name="seriesLiner" DependentValuePath="Value" IndependentValuePath="Key" 
+                                DataContext="{Binding Path=SelectedItem.Detector.AutoCorrelation ,ElementName=lvTracks, UpdateSourceTrigger=PropertyChanged,Mode=OneWay}"
+                                BorderBrush="Blue" Style="{StaticResource SimpleLineSeriesStyle}">
+                    </charting:LineSeries>
+                    <charting:LineSeries Name="seriesLiner" DependentValuePath="Value" IndependentValuePath="Key" 
                                 ItemsSource="{Binding}" IsSelectionEnabled="True"
                                 DataContext="{Binding Path=SelectedItem.Detector.Liner ,ElementName=lvTracks, UpdateSourceTrigger=PropertyChanged,Mode=OneWay}"
-                                BorderBrush="Red" Style="{StaticResource SimpleLineSeriesStyle}"/-->
+                                BorderBrush="Red" Style="{StaticResource SimpleLineSeriesStyle}">
+                    </charting:LineSeries>
+                    <charting:LineSeries Name="seriesNormalized" DependentValuePath="Value" IndependentValuePath="Key" 
+                                ItemsSource="{Binding}" IsSelectionEnabled="True" 
+                                DataContext="{Binding Path=SelectedItem.Detector.Normalized ,ElementName=lvTracks, UpdateSourceTrigger=PropertyChanged,Mode=OneWay}"
+                                BorderBrush="Green" Style="{StaticResource SimpleLineSeriesStyle}">
+                        <charting:LineSeries.DependentRangeAxis>
+                            <charting:LinearAxis Orientation="Y" Location="Right"/>
+                        </charting:LineSeries.DependentRangeAxis>
+                    </charting:LineSeries>
                 </charting:Chart>
                 <charting:Chart Name="chartBPM" Title="BPM" Grid.Row="2">
                     <charting:Chart.LegendStyle>
@@ -186,7 +197,7 @@
                 <ListBox Grid.Row="3" ItemsSource="{Binding SelectedItem.Detector.TopPeaks,ElementName=lvTracks}">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Button Content="{Binding Key}" Width="50" Click="btnSelectBPM_Click"/>
+                            <Button Content="{Binding Key}" Width="Auto" Click="btnSelectBPM_Click"/>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                     <ListBox.ItemsPanel>
@@ -195,7 +206,8 @@
                         </ItemsPanelTemplate>
                     </ListBox.ItemsPanel>
                 </ListBox>
-                <ScrollViewer Grid.Row="4" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" >
+                <!--ScrollViewer Grid.Row="4" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" -->
+                <Expander Grid.Row="4" Header="Settings">
                     <Grid Name="grdSettings" Width="Auto" ScrollViewer.CanContentScroll="True" >
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="auto"/>
@@ -216,26 +228,25 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.ColumnSpan="6" TextAlignment="Center" Background="{DynamicResource {x:Static SystemColors.GradientActiveCaptionBrushKey}}">Settings</TextBlock>
-                        <TextBlock Margin="1,3,0,0" Grid.Row="1" Grid.RowSpan="2" VerticalAlignment="Center" ><Run Text="BPM"/></TextBlock>
-                        <TextBlock Margin="1,3,0,0" Grid.Column="1" Grid.Row="1" ><Run Text="Lo:"/></TextBlock>
-                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="1" x:Name="iupBPMLo" Value="50" Minimum="40" Maximum="240" Increment="1"/>
-                        <TextBlock Margin="1,3,0,0" Grid.Column="1" Grid.Row="2" ><Run Text="Hi:"/></TextBlock>
-                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="2" x:Name="iupBPMHi" Value="240" Minimum="40" Maximum="240" Increment="1"/>
-                        <TextBlock Grid.Row="3" Panel.ZIndex="-1" Grid.RowSpan="2" VerticalAlignment="Center" ><Run Text="Priority"/></TextBlock>
-                        <TextBlock Grid.Column="1" Grid.Row="3" VerticalAlignment="Center"><Run Text="Lo:"/></TextBlock>
-                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="3" x:Name="iupPrioLo" Value="80" Minimum="40" Maximum="240" Increment="1" />
-                        <TextBlock Grid.Column="1" Grid.Row="4" VerticalAlignment="Center"><Run Text="Hi:"/></TextBlock>
-                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="4" x:Name="iupPrioHi" Value="159" Minimum="40" Maximum="240" Increment="1" />
-                        <TextBlock Grid.Column="4" Grid.Row="1" VerticalAlignment="Center" ><Run Text="Threshold:"/></TextBlock>
-                        <toolkit:DoubleUpDown Grid.Column="5" Grid.Row="1" x:Name="dupThreshold" Value="0.6" Minimum="0" Maximum="1" Increment="0.1"/>
-                        <TextBlock Grid.Column="4" Grid.Row="2" VerticalAlignment="Center" Grid.ColumnSpan="2"><Run Text="Frame Size:"/></TextBlock>
-                        <toolkit:IntegerUpDown Grid.Column="5" Grid.Row="2" x:Name="iupFrameSize" Value="2205" Increment="1" />
-                        <TextBlock Grid.Column="4" Grid.Row="3" VerticalAlignment="Center" Grid.ColumnSpan="2"><Run Text="Correlation Size:"/></TextBlock>
-                        <toolkit:IntegerUpDown Grid.Column="5" Grid.Row="3" x:Name="iupCorrelationSize" Value="100" Increment="1" />
+                        <TextBlock Margin="1,3,0,0" Grid.RowSpan="2" VerticalAlignment="Center" ><Run Text="BPM"/></TextBlock>
+                        <TextBlock Margin="1,3,0,0" Grid.Column="1"><Run Text="Lo:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="2" x:Name="iupBPMLo" Value="50" Minimum="40" Maximum="240" Increment="1"/>
+                        <TextBlock Margin="1,3,0,0" Grid.Column="1" Grid.Row="1" ><Run Text="Hi:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="1" x:Name="iupBPMHi" Value="240" Minimum="40" Maximum="240" Increment="1"/>
+                        <TextBlock Grid.Row="2" Panel.ZIndex="-1" Grid.RowSpan="2" VerticalAlignment="Center" ><Run Text="Priority"/></TextBlock>
+                        <TextBlock Grid.Column="1" Grid.Row="2" VerticalAlignment="Center"><Run Text="Lo:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="2" x:Name="iupPrioLo" Value="80" Minimum="40" Maximum="240" Increment="1" />
+                        <TextBlock Grid.Column="1" Grid.Row="3" VerticalAlignment="Center"><Run Text="Hi:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="2" Grid.Row="3" x:Name="iupPrioHi" Value="159" Minimum="40" Maximum="240" Increment="1" />
+                        <TextBlock Grid.Column="4" VerticalAlignment="Center" ><Run Text="Threshold:"/></TextBlock>
+                        <toolkit:DoubleUpDown Grid.Column="5" x:Name="dupThreshold" Value="0.6" Minimum="0" Maximum="1" Increment="0.1"/>
+                        <TextBlock Grid.Column="4" Grid.Row="1" VerticalAlignment="Center" Grid.ColumnSpan="2"><Run Text="Frame Size:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="5" Grid.Row="1" x:Name="iupFrameSize" Value="4410" Increment="1" />
+                        <TextBlock Grid.Column="4" Grid.Row="2" VerticalAlignment="Center" Grid.ColumnSpan="2"><Run Text="Correlation Size:"/></TextBlock>
+                        <toolkit:IntegerUpDown Grid.Column="5" Grid.Row="2" x:Name="iupCorrelationSize" Value="50" Increment="1" />
                         
                     </Grid>
-                </ScrollViewer>
+                </Expander><!-- / -->
             </Grid>
             <ListView Grid.Column="2" Grid.Row="0"  Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2" 
                           ItemsSource="{Binding Path=SelectedItem.Tracks,ElementName=trvPlayList,Mode=OneWay}">

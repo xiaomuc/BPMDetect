@@ -19,14 +19,14 @@ namespace SoundAnalyzeLib
 
         public BPMDetectorConfig()
         {
-            FrameSize = 512;
-            BPMLow = 60;
-            BPMHigh = 240;
-            PriorityBPMLow = 90;
-            PriorityBPMHigh = 180;
-            PeakThreshold = 0.5;
+            FrameSize = 4410;
+            BPMLow = 50;
+            BPMHigh = 250;
+            PriorityBPMLow = 80;
+            PriorityBPMHigh = 159;
+            PeakThreshold = 0.6;
             PeakWidth = 3;
-            AutoCorrelationSize = 500;
+            AutoCorrelationSize = 50;
         }
     }
 }
