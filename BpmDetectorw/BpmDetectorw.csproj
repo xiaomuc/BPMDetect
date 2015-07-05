@@ -141,9 +141,9 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\m_e_others_501.png">
+    <Resource Include="image\m_e_others_501.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
+    </Resource>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SoundAnalyzeLib\SoundAnalyzeLib.csproj">
@@ -152,10 +152,13 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="1435735759_play.png" />
-    <Resource Include="1435735785_pause.png" />
-    <Resource Include="1435735800_ff.png" />
-    <Resource Include="1435736051_rew.png" />
+    <Resource Include="image\1435735759_play.png" />
+    <Resource Include="image\1435735785_pause.png" />
+    <Resource Include="image\1435735800_ff.png" />
+    <Resource Include="image\1435736051_rew.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Resources\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -65,7 +65,8 @@ namespace BpmDetectorw
                 }
             }
 
-            return "pack://siteoforigin:,,,/Resources/m_e_others_501.png";
+            //return "pack://siteoforigin:,,,/Resources/m_e_others_501.png";
+            return "image/m_e_others_501.png";
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)

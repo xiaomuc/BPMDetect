@@ -2,30 +2,119 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:toolkit="clr-namespace:System.Windows.Controls;assembly=System.Windows.Controls.Layout.Toolkit"
+        xmlns:xceed="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:System="clr-namespace:System;assembly=mscorlib" x:Class="AccordionInWpf.MainWindow"
         Title="MainWindow" Height="350" Width="525">
-    <toolkit:Accordion HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
-        <toolkit:AccordionItem x:Name="accItemUInput" Header="user input" >
-            <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+    <DockPanel LastChildFill="True">
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="File">
+                <MenuItem Header="Open"/>
+            </MenuItem>
+            <MenuItem Header="Edit">
+                <MenuItem Header="Copy"/>
+            </MenuItem>
+        </Menu>
+        <Expander DockPanel.Dock="Top" ExpandDirection="Right">
+            <GroupBox Header="setting">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+                    <TextBlock>Detection Mode</TextBlock>
+                    <ComboBox Name="cmbMode" Grid.Column="1" IsReadOnly="True">
+                        <ComboBoxItem Content="Skip if detected" Selector.IsSelected="True"/>
+                        <ComboBoxItem Content="detect it again"/>
+                    </ComboBox>
+                    <ComboBox Name="cmbTest" ItemsSource="{Binding}" >
+                        <TreeViewItem Header="test">
+                            <TreeViewItem Header="test2"/>
+                            <TreeViewItem Header="test3"/>
+                        </TreeViewItem>
+                        <TreeViewItem Header="test4"/>
+                        
+                    </ComboBox>
+                </Grid>
+            </GroupBox>
+        </Expander>
+        <Grid DockPanel.Dock="Left">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Expander Grid.Row="1" Header="Settings" ExpandDirection="Down">
+                <Grid Name="grdSettings" Width="Auto" ScrollViewer.CanContentScroll="True" >
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Margin="1,3,0,0" Grid.RowSpan="2" VerticalAlignment="Center" ><Run Text="BPM"/></TextBlock>
+                    <TextBlock Margin="1,3,0,0" Grid.Column="1"><Run Text="Lo:"/></TextBlock>
+                    <TextBox Grid.Column="2" x:Name="iupBPMLo" />
+                    <TextBlock Margin="1,3,0,0" Grid.Column="1" Grid.Row="1" ><Run Text="Hi:"/></TextBlock>
+                    <TextBox Grid.Column="2" Grid.Row="1" x:Name="iupBPMHi"/>
+                    <TextBlock Grid.Row="2" Panel.ZIndex="-1" Grid.RowSpan="2" VerticalAlignment="Center" ><Run Text="Priority"/></TextBlock>
+                    <TextBlock Grid.Column="1" Grid.Row="2" VerticalAlignment="Center"><Run Text="Lo:"/></TextBlock>
+                    <TextBox Grid.Column="2" Grid.Row="2" x:Name="iupPrioLo"/>
+                    <TextBlock Grid.Column="1" Grid.Row="3" VerticalAlignment="Center"><Run Text="Hi:"/></TextBlock>
+                    <TextBox Grid.Column="2" Grid.Row="3" x:Name="iupPrioHi"/>
+                    <TextBlock Grid.Column="4" VerticalAlignment="Center" ><Run Text="Threshold:"/></TextBlock>
+                    <TextBox Grid.Column="5" x:Name="dupThreshold"/>
+                    <TextBlock Grid.Column="4" Grid.Row="1" VerticalAlignment="Center" Grid.ColumnSpan="2"><Run Text="Frame Size:"/></TextBlock>
+                    <TextBox Grid.Column="5" Grid.Row="1" x:Name="iupFrameSize"/>
+                    <TextBlock Grid.Column="4" Grid.Row="2" VerticalAlignment="Center" Grid.ColumnSpan="2"><Run Text="Correlation Size:"/></TextBlock>
+                    <TextBox Grid.Column="5" Grid.Row="2" x:Name="iupCorrelationSize"/>
+                    <Image Source="image/play.png"/>
+
+                </Grid>
+            </Expander>
+            <!-- / -->
+        </Grid>
+        <toolkit:Accordion HorizontalAlignment="Stretch" VerticalAlignment="Stretch" >
+            <toolkit:AccordionItem x:Name="accItemUInput" Header="user input" >
+                <Grid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
 				Background="White"  Width="{Binding ActualWidth, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}}"
 				Height="{Binding ActualHeight, RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Grid}}}">
-                <TextBlock Text="First Name: " Margin="0,5,0,-5" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-                <TextBox x:Name="txtFN" Margin="84,5,0,0" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                <TextBlock Text="Last Name: " Margin="1,42,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-                <TextBox x:Name="txtLN" Margin="84,39,0,0" HorizontalAlignment="Left" Width="150" VerticalAlignment="Top"/>
-                <Button x:Name="btnSubmit" Margin="84,84,0,0" Content="submit" Click="btnSubmit_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
-            </Grid>
-        </toolkit:AccordionItem>
-        <toolkit:AccordionItem x:Name="accitemUInfo" Header="User Info">
-            <TextBlock x:Name="txtInfo" Text=""/>
-        </toolkit:AccordionItem>
-        <toolkit:AccordionItem Header="ListBox" IsSelected="true" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
-            <StackPanel>
-                <Button Click="Button_Click" Content="threading"/>
-                <ListBox x:Name="listBox1" Height="100" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Visible">
-                    
-                </ListBox>
-            </StackPanel>
-        </toolkit:AccordionItem>
-    </toolkit:Accordion>
+                    <TextBlock Text="First Name: " Margin="0,5,0,-5" Height="auto" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                    <TextBox x:Name="txtFN" Margin="84,5,0,0" Width="150" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <TextBlock Text="Last Name: " Margin="1,42,0,0" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+                    <TextBox x:Name="txtLN" Margin="84,39,0,0" HorizontalAlignment="Left" Width="150" VerticalAlignment="Top"/>
+                    <Button x:Name="btnSubmit" Margin="84,84,0,0" Content="submit" Click="btnSubmit_Click" HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                </Grid>
+            </toolkit:AccordionItem>
+            <toolkit:AccordionItem x:Name="accitemUInfo" Header="User Info">
+                <TextBlock x:Name="txtInfo" Text=""/>
+            </toolkit:AccordionItem>
+            <toolkit:AccordionItem Header="ListBox" IsSelected="true" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+                <StackPanel>
+                    <Button Click="Button_Click" Content="threading"/>
+                    <ListBox x:Name="listBox1" Height="100" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Visible">
+
+                    </ListBox>
+                </StackPanel>
+            </toolkit:AccordionItem>
+        </toolkit:Accordion>
+    </DockPanel>
 </Window>

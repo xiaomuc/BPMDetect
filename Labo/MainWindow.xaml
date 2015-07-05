@@ -44,10 +44,13 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+            <MenuItem Header="menu">
+                <MenuItem Header="Execute"/>
+            </MenuItem>
             <Button Name="btnStart" Content="Start" Click="btnStart_Click"/>
             <ProgressBar Name="progressBar" HorizontalAlignment="Center" Width="100" Height="15" />
-            <Button Height="26">
-                <Image Source="1435735759_play.png" />
+            <Button Height="26" Click="Button_Click">
+                <Image Name="imgPlayPause" Source="1435735759_play.png" />
             </Button>
 
         </ToolBar>

@@ -18,10 +18,12 @@ namespace BpmDetectorw
     {
         IITTrackCollection _trackCollection;
         Dictionary<int, IBpmDetector> _detectorDictionary;
+        Dictionary<int, TrackWrapper> _items;
         public TrackCollectionWrapper(IITTrackCollection trackCollection, Dictionary<int, IBpmDetector> detectorDictionary)
         {
             this._trackCollection = trackCollection;
             this._detectorDictionary = detectorDictionary;
+            _items = new Dictionary<int, TrackWrapper>();
         }
 
         public IEnumerator GetEnumerator()
@@ -36,7 +38,23 @@ namespace BpmDetectorw
 
         public TrackWrapper this[int index]
         {
-            get { return new TrackWrapper(_trackCollection[index], this); }
+            get { return getByIndex(index); }
+        }
+        
+        public TrackWrapper get(IITTrack track)
+        {
+            if (!_items.ContainsKey(track.TrackDatabaseID))
+            {
+                _items.Add(track.TrackDatabaseID, new TrackWrapper(track, this));
+            }
+            return _items[track.TrackDatabaseID];
+        }
+        
+        public TrackWrapper getByIndex(int index)
+        {
+            IITTrack track = _trackCollection[index];
+            return get(track);
+        
         }
     }
 
@@ -112,7 +130,7 @@ namespace BpmDetectorw
 
         public object Current
         {
-            get { return new TrackWrapper(_enumerator.Current as IITTrack, _owner); }
+            get { return _owner.get(_enumerator.Current as IITTrack); }
         }
 
         public bool MoveNext()

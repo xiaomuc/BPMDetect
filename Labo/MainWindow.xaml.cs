@@ -32,6 +32,10 @@ namespace Labo
         BackgroundWorker _backgroundWorker;
         TrackCollectionWrapper _collection;
         Dictionary<int, IBpmDetector> detectorDictionary;
+        string _playImageFile = "1435735759_play.png";
+        string _pauseImageFile = "1435735785_pause.png";
+        BitmapImage biPlay;
+        BitmapImage biPause;
         public MainWindow()
         {
             InitializeComponent();
@@ -49,14 +53,23 @@ namespace Labo
             cmbPlaylist.ItemsSource = comboList;
 
             //lvTracks.ItemsSource = _collection;
-            
+
             _backgroundWorker = new BackgroundWorker();
             _backgroundWorker.WorkerReportsProgress = true;
             _backgroundWorker.WorkerSupportsCancellation = true;
             _backgroundWorker.DoWork += _backgroundWorker_DoWork;
             _backgroundWorker.ProgressChanged += _backgroundWorker_ProgressChanged;
             _backgroundWorker.RunWorkerCompleted += _backgroundWorker_RunWorkerCompleted;
+
+            _ituneApp.OnPlayerPlayEvent += _ituneApp_OnPlayerPlayEvent;
+            _ituneApp.OnPlayerPlayingTrackChangedEvent += _ituneApp_OnPlayerPlayingTrackChangedEvent;
+            _ituneApp.OnPlayerStopEvent += _ituneApp_OnPlayerStopEvent;
+
+            biPlay = new BitmapImage(new Uri(_playImageFile, UriKind.Relative));
+            biPause = new BitmapImage(new Uri(_pauseImageFile, UriKind.Relative));
         }
+
+
 
 
 
@@ -318,8 +331,10 @@ namespace Labo
                 progressBar.Value = 0;
                 btnStart.Content = "Stop";
                 _backgroundWorker.RunWorkerAsync(param);
-            }else{
-                btnStart.IsEnabled=false;
+            }
+            else
+            {
+                btnStart.IsEnabled = false;
                 _backgroundWorker.CancelAsync();
             }
         }
@@ -332,7 +347,7 @@ namespace Labo
         void _backgroundWorker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             progressBar.Value = e.ProgressPercentage;
-           // IBpmDetector detector = e.UserState as IBpmDetector;
+            // IBpmDetector detector = e.UserState as IBpmDetector;
             TrackWrapper tw = e.UserState as TrackWrapper;
 
             foreach (TrackWrapper item in lvTracks.Items)
@@ -366,10 +381,58 @@ namespace Labo
                 if (worker.CancellationPending) break;
                 IITFileOrCDTrack track = tw.Track as IITFileOrCDTrack;
                 IBpmDetector detector = new BPMVolumeAutoCorrelation(config);
-                tw.DetectedBPM= detector.detect(track.Location);
+                tw.DetectedBPM = detector.detect(track.Location);
                 detector.ID = tw.Track.trackID;
                 worker.ReportProgress(++i, tw);
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (_ituneApp.PlayerState == ITPlayerState.ITPlayerStateStopped)
+            {
+                _ituneApp.Play();
+            }
+            else if (_ituneApp.PlayerState == ITPlayerState.ITPlayerStatePlaying)
+            {
+                _ituneApp.Pause();
+            }
+        }
+        void _ituneApp_OnPlayerStopEvent(object iTrack)
+        {
+            imgPlayPause.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                imgPlayPause.Source = biPlay;
+            }));
+        }
+
+        void _ituneApp_OnPlayerPlayingTrackChangedEvent(object iTrack)
+        {
+            
+            Console.WriteLine("track changed:");
+        }
+
+        void _ituneApp_OnPlayerPlayEvent(object iTrack)
+        {
+            imgPlayPause.Dispatcher.BeginInvoke(new Action(() =>
+            {
+                //BitmapImage bi = new BitmapImage(new Uri("1435735785_pause.png", UriKind.Relative));
+                imgPlayPause.Source = biPause;
+            }));
+            lvTracks.Dispatcher.BeginInvoke(
+                     new Action(() =>
+                     {
+                         IITTrack track = iTrack as IITTrack;
+                         foreach (TrackWrapper tw in lvTracks.Items)
+                         {
+                             if (tw.Track.TrackDatabaseID == track.TrackDatabaseID)
+                             {
+                                 lvTracks.SelectedItem = tw;
+                                 lvTracks.ScrollIntoView(tw);
+                                 break;
+                             }
+                         }
+                     }));
         }
     }
 }
