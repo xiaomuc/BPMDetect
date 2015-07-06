@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using CSCore;
 using CSCore.Codecs;
 using CSCore.Streams;
@@ -109,7 +110,7 @@ namespace SoundAnalyzeLib
         #endregion
 
         #region constructor
-        
+
         /// <summary>
         /// コンストラクタ
         /// </summary>
@@ -260,25 +261,114 @@ namespace SoundAnalyzeLib
             }
             return firstBPM;
         }
+
         #endregion
 
-        public int detect(string fileName)
+        void writeDictionary(Dictionary<double, double> dictionary, BinaryWriter writer)
         {
-            _fileName = fileName;
-            IWaveSource waveSource = CodecFactory.Instance.GetCodec(fileName);
-            ISampleSource sampleSource = waveSource.ToSampleSource();
+            writer.Write(dictionary.Count);
+            foreach (KeyValuePair<double, double> kv in dictionary)
+            {
+                writer.Write(kv.Key);
+                writer.Write(kv.Value);
+            }
+        }
+        void writeDictionary(Dictionary<int, double> dictionary, BinaryWriter writer)
+        {
+            writer.Write(dictionary.Count);
+            foreach (KeyValuePair<int, double> kv in dictionary)
+            {
+                writer.Write(kv.Key);
+                writer.Write(kv.Value);
+            }
+        }
+        void readDictionary(Dictionary<double, double> dictionary, BinaryReader reader)
+        {
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                double key = reader.ReadDouble();
+                double value = reader.ReadDouble();
+                dictionary.Add(key, value);
+            }
+        }
+        void readDictionary(Dictionary<int, double> dictionary, BinaryReader reader)
+        {
+            int count = reader.ReadInt32();
+            for (int i = 0; i < count; i++)
+            {
+                int key = reader.ReadInt32();
+                double value = reader.ReadDouble();
+                dictionary.Add(key, value);
+            }
+        }
+        public void saveToFile(string fileName)
+        {
+            using (Stream stream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
+            {
+                using (BinaryWriter writer = new BinaryWriter(stream))
+                {
+                    writer.Write(_config.FrameSize);
+                    writer.Write(_config.AutoCorrelationSize);
+                    writer.Write(_config.BPMHigh);
+                    writer.Write(_config.BPMLow);
+                    writer.Write(_config.PriorityBPMHigh);
+                    writer.Write(_config.PriorityBPMLow);
+                    writer.Write(_config.PeakThreshold);
+                    writer.Write(_config.PeakWidth);
 
-            //音量情報を格納するDictionary(時刻、音量)
-            Dictionary<double, double> volume = getVolume(sampleSource, _config.FrameSize);
-            //自己相関を求める
-            _autoCorrelation = getAutoCorrelation(volume, _config.AutoCorrelationSize);
-            //最小二乗法により一次近似直線(y=ax+b)のパラメータa,bを求める
-            //            double a, b;
-            getLinerParam(_autoCorrelation, out _a, out _b);
-            //一次近似直線により正規化
-            _normalized = _autoCorrelation
-                .ToDictionary(x => x.Key, x => x.Value - (_a * x.Key + _b));
+                    writeDictionary(_autoCorrelation, writer);
+                    writer.Write(_a);
+                    writer.Write(_b);
+                    writeDictionary(_normalized, writer);
+                    writeDictionary(_peaks, writer);
+                    writeDictionary(_topPeaks, writer);
+                    writer.Write(BPM);
 
+
+                    writer.Close();
+                }
+                stream.Close();
+            }
+        }
+
+        public int loadFromFile(string fileName)
+        {
+            using (Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            {
+                using (BinaryReader reader = new BinaryReader(stream))
+                {
+                    _config = new BPMDetectorConfig();
+                    _config.FrameSize = reader.ReadInt32();
+
+                    _config.AutoCorrelationSize = reader.ReadInt32();
+                    _config.BPMHigh = reader.ReadInt32();
+                    _config.BPMLow = reader.ReadInt32();
+                    _config.PriorityBPMHigh = reader.ReadInt32();
+                    _config.PriorityBPMLow = reader.ReadInt32();
+                    _config.PeakThreshold = reader.ReadDouble();
+                    _config.PeakWidth = reader.ReadInt32();
+
+                    _autoCorrelation = new Dictionary<double, double>();
+                    readDictionary(_autoCorrelation, reader);
+                    _a = reader.ReadDouble();
+                    _b = reader.ReadDouble();
+                    _normalized = new Dictionary<double, double>();
+                    readDictionary(_normalized, reader);
+                    _peaks = new Dictionary<int, double>();
+                    readDictionary(_peaks, reader);
+                    _topPeaks = new Dictionary<int, double>();
+                    readDictionary(_topPeaks, reader);
+                    BPM = reader.ReadInt32();
+
+                    reader.Close();
+                }
+                stream.Close();
+            } return detectFromAutoCorrelation();
+        }
+
+        int detectFromAutoCorrelation()
+        {
             //BPM検出
             _bpms = getBPM(_normalized);
 
@@ -297,6 +387,49 @@ namespace SoundAnalyzeLib
 
             BPM = selectPeak(_topPeaks);
             return BPM;
+        }
+
+        public int detect(string fileName)
+        {
+            _fileName = fileName;
+            IWaveSource waveSource = CodecFactory.Instance.GetCodec(fileName);
+            ISampleSource sampleSource = waveSource.ToSampleSource();
+
+            //音量情報を格納するDictionary(時刻、音量)
+            Dictionary<double, double> volume = getVolume(sampleSource, _config.FrameSize);
+
+            //自己相関を求める
+            _autoCorrelation = getAutoCorrelation(volume, _config.AutoCorrelationSize);
+
+            //最小二乗法により一次近似直線(y=ax+b)のパラメータa,bを求める
+            //            double a, b;
+            getLinerParam(_autoCorrelation, out _a, out _b);
+            //一次近似直線により正規化
+            _normalized = _autoCorrelation
+                .ToDictionary(x => x.Key, x => x.Value - (_a * x.Key + _b));
+
+            return detectFromAutoCorrelation();
+
+            /*
+            //BPM検出
+            _bpms = getBPM(_normalized);
+
+            //ピーク検出
+            _peaks = _bpms.Skip(1)
+                .Take(_bpms.Count - 2)
+                .Where(x => _bpms[x.Key - 1] < x.Value && _bpms[x.Key + 1] < x.Value)
+                .OrderByDescending(x => x.Value)
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            //しきい値以上のピークに絞り込む
+            double max = _peaks.Max(x => x.Value);
+            _topPeaks = _peaks
+                .Where(x => x.Value / max > _config.PeakThreshold)
+                .ToDictionary(x => x.Key, x => x.Value);
+
+            BPM = selectPeak(_topPeaks);
+            return BPM;
+            */
         }
     }
 }

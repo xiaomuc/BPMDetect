@@ -19,6 +19,7 @@ using SoundAnalyzeLib;
 using CSCore;
 using CSCore.Codecs;
 using CSCore.Streams;
+using System.IO;
 
 namespace Labo
 {
@@ -36,6 +37,8 @@ namespace Labo
         string _pauseImageFile = "1435735785_pause.png";
         BitmapImage biPlay;
         BitmapImage biPause;
+        string _dataPath;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -67,12 +70,23 @@ namespace Labo
 
             biPlay = new BitmapImage(new Uri(_playImageFile, UriKind.Relative));
             biPause = new BitmapImage(new Uri(_pauseImageFile, UriKind.Relative));
+            _dataPath = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "BpmDetecor");
+            if (!Directory.Exists(_dataPath))
+            {
+                Directory.CreateDirectory(_dataPath);
+            }
         }
-
-
-
-
-
+        string getDataPath(IITTrack track)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(track.Artist + "_" + track.Album + "_" + track.Name+".dat");
+            char[] invalidChars=System.IO.Path.GetInvalidFileNameChars();
+            foreach (char c in invalidChars)
+            {
+                sb.Replace(c, '~');
+            }
+            return System.IO.Path.Combine(_dataPath, sb.ToString());
+        }
         private void lvTracks_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             TrackWrapper wt = lvTracks.SelectedItem as TrackWrapper;
@@ -83,8 +97,9 @@ namespace Labo
                 IWaveSource waveSource = CodecFactory.Instance.GetCodec(track.Location);
                 _sampleSource = waveSource.ToSampleSource();
 
-                showVolume(track.BPM);
-                wt.DetectedBPM = showVolByDetector(track.Location);
+                //showVolume(track.BPM);
+                
+                wt.DetectedBPM = showVolByDetector(track);
             }
             catch (Exception ex)
             {
@@ -219,8 +234,9 @@ namespace Labo
             }
             */
         }
-        int showVolByDetector(string fileName)
+        int showVolByDetector(IITFileOrCDTrack track)
         {
+            DateTime st = DateTime.Now;
             int frameSize = (int)iudFrameSize.Value;
             int autoCoSize = (int)iudFrameCount.Value;
             int bpmLo = (int)iudBpmLo.Value;
@@ -234,11 +250,18 @@ namespace Labo
                             BPMHigh = bpmHi,
                             AutoCorrelationSize = autoCoSize
                         });
-            int bpm = detector.detect(fileName);
+            Console.WriteLine((DateTime.Now - st).ToString()+" Detect Start");
+            int bpm = detector.detect(track.Location);
+            string saveFileName = getDataPath(track);
+            Console.WriteLine((DateTime.Now - st).ToString() + " Save Start");
+            detector.saveToFile(saveFileName);
+            Console.WriteLine((DateTime.Now - st).ToString() + " Chart Start");
             seriesVolAc.ItemsSource = detector.AutoCorrelation;
             seriesVolAcNorm.ItemsSource = detector.Normalized;
             seriesVolAcBpm.ItemsSource = detector.BPMs;
             volumePeakList.ItemsSource = detector.TopPeaks;
+            Console.WriteLine((DateTime.Now - st).ToString() + " end.");
+            
             return bpm;
         }
         Dictionary<int, double> getPeaks(Dictionary<int, double> data)
@@ -433,6 +456,24 @@ namespace Labo
                              }
                          }
                      }));
+        }
+
+        private void lvTracks_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            DateTime st = DateTime.Now;
+            TrackWrapper tw = lvTracks.SelectedItem as TrackWrapper;
+            string fileName = getDataPath(tw.Track);
+            if (File.Exists(fileName))
+            {
+                BPMVolumeAutoCorrelation detector = new BPMVolumeAutoCorrelation();
+                detector.loadFromFile(fileName);
+                tw.Detector = detector;
+                seriesVolAc.ItemsSource = detector.AutoCorrelation;
+                seriesVolAcNorm.ItemsSource = detector.Normalized;
+                seriesVolAcBpm.ItemsSource = detector.BPMs;
+                volumePeakList.ItemsSource = detector.TopPeaks;
+                Console.WriteLine((DateTime.Now - st).ToString() + " File Load end");
+            }
         }
     }
 }

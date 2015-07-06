@@ -67,7 +67,7 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
             <ListView Grid.RowSpan="2" Name="lvTracks"  VirtualizingPanel.IsVirtualizing="True" AlternationCount="2" 
-                          ItemsSource="{Binding Path=SelectedItem.Value,ElementName=cmbPlaylist,Mode=OneWay}" MouseDoubleClick="lvTracks_MouseDoubleClick" Grid.ColumnSpan="2">
+                          ItemsSource="{Binding Path=SelectedItem.Value,ElementName=cmbPlaylist,Mode=OneWay}" MouseDoubleClick="lvTracks_MouseDoubleClick" Grid.ColumnSpan="2" SelectionChanged="lvTracks_SelectionChanged">
                 <ListView.Resources>
                     <Style TargetType="{x:Type GridViewColumnHeader}">
                         <Setter Property="HorizontalContentAlignment" Value="Left" />
