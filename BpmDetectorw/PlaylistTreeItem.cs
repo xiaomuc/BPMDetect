@@ -21,7 +21,7 @@ namespace BpmDetectorw
         /// <param name="treeView">親のツリーアイテム</param>
         /// <param name="source">プレイリストが格納されているソース</param>
         /// <param name="dictionary">BPM検出クラスを格納しておくリスト</param>
-        public static void createPlaylistTree(TreeView treeView, IITSource source,Dictionary<int,IBpmDetector> dictionary)
+        public static void createPlaylistTree(TreeView treeView, IITSource source, Dictionary<int, IBpmDetector> dictionary, string dataPath)
         {
             //まずはプレイリストの一覧を作る
             List<PlaylistTreeItem> list = new List<PlaylistTreeItem>();
@@ -31,7 +31,7 @@ namespace BpmDetectorw
                 {
                     Title = p.Name,
                     iTunesPlaylist = p,
-                    Tracks = new TrackCollectionWrapper(p.Tracks, dictionary)
+                    Tracks = new TrackCollectionWrapper(p.Tracks, dictionary, dataPath)
                 };
                 list.Add(item);
             }
@@ -96,8 +96,8 @@ namespace BpmDetectorw
         /// プレイリスト
         /// </summary>
         public IITPlaylist iTunesPlaylist { get; set; }
-//        public ObservableTrackCollection Tracks { get; set; }
-        
+        //        public ObservableTrackCollection Tracks { get; set; }
+
         /// <summary>
         /// 子要素はプロパティ変更が受け取れるやつで
         /// </summary>

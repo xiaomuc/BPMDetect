@@ -13,6 +13,8 @@ namespace SoundAnalyzeLib
         Dictionary<int, double> Peaks { get; }
         Dictionary<int, double> TopPeaks { get; }
         BPMDetectorConfig Config { get; }
+        int loadFromFile(string fileName);
+        void saveToFile(string fileName);
         int ID { get; set; }
         int BPM { get; set; }
     }

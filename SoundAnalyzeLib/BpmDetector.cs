@@ -318,5 +318,16 @@ namespace SoundAnalyzeLib
 
             return _peaks.Count;
         }
+
+
+        public int loadFromFile(string fileName)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void saveToFile(string fileName)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

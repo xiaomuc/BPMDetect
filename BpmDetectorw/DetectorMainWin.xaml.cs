@@ -27,6 +27,7 @@ namespace BpmDetectorw
         BitmapImage biPause;
         BitmapImage biPlay;
         DateTime _startTime;
+        string _dataPath;
         #endregion
 
         #region Contructor/Destructor
@@ -45,8 +46,15 @@ namespace BpmDetectorw
             //BPM検出オブジェクトを格納するリスト(ディクショナリ)
             _detectorDictionary = new Dictionary<int, IBpmDetector>();
 
+            //BPM検出結果を保存するフォルダ
+            _dataPath = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "BpmDetecor");
+            if (!Directory.Exists(_dataPath))
+            {
+                Directory.CreateDirectory(_dataPath);
+            }
+
             //ツリー表示用にプレイリストを保持するオブジェクト
-            PlaylistTreeItem.createPlaylistTree(trvPlayList, _itunesApp.LibrarySource, _detectorDictionary);
+            PlaylistTreeItem.createPlaylistTree(trvPlayList, _itunesApp.LibrarySource, _detectorDictionary, _dataPath);
 
             //アルバムアートワーク用の設定
             _imagePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Properties.Resources.tempImageFolderName);
