@@ -13,7 +13,8 @@ namespace BpmDec
     {
         static Program instance = null;
         BPMDetectorConfig _config;
-        bool _overwrite = false;
+        bool _forceAnalyze = false;
+        bool _overwrite = true;
         string _dataPath;
         string _ext = "dat";
         string _itunesLib = "";
@@ -42,7 +43,8 @@ namespace BpmDec
                 Console.WriteLine(" [/I:playlist_Name][/D:save_dir_name][/Skip][/F:99][/C:99][/B:99-99][/P:99-99][/T:0.9]");
                 Console.WriteLine("/I\t分析対象のiTunesプレイリスト。Defalut=library");
                 Console.WriteLine("/D\t分析結果保存ディレクトリ。Defalut={0}", _dataPath);
-                Console.WriteLine("/O\t分析済みでも再分析する");
+                Console.WriteLine("/A\t分析済みでも再分析する");
+                Console.WriteLine("/N\t分析済みのBPMで上書きしない");
                 Console.WriteLine("/F\t音量測定のフレームサイズ。Defalut={0}", _config.FrameSize);
                 Console.WriteLine("/C\t自己相関測定サイズ。Defalut={0}", _config.AutoCorrelationSize);
                 Console.WriteLine("/B\tBPM検出範囲。Defalut={0}-{1}", _config.BPMLow, _config.BPMHigh);
@@ -55,7 +57,7 @@ namespace BpmDec
             {
                 if (arg.StartsWith("/i") || arg.StartsWith("/I"))
                 {
-                    string[] param = arg.Split('/');
+                    string[] param = arg.Split(':');
                     _itunesLib = param[1];
 
                 }
@@ -66,7 +68,7 @@ namespace BpmDec
                 }
                 else if (arg.StartsWith("/f") || arg.StartsWith("/F"))
                 {
-                    string[] param = arg.Split('/');
+                    string[] param = arg.Split(':');
                     int i;
                     if (int.TryParse(param[1], out i))
                     {
@@ -75,7 +77,7 @@ namespace BpmDec
                 }
                 else if (arg.StartsWith("/c") || arg.StartsWith("/C"))
                 {
-                    string[] param = arg.Split('/');
+                    string[] param = arg.Split(':');
                     int i;
                     if (int.TryParse(param[1], out i))
                     {
@@ -84,7 +86,7 @@ namespace BpmDec
                 }
                 else if (arg.StartsWith("/b") || arg.StartsWith("/B"))
                 {
-                    string[] param = arg.Split('/', '-');
+                    string[] param = arg.Split(':', '-');
                     int i;
                     if (int.TryParse(param[1], out i))
                     {
@@ -97,7 +99,7 @@ namespace BpmDec
                 }
                 else if (arg.StartsWith("/p") || arg.StartsWith("/P"))
                 {
-                    string[] param = arg.Split('/', '-');
+                    string[] param = arg.Split(':', '-');
                     int i;
                     if (int.TryParse(param[1], out i))
                     {
@@ -110,16 +112,20 @@ namespace BpmDec
                 }
                 else if (arg.StartsWith("/c") || arg.StartsWith("/C"))
                 {
-                    string[] param = arg.Split('/');
+                    string[] param = arg.Split(':');
                     double d;
                     if (double.TryParse(param[1], out d))
                     {
                         _config.PeakThreshold = d;
                     }
                 }
-                else if (arg.StartsWith("/O") || arg.StartsWith("/o"))
+                else if (arg.StartsWith("/A") || arg.StartsWith("/a"))
                 {
-                    _overwrite = true;
+                    _forceAnalyze = true;
+                }
+                else if (arg.StartsWith("/N") || arg.StartsWith("/n"))
+                {
+                    _overwrite = false;
                 }
                 else if (arg.StartsWith("/L") || arg.StartsWith("/l"))
                 {
@@ -182,11 +188,7 @@ namespace BpmDec
                 Console.WriteLine(" Artist:{0}", track.Artist);
                 int bpm = track.BPM; ;
                 string fileName = ComUtils.BpmUtils.getDataFileName(_dataPath, track,_ext);
-                if (!_overwrite && File.Exists(fileName))
-                {
-                    Console.WriteLine(" BPM   :{0} -> SKIP", bpm);
-                }
-                else
+                if (_forceAnalyze || !File.Exists(fileName))
                 {
                     try
                     {
@@ -194,19 +196,44 @@ namespace BpmDec
                         int prev = bpm;
                         bpm = detector.detect(track.Location);
                         detector.saveToFile(fileName);
-                        track.BPM = bpm;
                         Console.WriteLine(" BPM   :{0} -> {1}", prev, bpm);
+                        if (bpm != prev)
+                        {
+                            track.BPM = bpm;
+                        }
                     }
                     catch (System.Runtime.InteropServices.COMException ex)
                     {
-                        Console.WriteLine(" BPM   :{0} -> ERROR", bpm);
                         Console.WriteLine(ex.Message);
                         bpmResult.Add(track.TrackDatabaseID, bpm);
 
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(" BPM   :{0} -> ERROR", bpm);
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+                else if (_overwrite)
+                {
+                    try
+                    {
+                        BPMVolumeAutoCorrelation detector = new BPMVolumeAutoCorrelation();
+                        detector.loadFromFile(fileName);
+                        bpm = detector.BPM;
+                        Console.WriteLine(" BPM   :{0} -> {1}", track.BPM, bpm);
+                        if (track.BPM != bpm)
+                        {
+                            track.BPM = bpm;
+                        }
+                    }
+                    catch (System.Runtime.InteropServices.COMException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        bpmResult.Add(track.TrackDatabaseID, bpm);
+
+                    }
+                    catch (Exception ex)
+                    {
                         Console.WriteLine(ex.Message);
                     }
                 }
