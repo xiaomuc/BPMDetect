@@ -13,7 +13,7 @@ namespace UnitTestProject
             iTunesApp app = new iTunesApp();
             foreach (IITFileOrCDTrack track in app.LibraryPlaylist.Tracks)
             {
-                track.BPM = 10;
+                track.BPM = 1;
             }
         }
     }

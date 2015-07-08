@@ -10,11 +10,46 @@ using CSCore.Streams;
 
 namespace SoundAnalyzeLib
 {
+    public delegate double BeatWave(double t,double v);
+
     /// <summary>
     /// 音量の自己相関によるBPM検出クラス
     /// </summary>
     public class BPMVolumeAutoCorrelation : IBpmDetector
     {
+        /// <summary>
+        /// 単純コサイン関数
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public static double waveCos(double t, double f)
+        {
+            return Math.Cos(_2Pi * f * t);
+        }
+        /// <summary>
+        /// 8ビート系
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public static double wave8beat(double t, double f)
+        {
+            return 0.4 * Math.Cos(_2Pi * f * t) + 0.6 * Math.Cos(_2Pi * f * t * 2);
+        }
+        /// <summary>
+        /// 三拍子系
+        /// </summary>
+        /// <param name="t"></param>
+        /// <param name="f"></param>
+        /// <returns></returns>
+        public static double wave3note(double t, double f)
+        {
+            return 0.6 * Math.Cos(_2Pi * f * t) + 0.4 * Math.Cos(_2Pi * f * t /3);
+
+        }
+        BeatWave beatWave;
+
         #region Properties
         /// <summary>
         /// BPM検出に使用する各種設定値格納用
@@ -115,15 +150,19 @@ namespace SoundAnalyzeLib
         /// コンストラクタ
         /// </summary>
         /// <param name="config"></param>
-        public BPMVolumeAutoCorrelation(BPMDetectorConfig config)
+        public BPMVolumeAutoCorrelation(BPMDetectorConfig config, BeatWave bw)
         {
             _config = config;
+            beatWave = bw;
             BPM = 0;
         }
-        public BPMVolumeAutoCorrelation()
+        public BPMVolumeAutoCorrelation(BPMDetectorConfig config)
+            : this(config, wave8beat)
         {
-            _config = new BPMDetectorConfig();
-            BPM = 0;
+        }
+        public BPMVolumeAutoCorrelation()
+            : this(new BPMDetectorConfig(), wave8beat)
+        {
         }
 
         #endregion
@@ -213,6 +252,11 @@ namespace SoundAnalyzeLib
             b = (S * Q - R * P) / (n * S - P * P);
         }
 
+        /// <summary>
+        /// BPMマッチ度を計算
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
         public Dictionary<int, double> getBPM(Dictionary<double, double> data)
         {
             Dictionary<int, double> bpmList = new Dictionary<int, double>();
@@ -220,7 +264,7 @@ namespace SoundAnalyzeLib
             {
                 double f = (double)bpm / 60;
                 double a_sum = data
-                    .Select((x, i) => x.Value * bpmFuncCos2(x.Key, f))
+                    .Select((x, i) => x.Value * beatWave(x.Key, f))
                     .Sum();
                 bpmList.Add(bpm, a_sum);
             }
@@ -228,14 +272,7 @@ namespace SoundAnalyzeLib
             return bpmList.ToDictionary(x => x.Key, x => x.Value / m);
         }
 
-        double bpmFuncCos(double t, double f)
-        {
-            return Math.Cos(_2Pi * f * t);
-        }
-        double bpmFuncCos2(double t, double f)
-        {
-            return 0.4 * Math.Cos(_2Pi * f * t) + 0.6 * Math.Cos(_2Pi * f * t * 2);
-        }
+
 
         int selectPeak(Dictionary<int, double> topPeaks)
         {
@@ -264,6 +301,11 @@ namespace SoundAnalyzeLib
 
         #endregion
 
+        /// <summary>
+        /// double,doubleのディクショナリをファイルに書き込む
+        /// </summary>
+        /// <param name="dictionary"></param>
+        /// <param name="writer"></param>
         void writeDictionary(Dictionary<double, double> dictionary, BinaryWriter writer)
         {
             writer.Write(dictionary.Count);
@@ -273,6 +315,12 @@ namespace SoundAnalyzeLib
                 writer.Write(kv.Value);
             }
         }
+
+        /// <summary>
+        /// int,doubleのディクショナリをファイルに書き込む
+        /// </summary>
+        /// <param name="dictionary"></param>
+        /// <param name="writer"></param>
         void writeDictionary(Dictionary<int, double> dictionary, BinaryWriter writer)
         {
             writer.Write(dictionary.Count);
@@ -282,6 +330,12 @@ namespace SoundAnalyzeLib
                 writer.Write(kv.Value);
             }
         }
+
+        /// <summary>
+        /// double,doubleのディクショナリをファイルから読み込む
+        /// </summary>
+        /// <param name="dictionary"></param>
+        /// <param name="reader"></param>
         void readDictionary(Dictionary<double, double> dictionary, BinaryReader reader)
         {
             int count = reader.ReadInt32();
@@ -292,6 +346,12 @@ namespace SoundAnalyzeLib
                 dictionary.Add(key, value);
             }
         }
+
+        /// <summary>
+        /// int,doubleのディクショナリをファイルから読み込む
+        /// </summary>
+        /// <param name="dictionary"></param>
+        /// <param name="reader"></param>
         void readDictionary(Dictionary<int, double> dictionary, BinaryReader reader)
         {
             int count = reader.ReadInt32();
@@ -302,12 +362,18 @@ namespace SoundAnalyzeLib
                 dictionary.Add(key, value);
             }
         }
+
+        /// <summary>
+        /// ファイル保存処理
+        /// </summary>
+        /// <param name="fileName"></param>
         public void saveToFile(string fileName)
         {
             using (Stream stream = new FileStream(fileName, FileMode.Create, FileAccess.ReadWrite))
             {
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
+                    //Configの保存
                     writer.Write(_config.FrameSize);
                     writer.Write(_config.AutoCorrelationSize);
                     writer.Write(_config.BPMHigh);
@@ -317,14 +383,24 @@ namespace SoundAnalyzeLib
                     writer.Write(_config.PeakThreshold);
                     writer.Write(_config.PeakWidth);
 
+                    //自己相関
                     writeDictionary(_autoCorrelation, writer);
+
+                    //一時近似係数
                     writer.Write(_a);
                     writer.Write(_b);
-                    writeDictionary(_normalized, writer);
-                    writeDictionary(_peaks, writer);
-                    writeDictionary(_topPeaks, writer);
-                    writer.Write(BPM);
 
+                    //一時近似で正規化後の自己相関
+                    writeDictionary(_normalized, writer);
+
+                    //ピーク
+                    writeDictionary(_peaks, writer);
+
+                    //閾値を超えたピーク
+                    writeDictionary(_topPeaks, writer);
+
+                    //特定したBPM
+                    writer.Write(BPM);
 
                     writer.Close();
                 }
@@ -332,15 +408,19 @@ namespace SoundAnalyzeLib
             }
         }
 
-        public int loadFromFile(string fileName)
+        /// <summary>
+        /// ファイルからの読み込み処理
+        /// </summary>
+        /// <param name="fileName"></param>
+        public void loadFromFile(string fileName)
         {
             using (Stream stream = new FileStream(fileName, FileMode.Open, FileAccess.Read))
             {
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
+                    //Config
                     _config = new BPMDetectorConfig();
                     _config.FrameSize = reader.ReadInt32();
-
                     _config.AutoCorrelationSize = reader.ReadInt32();
                     _config.BPMHigh = reader.ReadInt32();
                     _config.BPMLow = reader.ReadInt32();
@@ -349,46 +429,44 @@ namespace SoundAnalyzeLib
                     _config.PeakThreshold = reader.ReadDouble();
                     _config.PeakWidth = reader.ReadInt32();
 
+                    //自己相関
                     _autoCorrelation = new Dictionary<double, double>();
                     readDictionary(_autoCorrelation, reader);
+
+                    //一時近似係数
                     _a = reader.ReadDouble();
                     _b = reader.ReadDouble();
+
+                    //一時近似で正規化後の自己相関
                     _normalized = new Dictionary<double, double>();
                     readDictionary(_normalized, reader);
+
+                    //ピーク
                     _peaks = new Dictionary<int, double>();
                     readDictionary(_peaks, reader);
+
+                    //閾値を超えたピーク
                     _topPeaks = new Dictionary<int, double>();
                     readDictionary(_topPeaks, reader);
+
+                    //特定したBPM
                     BPM = reader.ReadInt32();
 
                     reader.Close();
                 }
                 stream.Close();
-            } return detectFromAutoCorrelation();
+            }
         }
 
-        int detectFromAutoCorrelation()
-        {
-            //BPM検出
-            _bpms = getBPM(_normalized);
-
-            //ピーク検出
-            _peaks = _bpms.Skip(1)
-                .Take(_bpms.Count - 2)
-                .Where(x => _bpms[x.Key - 1] < x.Value && _bpms[x.Key + 1] < x.Value)
-                .OrderByDescending(x => x.Value)
-                .ToDictionary(x => x.Key, x => x.Value);
-
-            //しきい値以上のピークに絞り込む
-            double max = _peaks.Max(x => x.Value);
-            _topPeaks = _peaks
-                .Where(x => x.Value / max > _config.PeakThreshold)
-                .ToDictionary(x => x.Key, x => x.Value);
-
-            BPM = selectPeak(_topPeaks);
-            return BPM;
-        }
-
+        /// <summary>
+        /// BPM検出
+        /// </summary>
+        /// <remarks>
+        /// 音量検出、自己相関、自己相関の一時近似係数、一時近似直線で自己相関を正規化、BPMマッチ度計算、
+        /// BPMピーク検出、閾値を超えたピークの検出、優先度を考慮したBPMを特定
+        /// </remarks>
+        /// <param name="fileName"></param>
+        /// <returns></returns>
         public int detect(string fileName)
         {
             _fileName = fileName;
@@ -408,9 +486,6 @@ namespace SoundAnalyzeLib
             _normalized = _autoCorrelation
                 .ToDictionary(x => x.Key, x => x.Value - (_a * x.Key + _b));
 
-            return detectFromAutoCorrelation();
-
-            /*
             //BPM検出
             _bpms = getBPM(_normalized);
 
@@ -427,9 +502,9 @@ namespace SoundAnalyzeLib
                 .Where(x => x.Value / max > _config.PeakThreshold)
                 .ToDictionary(x => x.Key, x => x.Value);
 
+            //優先度を考慮してBPMを検出する
             BPM = selectPeak(_topPeaks);
             return BPM;
-            */
         }
     }
 }

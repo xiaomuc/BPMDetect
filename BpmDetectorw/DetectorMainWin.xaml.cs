@@ -28,6 +28,7 @@ namespace BpmDetectorw
         BitmapImage biPlay;
         DateTime _startTime;
         string _dataPath;
+        string _ext = "dat";
         #endregion
 
         #region Contructor/Destructor
@@ -54,7 +55,7 @@ namespace BpmDetectorw
             }
 
             //ツリー表示用にプレイリストを保持するオブジェクト
-            PlaylistTreeItem.createPlaylistTree(trvPlayList, _itunesApp.LibrarySource, _detectorDictionary, _dataPath);
+            PlaylistTreeItem.createPlaylistTree(trvPlayList, _itunesApp.LibrarySource, _detectorDictionary, _dataPath, _ext);
 
             //アルバムアートワーク用の設定
             _imagePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Properties.Resources.tempImageFolderName);

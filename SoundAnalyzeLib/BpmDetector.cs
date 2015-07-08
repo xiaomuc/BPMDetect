@@ -320,7 +320,7 @@ namespace SoundAnalyzeLib
         }
 
 
-        public int loadFromFile(string fileName)
+        public void loadFromFile(string fileName)
         {
             throw new NotImplementedException();
         }

@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BpmDec", "BpmDec\BpmDec.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestProject", "UnitTestProject\UnitTestProject.csproj", "{9B4DD458-813A-4225-8364-88B865E19CDC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ComUtils", "ComUtils\ComUtils.csproj", "{3A8945C6-A563-4957-85E1-221B0715F8E2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{9B4DD458-813A-4225-8364-88B865E19CDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B4DD458-813A-4225-8364-88B865E19CDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B4DD458-813A-4225-8364-88B865E19CDC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3A8945C6-A563-4957-85E1-221B0715F8E2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A8945C6-A563-4957-85E1-221B0715F8E2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A8945C6-A563-4957-85E1-221B0715F8E2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A8945C6-A563-4957-85E1-221B0715F8E2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

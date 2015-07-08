@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{2B7B6825-6EBE-48A2-8BF7-DDCC477C84D7}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{3A8945C6-A563-4957-85E1-221B0715F8E2}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BpmDec</RootNamespace>
-    <AssemblyName>BpmDec</AssemblyName>
+    <RootNamespace>ComUtils</RootNamespace>
+    <AssemblyName>ComUtils</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -41,21 +39,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="BpmUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="App.config" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\ComUtils\ComUtils.csproj">
-      <Project>{3a8945c6-a563-4957-85e1-221b0715f8e2}</Project>
-      <Name>ComUtils</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\SoundAnalyzeLib\SoundAnalyzeLib.csproj">
-      <Project>{b447f80a-a29d-4a5b-9a0b-2acf7c3bb499}</Project>
-      <Name>SoundAnalyzeLib</Name>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <COMReference Include="iTunesLib">

@@ -79,8 +79,8 @@ namespace Labo
         string getDataPath(IITTrack track)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(track.Artist + "_" + track.Album + "_" + track.Name+".dat");
-            char[] invalidChars=System.IO.Path.GetInvalidFileNameChars();
+            sb.Append(track.Artist + "_" + track.Album + "_" + track.Name + ".dat");
+            char[] invalidChars = System.IO.Path.GetInvalidFileNameChars();
             foreach (char c in invalidChars)
             {
                 sb.Replace(c, '~');
@@ -98,8 +98,13 @@ namespace Labo
                 _sampleSource = waveSource.ToSampleSource();
 
                 //showVolume(track.BPM);
-                
-                wt.DetectedBPM = showVolByDetector(track);
+
+                wt.DetectedBPM = showVolByDetector(track,
+                    BPMVolumeAutoCorrelation.wave8beat,
+                    seriesVolAc,seriesVolAcNorm,seriesVolAcBpm);
+                wt.DetectedBPM = showVolByDetector(track,
+                    BPMVolumeAutoCorrelation.wave3note,
+                    seriesDiffAutoCorrelation, seriesDiffAcNorm, seriesDiffBpm);
             }
             catch (Exception ex)
             {
@@ -234,7 +239,10 @@ namespace Labo
             }
             */
         }
-        int showVolByDetector(IITFileOrCDTrack track)
+        int showVolByDetector(IITFileOrCDTrack track, BeatWave bw,
+            System.Windows.Controls.DataVisualization.Charting.LineSeries seriesAc,
+            System.Windows.Controls.DataVisualization.Charting.LineSeries seriesNorm,
+            System.Windows.Controls.DataVisualization.Charting.LineSeries seriesBpm)
         {
             DateTime st = DateTime.Now;
             int frameSize = (int)iudFrameSize.Value;
@@ -250,18 +258,18 @@ namespace Labo
                             BPMHigh = bpmHi,
                             AutoCorrelationSize = autoCoSize
                         });
-            Console.WriteLine((DateTime.Now - st).ToString()+" Detect Start");
+            Console.WriteLine((DateTime.Now - st).ToString() + " Detect Start");
             int bpm = detector.detect(track.Location);
             string saveFileName = getDataPath(track);
             Console.WriteLine((DateTime.Now - st).ToString() + " Save Start");
             detector.saveToFile(saveFileName);
             Console.WriteLine((DateTime.Now - st).ToString() + " Chart Start");
-            seriesVolAc.ItemsSource = detector.AutoCorrelation;
-            seriesVolAcNorm.ItemsSource = detector.Normalized;
-            seriesVolAcBpm.ItemsSource = detector.BPMs;
+            seriesAc.ItemsSource = detector.AutoCorrelation;
+            seriesNorm.ItemsSource = detector.Normalized;
+            seriesBpm.ItemsSource = detector.BPMs;
             volumePeakList.ItemsSource = detector.TopPeaks;
             Console.WriteLine((DateTime.Now - st).ToString() + " end.");
-            
+
             return bpm;
         }
         Dictionary<int, double> getPeaks(Dictionary<int, double> data)
@@ -431,7 +439,7 @@ namespace Labo
 
         void _ituneApp_OnPlayerPlayingTrackChangedEvent(object iTrack)
         {
-            
+
             Console.WriteLine("track changed:");
         }
 

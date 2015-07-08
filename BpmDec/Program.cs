@@ -13,12 +13,23 @@ namespace BpmDec
     {
         static Program instance = null;
         BPMDetectorConfig _config;
-        bool _skip = false;
+        bool _overwrite = false;
         string _dataPath;
+        string _ext = "dat";
         string _itunesLib = "";
         Dictionary<int, int> bpmResult;
-        iTunesApp app;
-        IITPlaylist playlist;
+        iTunesApp _app;
+        IITPlaylist _playlist;
+        bool _clear=false;
+
+        iTunesApp getiTunes()
+        {
+            if (_app == null)
+            {
+                _app = new iTunesApp();
+            }
+            return _app;
+        }
 
         int getArgs(string[] args)
         {
@@ -31,12 +42,13 @@ namespace BpmDec
                 Console.WriteLine(" [/I:playlist_Name][/D:save_dir_name][/Skip][/F:99][/C:99][/B:99-99][/P:99-99][/T:0.9]");
                 Console.WriteLine("/I\t分析対象のiTunesプレイリスト。Defalut=library");
                 Console.WriteLine("/D\t分析結果保存ディレクトリ。Defalut={0}", _dataPath);
-                Console.WriteLine("/S\t分析済みをスキップする");
+                Console.WriteLine("/O\t分析済みでも再分析する");
                 Console.WriteLine("/F\t音量測定のフレームサイズ。Defalut={0}", _config.FrameSize);
                 Console.WriteLine("/C\t自己相関測定サイズ。Defalut={0}", _config.AutoCorrelationSize);
                 Console.WriteLine("/B\tBPM検出範囲。Defalut={0}-{1}", _config.BPMLow, _config.BPMHigh);
                 Console.WriteLine("/P\t優先するBPM範囲。Defalut={0}-{1}", _config.PriorityBPMLow, _config.PriorityBPMHigh);
                 Console.WriteLine("/T\tピーク検出する閾値。Defalut={0}", _config.PeakThreshold);
+                Console.WriteLine("/L\tBPMをクリアする。Defalut={0}", _config.PeakThreshold);
                 return -1;
             }
             foreach (string arg in args)
@@ -105,9 +117,13 @@ namespace BpmDec
                         _config.PeakThreshold = d;
                     }
                 }
-                else if (arg.StartsWith("/S") || arg.StartsWith("/s"))
+                else if (arg.StartsWith("/O") || arg.StartsWith("/o"))
                 {
-                    _skip = true;
+                    _overwrite = true;
+                }
+                else if (arg.StartsWith("/L") || arg.StartsWith("/l"))
+                {
+                    _clear = true;
                 }
             }
             Console.WriteLine("プレイリスト\t:{0}", _itunesLib);
@@ -120,58 +136,77 @@ namespace BpmDec
 
             return 0;
         }
-        string getDataPath(IITTrack track)
+        void findPlaylist(string name)
         {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(track.Artist + "_" + track.Album + "_" + track.Name + ".dat");
-            char[] invalidChars = System.IO.Path.GetInvalidFileNameChars();
-            foreach (char c in invalidChars)
-            {
-                sb.Replace(c, '~');
-            }
-            return System.IO.Path.Combine(_dataPath, sb.ToString());
-        }
-        int doDetetection()
-        {
-            bpmResult = new Dictionary<int, int>();
-            app = new iTunesApp();
-            playlist = app.LibraryPlaylist;
+            iTunesApp app = getiTunes();
+            _playlist = app.LibraryPlaylist;
             foreach (IITPlaylist pl in app.LibrarySource.Playlists)
             {
                 if (pl.Name.Equals(_itunesLib))
                 {
-                    playlist = pl;
+                    _playlist = pl;
                     break;
                 }
             }
+        }
+        void BPMClear()
+        {
+            foreach (IITTrack track in _playlist.Tracks)
+            {
+                try
+                {
+                    track.BPM = 0;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error:{0}/{1}/{2}", track.Name, track.Album, track.Artist);
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+        int doDetetection()
+        {
+            if (_clear)
+            {
+                BPMClear();
+                return 1;
+            }
+            bpmResult = new Dictionary<int, int>();
             int counter = 0;
-            foreach (IITFileOrCDTrack track in playlist.Tracks)
+            foreach (IITFileOrCDTrack track in _playlist.Tracks)
             {
                 counter++;
-                Console.WriteLine("[{0}/{1}]", counter, playlist.Tracks.Count);
+                Console.WriteLine("[{0}/{1}]", counter, _playlist.Tracks.Count);
                 Console.WriteLine(" Title :{0}", track.Name);
                 Console.WriteLine(" Album :{0}", track.Album);
                 Console.WriteLine(" Artist:{0}", track.Artist);
-                int prevBPM = track.BPM;
-                string fileName = getDataPath(track);
-                if (_skip && File.Exists(fileName))
+                int bpm = track.BPM; ;
+                string fileName = ComUtils.BpmUtils.getDataFileName(_dataPath, track,_ext);
+                if (!_overwrite && File.Exists(fileName))
                 {
-                    Console.WriteLine(" BPM   :{0} -> SKIP", prevBPM);
+                    Console.WriteLine(" BPM   :{0} -> SKIP", bpm);
                 }
                 else
                 {
                     try
                     {
                         BPMVolumeAutoCorrelation detector = new BPMVolumeAutoCorrelation(_config);
-                        int bpm = detector.detect(track.Location);
+                        int prev = bpm;
+                        bpm = detector.detect(track.Location);
                         detector.saveToFile(fileName);
-
+                        track.BPM = bpm;
+                        Console.WriteLine(" BPM   :{0} -> {1}", prev, bpm);
+                    }
+                    catch (System.Runtime.InteropServices.COMException ex)
+                    {
+                        Console.WriteLine(" BPM   :{0} -> ERROR", bpm);
+                        Console.WriteLine(ex.Message);
                         bpmResult.Add(track.TrackDatabaseID, bpm);
-                        Console.WriteLine(" BPM   :{0} -> {1}", prevBPM, bpm);
+
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine(" BPM   :{0} -> ERROR", prevBPM);
+                        Console.WriteLine(" BPM   :{0} -> ERROR", bpm);
                         Console.WriteLine(ex.Message);
                     }
                 }
@@ -181,7 +216,9 @@ namespace BpmDec
         }
         void writeiTunes()
         {
-            foreach (IITTrack track in playlist.Tracks)
+            if (_clear) return;
+
+            foreach (IITTrack track in _playlist.Tracks)
             {
                 if (bpmResult.ContainsKey(track.TrackDatabaseID))
                 {
@@ -203,15 +240,15 @@ namespace BpmDec
             }
         }
 
-        static int Main(string[] args)
+        static void Main(string[] args)
         {
             instance = new Program();
             int ret = instance.getArgs(args);
-            if (ret < 0) return ret;
+            if (ret < 0) return;
+            instance.findPlaylist(instance._itunesLib);
             ret = instance.doDetetection();
             System.Threading.Thread.Sleep(1500);
             instance.writeiTunes();
-            return ret;
         }
     }
 }

@@ -8,6 +8,7 @@ using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using iTunesLib;
 using SoundAnalyzeLib;
+using ComUtils;
 
 namespace BpmDetectorw
 {
@@ -20,13 +21,15 @@ namespace BpmDetectorw
         Dictionary<int, IBpmDetector> _detectorDictionary;
         Dictionary<int, TrackWrapper> _items;
         string _dataPath;
+        string _ext;
 
-        public TrackCollectionWrapper(IITTrackCollection trackCollection, Dictionary<int, IBpmDetector> detectorDictionary, string dataPath)
+        public TrackCollectionWrapper(IITTrackCollection trackCollection, Dictionary<int, IBpmDetector> detectorDictionary, string dataPath,string ext)
         {
             this._trackCollection = trackCollection;
             this._detectorDictionary = detectorDictionary;
             _items = new Dictionary<int, TrackWrapper>();
             _dataPath = dataPath;
+            _ext = ext;
         }
 
         public IEnumerator GetEnumerator()
@@ -58,18 +61,7 @@ namespace BpmDetectorw
             IITTrack track = _trackCollection[index];
             return get(track);
         }
-        string getDataPath(IITTrack track)
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.Append(track.Artist + "_" + track.Album + "_" + track.Name + ".dat");
-            char[] invalidChars = System.IO.Path.GetInvalidFileNameChars();
-            foreach (char c in invalidChars)
-            {
-                sb.Replace(c, '~');
-            }
-            return System.IO.Path.Combine(_dataPath, sb.ToString());
-        }
-
+        
         public IBpmDetector getDetector(IITTrack track)
         {
             if (_detectorDictionary.ContainsKey(track.TrackDatabaseID))
@@ -78,7 +70,7 @@ namespace BpmDetectorw
             }
             else
             {
-                string fileName = getDataPath(track);
+                string fileName = BpmUtils.getDataFileName(_dataPath,track,_ext);
                 if (System.IO.File.Exists(fileName))
                 {
                     IBpmDetector detector = new BPMVolumeAutoCorrelation();
@@ -91,7 +83,7 @@ namespace BpmDetectorw
         }
         public void setDetector(IITTrack track, IBpmDetector detector)
         {
-            string fileName = getDataPath(track);
+            string fileName = BpmUtils.getDataFileName(_dataPath, track,_ext);
             detector.saveToFile(fileName);
             _detectorDictionary[track.TrackDatabaseID] = detector;
         }
