@@ -10,13 +10,14 @@ using CSCore.Streams;
 
 namespace SoundAnalyzeLib
 {
-    public delegate double BeatWave(double t,double v);
+    public delegate double BeatWave(double t, double v);
 
     /// <summary>
     /// 音量の自己相関によるBPM検出クラス
     /// </summary>
     public class BPMVolumeAutoCorrelation : IBpmDetector
     {
+        #region WaveFunctions
         /// <summary>
         /// 単純コサイン関数
         /// </summary>
@@ -27,6 +28,7 @@ namespace SoundAnalyzeLib
         {
             return Math.Cos(_2Pi * f * t);
         }
+
         /// <summary>
         /// 8ビート系
         /// </summary>
@@ -45,10 +47,14 @@ namespace SoundAnalyzeLib
         /// <returns></returns>
         public static double wave3note(double t, double f)
         {
-            return 0.6 * Math.Cos(_2Pi * f * t) + 0.4 * Math.Cos(_2Pi * f * t /3);
+            return 0.6 * Math.Cos(_2Pi * f * t) + 0.4 * Math.Cos(_2Pi * f * t / 3);
 
         }
+        /// <summary>
+        /// BPM特定に使用する波(COS波)関数
+        /// </summary>
         BeatWave beatWave;
+        #endregion
 
         #region Properties
         /// <summary>
@@ -179,8 +185,11 @@ namespace SoundAnalyzeLib
         /// <param name="sampleSource"></param>
         /// <param name="frameSize"></param>
         /// <returns></returns>
-        Dictionary<double, double> getVolume(ISampleSource sampleSource, int frameSize)
+        Dictionary<double, double> getVolume(string fileName, int frameSize)
         {
+            IWaveSource waveSource = CodecFactory.Instance.GetCodec(fileName);
+            ISampleSource sampleSource = waveSource.ToSampleSource();
+
             int channels = sampleSource.WaveFormat.Channels;
             //フレームごとの読み込みサンプル数（フレームサイズ×チャネル数）
             int readSize = frameSize * channels;
@@ -205,6 +214,7 @@ namespace SoundAnalyzeLib
                 frameCounter++;
                 pos = sampleSource.GetPosition().TotalSeconds;
             }
+            waveSource.Dispose();
             return volume;
         }
 
@@ -272,8 +282,11 @@ namespace SoundAnalyzeLib
             return bpmList.ToDictionary(x => x.Key, x => x.Value / m);
         }
 
-
-
+        /// <summary>
+        /// 閾値を超えているピークから、優先BPM範囲内のものを抽出する
+        /// </summary>
+        /// <param name="topPeaks"></param>
+        /// <returns></returns>
         int selectPeak(Dictionary<int, double> topPeaks)
         {
             int firstBPM = topPeaks.First().Key;
@@ -282,24 +295,10 @@ namespace SoundAnalyzeLib
                 if (p.Key >= _config.PriorityBPMLow && _config.PriorityBPMHigh >= p.Key)
                 {
                     return p.Key;
-                    //        if (p.Key % firstBPM < 2 || firstBPM % p.Key < 2)
-                    //        {
-                    //            return p.Key;
-                    //        }
-                    //        if (p.Key % (firstBPM - 1) < 2 || firstBPM % (p.Key - 1) < 2)
-                    //        {
-                    //            return p.Key;
-                    //        }
-                    //        if (p.Key % (firstBPM + 1) < 2 || firstBPM % (p.Key + 1) < 2)
-                    //        {
-                    //            return p.Key;
-                    //        }
                 }
             }
             return firstBPM;
         }
-
-        #endregion
 
         /// <summary>
         /// double,doubleのディクショナリをファイルに書き込む
@@ -362,6 +361,9 @@ namespace SoundAnalyzeLib
                 dictionary.Add(key, value);
             }
         }
+        #endregion
+
+        #region public method
 
         /// <summary>
         /// ファイル保存処理
@@ -392,6 +394,9 @@ namespace SoundAnalyzeLib
 
                     //一時近似で正規化後の自己相関
                     writeDictionary(_normalized, writer);
+
+                    //BPM
+                    writeDictionary(_bpms, writer);
 
                     //ピーク
                     writeDictionary(_peaks, writer);
@@ -441,6 +446,10 @@ namespace SoundAnalyzeLib
                     _normalized = new Dictionary<double, double>();
                     readDictionary(_normalized, reader);
 
+                    //BPM
+                    _bpms = new Dictionary<int, double>();
+                    readDictionary(_bpms, reader);
+
                     //ピーク
                     _peaks = new Dictionary<int, double>();
                     readDictionary(_peaks, reader);
@@ -462,26 +471,32 @@ namespace SoundAnalyzeLib
         /// BPM検出
         /// </summary>
         /// <remarks>
-        /// 音量検出、自己相関、自己相関の一時近似係数、一時近似直線で自己相関を正規化、BPMマッチ度計算、
-        /// BPMピーク検出、閾値を超えたピークの検出、優先度を考慮したBPMを特定
+        /// <list type="number">
+        /// <item><description>音量検出</description></item>
+        /// <item><description>自己相関</description></item>
+        /// <item><description>自己相関の一時近似係数</description></item>
+        /// <item><description>一時近似直線で自己相関を正規化</description></item>
+        /// <item><description>BPMマッチ度計算</description></item>
+        /// <item><description>BPMピーク検出</description></item>
+        /// <item><description>閾値を超えたピークの検出</description></item>
+        /// <item><description>優先度を考慮したBPMを特定</description></item>
+        /// </list>
         /// </remarks>
         /// <param name="fileName"></param>
         /// <returns></returns>
         public int detect(string fileName)
         {
             _fileName = fileName;
-            IWaveSource waveSource = CodecFactory.Instance.GetCodec(fileName);
-            ISampleSource sampleSource = waveSource.ToSampleSource();
 
             //音量情報を格納するDictionary(時刻、音量)
-            Dictionary<double, double> volume = getVolume(sampleSource, _config.FrameSize);
+            Dictionary<double, double> volume = getVolume(fileName, _config.FrameSize);
 
             //自己相関を求める
             _autoCorrelation = getAutoCorrelation(volume, _config.AutoCorrelationSize);
 
             //最小二乗法により一次近似直線(y=ax+b)のパラメータa,bを求める
-            //            double a, b;
             getLinerParam(_autoCorrelation, out _a, out _b);
+
             //一次近似直線により正規化
             _normalized = _autoCorrelation
                 .ToDictionary(x => x.Key, x => x.Value - (_a * x.Key + _b));
@@ -504,7 +519,9 @@ namespace SoundAnalyzeLib
 
             //優先度を考慮してBPMを検出する
             BPM = selectPeak(_topPeaks);
+
             return BPM;
         }
+        #endregion
     }
 }

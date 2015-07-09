@@ -11,6 +11,7 @@ namespace BpmDetectorw
 {
     class TrackToImageSourceConverter : IValueConverter
     {
+        public static string _imagePath = string.Empty;
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             IITFileOrCDTrack track = value as IITFileOrCDTrack;
@@ -32,8 +33,10 @@ namespace BpmDetectorw
                 }
                 if (track.Artwork != null && track.Artwork.Count > 0)
                 {
-
-                    string dir = Path.Combine(Path.GetTempPath(), Properties.Resources.tempImageFolderName);
+                    if (string.IsNullOrEmpty(_imagePath))
+                    {
+                        _imagePath = Path.Combine(Path.GetTempPath(), "bpmDetector");
+                    }
                     string fileBody;
                     if (string.IsNullOrEmpty(track.AlbumArtist) && string.IsNullOrEmpty(track.Album))
                     {
@@ -44,7 +47,7 @@ namespace BpmDetectorw
                         fileBody = track.Artist + "_" + track.Album;
                     }
                     fileBody = Path.GetInvalidFileNameChars().Aggregate(fileBody, (current, c) => current.Replace(c.ToString(), string.Empty));
-                    string fileName = Path.Combine(dir, fileBody);
+                    string fileName = Path.Combine(_imagePath, fileBody);
                     switch (track.Artwork[1].Format)
                     {
                         case ITArtworkFormat.ITArtworkFormatBMP:
@@ -75,6 +78,6 @@ namespace BpmDetectorw
         }
     }
 
-   
+
 
 }

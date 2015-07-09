@@ -11,6 +11,8 @@ namespace BpmDec
 {
     class Program
     {
+        enum ExecMode { detect, clear, initbpm, help };
+        ExecMode _mode = ExecMode.detect;
         static Program instance = null;
         BPMDetectorConfig _config;
         bool _forceAnalyze = false;
@@ -18,11 +20,13 @@ namespace BpmDec
         string _dataPath;
         string _ext = "dat";
         string _itunesLib = "";
-        Dictionary<int, int> bpmResult;
         iTunesApp _app;
         IITPlaylist _playlist;
-        bool _clear=false;
 
+        /// <summary>
+        /// iTunes Appのインスタンス取得
+        /// </summary>
+        /// <returns></returns>
         iTunesApp getiTunes()
         {
             if (_app == null)
@@ -32,30 +36,48 @@ namespace BpmDec
             return _app;
         }
 
-        int getArgs(string[] args)
+        /// <summary>
+        /// ヘルプ表示
+        /// </summary>
+        void showHelp()
+        {
+            Console.WriteLine("usage:");
+            Console.Write(AppDomain.CurrentDomain.SetupInformation.ApplicationName);
+            Console.WriteLine("[command][/A][/N][/I:playlist_Name][/D:save_dir_name][/F:99][/C:99][/B:99-99][/P:99-99][/T:0.9]");
+            Console.WriteLine("");
+            Console.WriteLine("オプションの説明。[]は省略時のデフォルト値");
+            Console.WriteLine("command:[detect]:BPM検出、");
+            Console.WriteLine("\tclear\t:分析結果ファイルの消去、");
+            Console.WriteLine("\tinitbpm\t:iTunesに設定されているBPM値を削除する、");
+            Console.WriteLine("\thelp\t:これ。");
+            Console.WriteLine("/A\t:分析済みでも再分析する");
+            Console.WriteLine("/N\t:BPMをiTunesに書き込まない");
+            Console.WriteLine("/I\t:対象iTunesプレイリスト\t[libray]");
+            Console.WriteLine("/D\t:分析結果の保存先\t[{0}]", _dataPath);
+            Console.WriteLine("/F\t:音量測定フレームサイズ\t[{0}]", _config.FrameSize);
+            Console.WriteLine("/C\t:自己相関計測フレーム数\t[{0}]", _config.AutoCorrelationSize);
+            Console.WriteLine("/B\t:BPMを検出する範囲\t[{0}-{1}]", _config.BPMLow, _config.BPMHigh);
+            Console.WriteLine("/P\t:優先するBPMの範囲\t[{0}-{1}]", _config.PriorityBPMLow, _config.PriorityBPMHigh);
+            Console.WriteLine("/T\t:ピーク検出するしきい値\t[{0}]", _config.PeakThreshold);
+        }
+
+        /// <summary>
+        /// 引数の判定処理
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        ExecMode getArgs(string[] args)
         {
             _config = new BPMDetectorConfig();
             _dataPath = System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.MyDocuments), "BpmDetecor");
-            if (args.Contains(@"/?") || args.Contains("/h") || args.Contains("/H"))
-            {
-                Console.Write("usage:");
-                Console.Write(AppDomain.CurrentDomain.SetupInformation.ApplicationName);
-                Console.WriteLine(" [/I:playlist_Name][/D:save_dir_name][/Skip][/F:99][/C:99][/B:99-99][/P:99-99][/T:0.9]");
-                Console.WriteLine("/I\t分析対象のiTunesプレイリスト。Defalut=library");
-                Console.WriteLine("/D\t分析結果保存ディレクトリ。Defalut={0}", _dataPath);
-                Console.WriteLine("/A\t分析済みでも再分析する");
-                Console.WriteLine("/N\t分析済みのBPMで上書きしない");
-                Console.WriteLine("/F\t音量測定のフレームサイズ。Defalut={0}", _config.FrameSize);
-                Console.WriteLine("/C\t自己相関測定サイズ。Defalut={0}", _config.AutoCorrelationSize);
-                Console.WriteLine("/B\tBPM検出範囲。Defalut={0}-{1}", _config.BPMLow, _config.BPMHigh);
-                Console.WriteLine("/P\t優先するBPM範囲。Defalut={0}-{1}", _config.PriorityBPMLow, _config.PriorityBPMHigh);
-                Console.WriteLine("/T\tピーク検出する閾値。Defalut={0}", _config.PeakThreshold);
-                Console.WriteLine("/L\tBPMをクリアする。Defalut={0}", _config.PeakThreshold);
-                return -1;
-            }
+            
             foreach (string arg in args)
             {
-                if (arg.StartsWith("/i") || arg.StartsWith("/I"))
+                if (arg.StartsWith(@"/?") || arg.StartsWith("/h") 
+                    || arg.StartsWith("/H") || arg.ToLower().Equals("help"))
+                {
+                    _mode = ExecMode.help;
+                } else if (arg.StartsWith("/i") || arg.StartsWith("/I"))
                 {
                     string[] param = arg.Split(':');
                     _itunesLib = param[1];
@@ -127,21 +149,22 @@ namespace BpmDec
                 {
                     _overwrite = false;
                 }
-                else if (arg.StartsWith("/L") || arg.StartsWith("/l"))
+                else if (arg.ToLower().Equals("clear"))
                 {
-                    _clear = true;
+                    _mode = ExecMode.clear;
+                }
+                else if (arg.ToLower().Equals("initbpm"))
+                {
+                    _mode = ExecMode.initbpm;
                 }
             }
-            Console.WriteLine("プレイリスト\t:{0}", _itunesLib);
-            Console.WriteLine("分析結果\t:{0}", _dataPath);
-            Console.WriteLine("フレーム\t:{0}", _config.FrameSize);
-            Console.WriteLine("自己相関測定\t:{0}", _config.AutoCorrelationSize);
-            Console.WriteLine("BPM検出範囲\t:{0}-{1}", _config.BPMLow, _config.BPMHigh);
-            Console.WriteLine("優先BPM範囲\t:{0}-{1}", _config.PriorityBPMLow, _config.PriorityBPMHigh);
-            Console.WriteLine("ピーク検出\t:{0}", _config.PeakThreshold);
-
-            return 0;
+            return _mode;
         }
+
+        /// <summary>
+        /// プレイリストを探す。見つからない場合は既定のLibraryを返す
+        /// </summary>
+        /// <param name="name"></param>
         void findPlaylist(string name)
         {
             iTunesApp app = getiTunes();
@@ -155,8 +178,14 @@ namespace BpmDec
                 }
             }
         }
+
+        /// <summary>
+        /// iTunes経由で対象プレイリストにある曲のBPMをクリアする
+        /// </summary>
         void BPMClear()
         {
+            findPlaylist(_itunesLib);
+            Console.WriteLine("Delete BPM for itunes::{0}", _playlist.Name);
             foreach (IITTrack track in _playlist.Tracks)
             {
                 try
@@ -170,24 +199,38 @@ namespace BpmDec
                 }
             }
         }
+
+        /// <summary>
+        /// BPM検出してiTunes経由で書き込む
+        /// </summary>
+        /// <returns></returns>
         int doDetetection()
         {
-            if (_clear)
+            findPlaylist(_itunesLib);
+            if (_forceAnalyze)
             {
-                BPMClear();
-                return 1;
+                Console.WriteLine("/A:分析済みでも再分析");
             }
-            bpmResult = new Dictionary<int, int>();
+            if (!_overwrite)
+            {
+                Console.WriteLine("/N:BPMを書き込まない");
+            }
+            Console.WriteLine("プレイリスト\t:{0}", _playlist.Name);
+            Console.WriteLine("分析結果\t:{0}", _dataPath);
+            Console.WriteLine("フレーム\t:{0}", _config.FrameSize);
+            Console.WriteLine("自己相関測定\t:{0}", _config.AutoCorrelationSize);
+            Console.WriteLine("BPM検出範囲\t:{0}-{1}", _config.BPMLow, _config.BPMHigh);
+            Console.WriteLine("優先BPM範囲\t:{0}-{1}", _config.PriorityBPMLow, _config.PriorityBPMHigh);
+            Console.WriteLine("ピーク検出\t:{0}", _config.PeakThreshold);
+
             int counter = 0;
             foreach (IITFileOrCDTrack track in _playlist.Tracks)
             {
                 counter++;
-                Console.WriteLine("[{0}/{1}]", counter, _playlist.Tracks.Count);
-                Console.WriteLine(" Title :{0}", track.Name);
-                Console.WriteLine(" Album :{0}", track.Album);
-                Console.WriteLine(" Artist:{0}", track.Artist);
+                Console.Write("[{0}/{1}]", counter, _playlist.Tracks.Count);
+                Console.WriteLine("{0}/{1}/{2}/[{3}]", track.Name,track.Album,track.Artist,track.Time);
                 int bpm = track.BPM; ;
-                string fileName = ComUtils.BpmUtils.getDataFileName(_dataPath, track,_ext);
+                string fileName = ComUtils.BpmUtils.getDataFileName(_dataPath, track, _ext);
                 if (_forceAnalyze || !File.Exists(fileName))
                 {
                     try
@@ -196,17 +239,11 @@ namespace BpmDec
                         int prev = bpm;
                         bpm = detector.detect(track.Location);
                         detector.saveToFile(fileName);
-                        Console.WriteLine(" BPM   :{0} -> {1}", prev, bpm);
+                        Console.WriteLine("\tBPM:{0} -> {1}", prev, bpm);
                         if (bpm != prev)
                         {
                             track.BPM = bpm;
                         }
-                    }
-                    catch (System.Runtime.InteropServices.COMException ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                        bpmResult.Add(track.TrackDatabaseID, bpm);
-
                     }
                     catch (Exception ex)
                     {
@@ -220,62 +257,64 @@ namespace BpmDec
                         BPMVolumeAutoCorrelation detector = new BPMVolumeAutoCorrelation();
                         detector.loadFromFile(fileName);
                         bpm = detector.BPM;
-                        Console.WriteLine(" BPM   :{0} -> {1}", track.BPM, bpm);
+                        Console.WriteLine("\tBPM:{0} -> {1}", track.BPM, bpm);
                         if (track.BPM != bpm)
                         {
                             track.BPM = bpm;
                         }
                     }
-                    catch (System.Runtime.InteropServices.COMException ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                        bpmResult.Add(track.TrackDatabaseID, bpm);
-
-                    }
                     catch (Exception ex)
                     {
                         Console.WriteLine(ex.Message);
                     }
                 }
-                Console.WriteLine("");
             }
             return counter;
         }
-        void writeiTunes()
-        {
-            if (_clear) return;
 
-            foreach (IITTrack track in _playlist.Tracks)
+        /// <summary>
+        /// 分析結果フォルダをフォルダごと削除
+        /// </summary>
+        void doClear()
+        {
+            Console.WriteLine("clear:{0}", _dataPath);
+            if (Directory.Exists(_dataPath))
             {
-                if (bpmResult.ContainsKey(track.TrackDatabaseID))
-                {
-                    try
-                    {
-                        track.BPM = bpmResult[track.TrackDatabaseID];
-                    }
-                    catch (System.Runtime.InteropServices.COMException ex)
-                    {
-                        Console.WriteLine(track.Name);
-                        Console.WriteLine("result:{0:X}", ex.HResult);
-                        Console.WriteLine(ex.Message);
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }
+                Directory.Delete(_dataPath, true);
+            }
+            else
+            {
+                Console.WriteLine("..not exists.");
             }
         }
 
+        /// <summary>
+        /// メイン処理部。モード判定とオプションにより動作を決定する
+        /// </summary>
+        /// <param name="args"></param>
         static void Main(string[] args)
         {
+            Console.WriteLine("BPM detector for iTunes ver 0.1 by xiaomu 2015.");
             instance = new Program();
-            int ret = instance.getArgs(args);
-            if (ret < 0) return;
-            instance.findPlaylist(instance._itunesLib);
-            ret = instance.doDetetection();
-            System.Threading.Thread.Sleep(1500);
-            instance.writeiTunes();
+            ExecMode mode = instance.getArgs(args);
+            switch (mode)
+            {
+                case ExecMode.help:
+                    instance.showHelp();
+                    break;
+                case ExecMode.clear:
+                    instance.doClear();
+                    break;
+                case ExecMode.initbpm:
+                    instance.BPMClear();
+                    break;
+                case ExecMode.detect:
+                    instance.findPlaylist(instance._itunesLib);
+                    instance.doDetetection();
+                    break;
+            }
+            Console.WriteLine("press any key to exit.");
+            Console.ReadLine();
         }
     }
 }

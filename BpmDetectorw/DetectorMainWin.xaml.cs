@@ -58,8 +58,9 @@ namespace BpmDetectorw
             PlaylistTreeItem.createPlaylistTree(trvPlayList, _itunesApp.LibrarySource, _detectorDictionary, _dataPath, _ext);
 
             //アルバムアートワーク用の設定
-            _imagePath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), Properties.Resources.tempImageFolderName);
+            _imagePath = System.IO.Path.Combine(_dataPath, Properties.Resources.tempImageFolderName);
             deleteImageDir();
+            TrackToImageSourceConverter._imagePath = _imagePath;
             Directory.CreateDirectory(_imagePath);
 
             //BPMバックグラウンドスレッドの準備

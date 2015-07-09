@@ -12,7 +12,7 @@ namespace SoundAnalyzeLib
     /// <summary>
     /// 楽曲ファイルからテンポ（BPM)を検出するクラス
     /// </summary>
-    public class BpmDetector : IBpmDetector
+    public class BpmVolumeDiffDetector : IBpmDetector
     {
         /// <summary>ファイル名</summary>
         private string _fileName;
@@ -107,7 +107,7 @@ namespace SoundAnalyzeLib
         /// コンストラクタ
         /// </summary>
         /// <param name="config"></param>
-        public BpmDetector(BPMDetectorConfig config)
+        public BpmVolumeDiffDetector(BPMDetectorConfig config)
         {
             _frameSize = config.FrameSize;
             _bpmLow = config.BPMLow;
@@ -132,6 +132,7 @@ namespace SoundAnalyzeLib
             List<double> diff = getDiff(sampleSource);
             calcBpm(diff, sampleSource.WaveFormat.SampleRate);
             findPeaks(_peakWidth);
+            waveSource.Dispose();
             return getBpm();
         }
 
