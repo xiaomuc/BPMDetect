@@ -1,7 +1,7 @@
-﻿<Application x:Class="BpmDetector.App"
+﻿<Application x:Class="PlaylistGenerator.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             StartupUri="DetectorMainWin.xaml" Exit="Application_Exit">
+             StartupUri="PlaylistGeneratorMain.xaml">
     <Application.Resources>
          
     </Application.Resources>

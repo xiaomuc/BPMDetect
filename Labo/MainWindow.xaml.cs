@@ -20,6 +20,7 @@ using CSCore;
 using CSCore.Codecs;
 using CSCore.Streams;
 using System.IO;
+using Labo.Wrapper;
 
 namespace Labo
 {
@@ -75,6 +76,8 @@ namespace Labo
             {
                 Directory.CreateDirectory(_dataPath);
             }
+            sub.ChildClass c = new sub.ChildClass();
+            c.writeConsole();
         }
         string getDataPath(IITTrack track)
         {

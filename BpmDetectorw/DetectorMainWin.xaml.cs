@@ -6,12 +6,11 @@ using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Threading.Tasks;
-using System.Windows.Threading;
 using System.Windows.Media.Imaging;
 using SoundAnalyzeLib;
+using BpmDetector.TreeList;
 
-namespace BpmDetectorw
+namespace BpmDetector
 {
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック

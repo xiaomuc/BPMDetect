@@ -11,7 +11,7 @@ using System.Runtime.CompilerServices;
 using iTunesLib;
 using SoundAnalyzeLib;
 
-namespace Labo
+namespace Labo.Wrapper
 {
     public class TrackCollectionWrapper : IEnumerable
     {

@@ -9,6 +9,9 @@ using SoundAnalyzeLib;
 
 namespace BpmDec
 {
+    /// <summary>
+    /// コマンドラインでBPM検出を行うプログラム
+    /// </summary>
     class Program
     {
         enum ExecMode { detect, clear, initbpm, help };

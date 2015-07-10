@@ -88,7 +88,8 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="BPMToIntervalConverter.cs" />
-    <Compile Include="TrackCollection.cs" />
+    <Compile Include="sub\ChildClass.cs" />
+    <Compile Include="Wrapper\TrackCollection.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
