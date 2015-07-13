@@ -228,6 +228,10 @@ namespace SoundAnalyzeLib
         {
             Dictionary<double, double> autoCorrelation = new Dictionary<double, double>();
             double norm = data.Zip(data, (i, j) => i.Value * j.Value).Sum() / (double)data.Count;
+            if (correlationSize > data.Count)
+            {
+                correlationSize = data.Count;
+            }
             for (int n = 0; n < correlationSize; n++)
             {
                 double inp = data.Zip(data.Skip(n), (i, j) => i.Value * j.Value).Sum() / (double)(data.Count - n);

@@ -27,13 +27,13 @@ namespace PlaylistGenerator
         iTunesApp _app;
 
         [System.Xml.Serialization.XmlArrayItem(typeof(GenCode))]
-        List<GenCode> codeList;
+        GenList codeList;
         List<string> _playlistNames;
         public PlaylistGeneratorMain()
         {
             InitializeComponent();
             _app = new iTunesApp();
-            codeList = new List<GenCode>();
+            codeList = new GenList();
             _playlistNames = new List<string>();
             foreach (IITPlaylist pl in _app.LibrarySource.Playlists)
             {
@@ -41,20 +41,32 @@ namespace PlaylistGenerator
             }
             for (int i = 0; i < 3; i++)
             {
-                codeList.Add(new GenCode()
+                codeList.Items.Add(new GenCode()
                 {
                     Playlist = _playlistNames[i],
                     Duration = 5,
                 });
             }
-            lvCode.ItemsSource = codeList;
+            lvCode.ItemsSource = codeList.Items;
             cmbPlaylist.ItemsSource = _playlistNames;
 
         }
 
         private void btnOpen_Click(object sender, RoutedEventArgs e)
         {
-
+            Microsoft.Win32.OpenFileDialog openDialog = new Microsoft.Win32.OpenFileDialog();
+            bool? result = openDialog.ShowDialog();
+            if (result == true)
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(GenList));
+                using (FileStream fs = new FileStream(openDialog.FileName, FileMode.Open, FileAccess.Read))
+                {
+                    codeList = (GenList)serializer.Deserialize(fs);
+                    fs.Close();
+                }
+                lvCode.ItemsSource = codeList.Items;
+                lvCode.Items.Refresh();
+            }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -63,19 +75,13 @@ namespace PlaylistGenerator
             bool? result = saveDialog.ShowDialog();
             if (result == true)
             {
-                using (Stream stream = new FileStream(saveDialog.SafeFileName, FileMode.Create, FileAccess.ReadWrite))
+                XmlSerializer serializer = new XmlSerializer(typeof(GenList));
+                using (FileStream fs = new FileStream(saveDialog.FileName, FileMode.Create))
                 {
-                    using (StreamWriter writer = new StreamWriter(stream))
-                    {
-                        Type[] et = new Type[] { typeof(GenCode) };
-                        XmlSerializer serializer = new XmlSerializer(typeof(List<GenCode>), et);
-                        serializer.Serialize(writer, codeList);
-                        writer.Close();
-                    }
-                    stream.Close();
+                    serializer.Serialize(fs, codeList);
+                    fs.Close();
                 }
             }
-
         }
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
@@ -85,7 +91,7 @@ namespace PlaylistGenerator
                 Playlist = (string)cmbPlaylist.SelectedValue,
                 Duration = (int)iudDuration.Value
             };
-            codeList.Add(g);
+            codeList.Items.Add(g);
             lvCode.Items.Refresh();
         }
 
@@ -94,10 +100,31 @@ namespace PlaylistGenerator
             GenCode c = lvCode.SelectedItem as GenCode;
             if (c != null)
             {
-                codeList.Remove(c);
+                codeList.Items.Remove(c);
                 lvCode.Items.Refresh();
             }
         }
+
+        private void lvCode_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (lvCode.SelectedItem != null)
+            {
+                GenCode g = (GenCode)lvCode.SelectedItem;
+                cmbPlaylist.SelectedValue = g.Playlist;
+                iudDuration.Value = g.Duration;
+            }
+        }
+
+        private void btnUpdate_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+    }
+
+    public class GenList
+    {
+        public List<GenCode> Items = new List<GenCode>();
+
     }
     public class GenCode
     {

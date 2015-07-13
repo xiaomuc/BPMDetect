@@ -3,40 +3,37 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:PlaylistGenerator"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow">
     <DockPanel LastChildFill="True">
-        <ToolBar DockPanel.Dock="Top">
+        <ToolBar DockPanel.Dock="Top" VerticalAlignment="Stretch" >
             <Button Name="btOpen" Content="Open" Click="btnOpen_Click"/>
             <Button Name="btSave" Content="Save" Click="btnSave_Click"/>
-            <Button Name="btAdd" Content="Add" Click="btnAdd_Click"/>
-            <Button Name="btDelete" Content="Delete" Click="btnDelete_Click" VerticalAlignment="Bottom"/>
+            <Separator/>
+            <Label Content="Playlist:" VerticalAlignment="Center"/>
+            <ComboBox Name="cmbPlaylist" ItemsSource="{Binding}" IsReadOnly="True" MinWidth="50"/>
+            <toolkit:IntegerUpDown Name="iudDuration" Value="10" VerticalAlignment="Center"/>
+            <Button Content="+" Name="btnAdd" Click="btnAdd_Click" ToolTip="Add"/>
+            <Button Content="-" Name="btnDelete" Click="btnDelete_Click" ToolTip="Delete"/>
+            <Button Content="o" Name="btnUpdate" Click="btnUpdate_Click" ToolTip="Update"/>
+            <Separator/>
         </ToolBar>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="2*"/>
             </Grid.ColumnDefinitions>
-            <DockPanel LastChildFill="True">
-            <ToolBar DockPanel.Dock="Top" VerticalAlignment="Stretch" >
-                <Label Content="Playlist:" VerticalAlignment="Center"/>
-                <ComboBox Name="cmbPlaylist" ItemsSource="{Binding}" IsReadOnly="True" MinWidth="50"/>
-                <toolkit:IntegerUpDown Name="iudDuration" Value="10" VerticalAlignment="Center"/>
-                <Button Content="+" Click="btnAdd_Click" Margin="0,0,0,2" VerticalAlignment="Bottom"/>
-                <Button Content="-" Click="btnDelete_Click"/>
-            </ToolBar>
-            <ListView Name="lvCode" ItemsSource="{Binding}">
+            <ListView Name="lvCode" ItemsSource="{Binding}" SelectionChanged="lvCode_SelectionChanged">
                 <ListView.View>
                     <GridView>
                         <GridViewColumn DisplayMemberBinding="{Binding Playlist}" Header="Playlist" />
                         <GridViewColumn DisplayMemberBinding="{Binding Duration}" Header="Duration(min)" />
-                    </GridView> 
+                    </GridView>
                 </ListView.View>
-                </ListView>
-            </DockPanel>
+            </ListView>
             <GridSplitter Grid.Column="1" Width="2" ResizeDirection="Columns" HorizontalAlignment="Stretch"/>
-            
+
         </Grid>
-        
+
     </DockPanel>
 </Window>
