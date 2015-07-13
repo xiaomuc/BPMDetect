@@ -12,6 +12,9 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.IO;
+using System.Collections;
+using System.Xml.Serialization;
 using iTunesLib;
 
 namespace PlaylistGenerator
@@ -22,6 +25,8 @@ namespace PlaylistGenerator
     public partial class PlaylistGeneratorMain : Window
     {
         iTunesApp _app;
+
+        [System.Xml.Serialization.XmlArrayItem(typeof(GenCode))]
         List<GenCode> codeList;
         List<string> _playlistNames;
         public PlaylistGeneratorMain()
@@ -29,30 +34,62 @@ namespace PlaylistGenerator
             InitializeComponent();
             _app = new iTunesApp();
             codeList = new List<GenCode>();
-            _playlistNames=new List<string>();
-            foreach(IITPlaylist pl in _app.LibrarySource.Playlists){
+            _playlistNames = new List<string>();
+            foreach (IITPlaylist pl in _app.LibrarySource.Playlists)
+            {
                 _playlistNames.Add(pl.Name);
             }
             for (int i = 0; i < 3; i++)
             {
-                codeList.Add(new GenCode(_playlistNames)
+                codeList.Add(new GenCode()
                 {
                     Playlist = _playlistNames[i],
-                    Duration = 5
+                    Duration = 5,
                 });
             }
             lvCode.ItemsSource = codeList;
-            combo.ItemsSource = _playlistNames;
-         
+            cmbPlaylist.ItemsSource = _playlistNames;
+
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
+        private void btnOpen_Click(object sender, RoutedEventArgs e)
         {
-            codeList.Add(new GenCode(_playlistNames));
+
+        }
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog();
+            bool? result = saveDialog.ShowDialog();
+            if (result == true)
+            {
+                using (Stream stream = new FileStream(saveDialog.SafeFileName, FileMode.Create, FileAccess.ReadWrite))
+                {
+                    using (StreamWriter writer = new StreamWriter(stream))
+                    {
+                        Type[] et = new Type[] { typeof(GenCode) };
+                        XmlSerializer serializer = new XmlSerializer(typeof(List<GenCode>), et);
+                        serializer.Serialize(writer, codeList);
+                        writer.Close();
+                    }
+                    stream.Close();
+                }
+            }
+
+        }
+
+        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        {
+            GenCode g = new GenCode()
+            {
+                Playlist = (string)cmbPlaylist.SelectedValue,
+                Duration = (int)iudDuration.Value
+            };
+            codeList.Add(g);
             lvCode.Items.Refresh();
         }
 
-        private void Button_Click_1(object sender, RoutedEventArgs e)
+        private void btnDelete_Click(object sender, RoutedEventArgs e)
         {
             GenCode c = lvCode.SelectedItem as GenCode;
             if (c != null)
@@ -62,15 +99,9 @@ namespace PlaylistGenerator
             }
         }
     }
-    class GenCode
+    public class GenCode
     {
-        List<string> _playlists;
-        public GenCode(List<string> playlists)
-        {
-            _playlists = playlists;
-        }
         public string Playlist { get; set; }
         public int Duration { get; set; }
-        public List<string> Playlists { get { return _playlists; } }
     }
 }
