@@ -33,6 +33,9 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>image\1436879849_folder_green_music.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -122,6 +125,31 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\NewFile_6276_24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\Open_6529_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\Save_6530_32.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\action_add_16xLG.png" />
+    <Resource Include="image\action_Cancel_16xLG.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\Activity_16xLG.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\table_16xLG.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\database_16xLG.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\1436879849_folder_green_music.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

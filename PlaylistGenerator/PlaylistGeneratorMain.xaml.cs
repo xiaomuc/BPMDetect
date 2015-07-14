@@ -24,64 +24,81 @@ namespace PlaylistGenerator
     /// </summary>
     public partial class PlaylistGeneratorMain : Window
     {
+        bool _modified = false;
         iTunesApp _app;
-
-        [System.Xml.Serialization.XmlArrayItem(typeof(GenCode))]
-        GenList codeList;
+        GenerateList _generateList;
         List<string> _playlistNames;
+        List<IITTrack> _tracklist;
+
         public PlaylistGeneratorMain()
         {
             InitializeComponent();
             _app = new iTunesApp();
-            codeList = new GenList();
+            _generateList = new GenerateList();
             _playlistNames = new List<string>();
             foreach (IITPlaylist pl in _app.LibrarySource.Playlists)
             {
                 _playlistNames.Add(pl.Name);
             }
-            for (int i = 0; i < 3; i++)
-            {
-                codeList.Items.Add(new GenCode()
-                {
-                    Playlist = _playlistNames[i],
-                    Duration = 5,
-                });
-            }
-            lvCode.ItemsSource = codeList.Items;
+            lvCode.ItemsSource = _generateList.Items;
             cmbPlaylist.ItemsSource = _playlistNames;
 
+            if (File.Exists(Properties.Settings.Default.CodeFileName))
+            {
+                loadGeneraterList(Properties.Settings.Default.CodeFileName);
+            }
+        }
+        void dispSourceTime()
+        {
+            sbiSourceDuration.Content = _generateList.Items.Sum(x => x.Duration).ToString();
+        }
+        void loadGeneraterList(string fileName)
+        {
+            XmlSerializer serializer = new XmlSerializer(typeof(GenerateList));
+            using (FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read))
+            {
+                _generateList = (GenerateList)serializer.Deserialize(fs);
+                fs.Close();
+            }
+            lvCode.ItemsSource = _generateList.Items;
+            lvCode.Items.Refresh();
+            Properties.Settings.Default.CodeFileName = fileName;
+            _modified = false;
+            dispSourceTime();
+        }
+
+        void saveGeneratorlist()
+        {
+            Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog();
+            saveDialog.FileName = Properties.Settings.Default.CodeFileName;
+            bool? result = saveDialog.ShowDialog();
+            if (result == true)
+            {
+                XmlSerializer serializer = new XmlSerializer(typeof(GenerateList));
+                using (FileStream fs = new FileStream(saveDialog.FileName, FileMode.Create))
+                {
+                    serializer.Serialize(fs, _generateList);
+                    fs.Close();
+                }
+                Properties.Settings.Default.CodeFileName = saveDialog.FileName;
+                _modified = false;
+            }
         }
 
         private void btnOpen_Click(object sender, RoutedEventArgs e)
         {
             Microsoft.Win32.OpenFileDialog openDialog = new Microsoft.Win32.OpenFileDialog();
+            openDialog.FileName = Properties.Settings.Default.CodeFileName;
             bool? result = openDialog.ShowDialog();
             if (result == true)
             {
-                XmlSerializer serializer = new XmlSerializer(typeof(GenList));
-                using (FileStream fs = new FileStream(openDialog.FileName, FileMode.Open, FileAccess.Read))
-                {
-                    codeList = (GenList)serializer.Deserialize(fs);
-                    fs.Close();
-                }
-                lvCode.ItemsSource = codeList.Items;
-                lvCode.Items.Refresh();
+                loadGeneraterList(openDialog.FileName);
             }
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog();
-            bool? result = saveDialog.ShowDialog();
-            if (result == true)
-            {
-                XmlSerializer serializer = new XmlSerializer(typeof(GenList));
-                using (FileStream fs = new FileStream(saveDialog.FileName, FileMode.Create))
-                {
-                    serializer.Serialize(fs, codeList);
-                    fs.Close();
-                }
-            }
+            saveGeneratorlist();
         }
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
@@ -91,8 +108,10 @@ namespace PlaylistGenerator
                 Playlist = (string)cmbPlaylist.SelectedValue,
                 Duration = (int)iudDuration.Value
             };
-            codeList.Items.Add(g);
+            _generateList.Items.Add(g);
+            _modified = true;
             lvCode.Items.Refresh();
+            dispSourceTime();
         }
 
         private void btnDelete_Click(object sender, RoutedEventArgs e)
@@ -100,8 +119,10 @@ namespace PlaylistGenerator
             GenCode c = lvCode.SelectedItem as GenCode;
             if (c != null)
             {
-                codeList.Items.Remove(c);
+                _generateList.Items.Remove(c);
                 lvCode.Items.Refresh();
+                _modified = true;
+                dispSourceTime();
             }
         }
 
@@ -117,11 +138,93 @@ namespace PlaylistGenerator
 
         private void btnUpdate_Click(object sender, RoutedEventArgs e)
         {
+            if (lvCode.SelectedItem != null)
+            {
+                GenCode g = (GenCode)lvCode.SelectedItem;
+                g.Playlist = (string)cmbPlaylist.SelectedValue;
+                g.Duration = (int)iudDuration.Value;
+                lvCode.Items.Refresh();
+                _modified = true;
+                dispSourceTime();
+            }
+        }
 
+        private void btNew_Click(object sender, RoutedEventArgs e)
+        {
+            _generateList.Items.Clear();
+            lvCode.Items.Refresh();
+            _modified = true;
+            dispSourceTime();
+        }
+        int _durationWidth = 60;
+        int MAX_RETRY = 10;
+
+        private void btnCreatePlaylist_Click(object sender, RoutedEventArgs e)
+        {
+            _tracklist = new List<IITTrack>();
+            Random ran = new Random();
+            foreach (GenCode g in _generateList.Items)
+            {
+                IITPlaylist playlist = _app.LibraryPlaylist;
+                foreach (IITPlaylist p in _app.LibrarySource.Playlists)
+                {
+                    if (p.Name.Equals(g.Playlist))
+                    {
+                        playlist = p;
+                        break;
+                    }
+                }
+                List<IITTrack> list = new List<IITTrack>();
+                int maxDurationSec = g.Duration * 60 + _durationWidth;
+                int minDurationSec = g.Duration * 60 - _durationWidth;
+                int du = 0;
+                int counter = 0;
+                while (du < minDurationSec)
+                {
+                    int index = ran.Next(playlist.Tracks.Count) + 1;
+                    IITTrack track = playlist.Tracks[index];
+                    if (!list.Any(x => x.TrackDatabaseID == track.TrackDatabaseID)
+                        && !_tracklist.Any(x => x.TrackDatabaseID == track.TrackDatabaseID))
+                    {
+                        list.Add(track);
+                    }
+                    du = list.Sum(x => x.Duration);
+                    if (du > maxDurationSec)
+                    {
+                        list.Clear();
+                        du = 0;
+                        counter++;
+                        if (counter > MAX_RETRY)
+                        {
+                            maxDurationSec += _durationWidth / 2;
+                            minDurationSec -= _durationWidth / 2;
+                            counter = 0;
+                        }
+                    }
+                }
+                _tracklist.AddRange(list);
+            }
+            TimeSpan ts = new TimeSpan(0, 0, _tracklist.Sum(x => x.Duration));
+            sbiPlaylistDuration.Content = ts.ToString();
+            lvGeneratedPlaylist.ItemsSource = _tracklist;
+        }
+
+        private void btnWriteToitunes_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (_modified)
+            {
+                saveGeneratorlist();
+            }
+            Properties.Settings.Default.Save();
         }
     }
 
-    public class GenList
+    public class GenerateList
     {
         public List<GenCode> Items = new List<GenCode>();
 
