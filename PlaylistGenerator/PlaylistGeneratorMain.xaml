@@ -4,92 +4,115 @@
         xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:PlaylistGenerator"
         Title="Playlist Generator" Closing="Window_Closing" FontFamily="Source Code Pro" Icon="image/1436879849_folder_green_music.ico">
-    <DockPanel LastChildFill="True">
-        <WrapPanel DockPanel.Dock="Top">
-            <ToolBar>
-                <Button Name="btNew" Click="btNew_Click" ToolTip="New">
-                    <Image Source="image/NewFile_6276_24.png" Stretch="None"/>
-                </Button>
-                <Button Name="btOpen" Click="btnOpen_Click" ToolTip="Open">
-                    <Image Source="image/Open_6529_32.png" Stretch="None" />
-                </Button>
-                <Button Name="btSave" Click="btnSave_Click" ToolTip="Save">
-                    <Image Source="image/Save_6530_32.png" Stretch="None"/>
-                </Button>
-            </ToolBar>
-            <ToolBar>
-                <Label Content="Source:" VerticalAlignment="Center"/>
-                <ComboBox Name="cmbPlaylist" ItemsSource="{Binding}" IsReadOnly="True" MinWidth="50"/>
-                <Separator/>
-                <Label Content="Duration:"/>
-                <toolkit:IntegerUpDown Name="iudDuration" Value="10" VerticalAlignment="Center"/>
-                <Label Content="[min]"/>
-                <Separator/>
-                <Button Name="btnAdd" Click="btnAdd_Click" ToolTip="Add">
-                    <Image Source="image/action_add_16xLG.png" Stretch="None"/>
-                </Button>
-                <Button Name="btnDelete" Click="btnDelete_Click" ToolTip="Delete">
-                    <Image Source="image/action_Cancel_16xLG.png" Stretch="None"/>
-                </Button>
-                <Button Name="btnUpdate" Click="btnUpdate_Click" ToolTip="Update">
-                    <Image Source="image/Activity_16xLG.png" Stretch="None"/>
-                </Button>
-            </ToolBar>
-            <ToolBar>
-                <Button Name="btnCreatePlaylist" Click="btnCreatePlaylist_Click">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="image/table_16xLG.png" Stretch="None"/>
-                        <TextBlock Text="Create Playlist"/>
-                    </StackPanel>
-                </Button>
-                <Button Name="btnWriteToitunes" Click="btnWriteToitunes_Click">
-                    <StackPanel Orientation="Horizontal">
-                        <Image Source="image/database_16xLG.png" Stretch="None"/>
-                        <TextBlock Text="Write to iTunes"/>
-                    </StackPanel>
-                </Button>
-            </ToolBar>
-        </WrapPanel>
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="2*"/>
-            </Grid.ColumnDefinitions>
-            <DockPanel LastChildFill="True">
-                <TextBlock Text="generator source" DockPanel.Dock="Top"/>
-                <StatusBar DockPanel.Dock="Bottom">
-                    <StatusBarItem Name="sbiSourceDuration" Content="0"/>
-                    <StatusBarItem Content="[min]"/>
-                </StatusBar>
-                <ListView Name="lvCode" ItemsSource="{Binding}" SelectionChanged="lvCode_SelectionChanged">
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn DisplayMemberBinding="{Binding Playlist}" Header="Source" />
-                            <GridViewColumn DisplayMemberBinding="{Binding Duration}" Header="Duration(min)" />
-                        </GridView>
-                    </ListView.View>
-                </ListView>
-            </DockPanel>
-            <GridSplitter Grid.Column="1" Width="2" ResizeDirection="Columns" HorizontalAlignment="Stretch"/>
-            <DockPanel LastChildFill="True" Grid.Column="2">
-                <TextBlock Text="playlist" DockPanel.Dock="Top"/>
-                <StatusBar DockPanel.Dock="Bottom">
-                    <StatusBarItem Name="sbiPlaylistDuration" Content=" "/>
-                </StatusBar>
-                <ListView Name="lvGeneratedPlaylist" ItemsSource="{Binding}" >
-                    <ListView.View>
-                        <GridView>
-                            <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" />
-                            <GridViewColumn DisplayMemberBinding="{Binding Time}" Header="Time" />
-                            <GridViewColumn DisplayMemberBinding="{Binding Album}" Header="Album" />
-                            <GridViewColumn DisplayMemberBinding="{Binding Artist}" Header="Artist" />
-                            <GridViewColumn DisplayMemberBinding="{Binding BPM}" Header="BPM" />
-                        </GridView>
-                    </ListView.View>
-                </ListView>
-            </DockPanel>
-        </Grid>
+    <Grid>
+        <DockPanel LastChildFill="True">
+            <WrapPanel DockPanel.Dock="Top">
+                <ToolBar>
+                    <Button Name="btNew" Click="btNew_Click" ToolTip="New">
+                        <Image Source="image/NewFile_6276_24.png" Stretch="None"/>
+                    </Button>
+                    <Button Name="btOpen" Click="btnOpen_Click" ToolTip="Open">
+                        <Image Source="image/Open_6529_32.png" Stretch="None" />
+                    </Button>
+                    <Button Name="btSave" Click="btnSave_Click" ToolTip="Save">
+                        <Image Source="image/Save_6530_32.png" Stretch="None"/>
+                    </Button>
+                </ToolBar>
+                <ToolBar>
+                    <Label Content="Source:" VerticalAlignment="Center"/>
+                    <ComboBox Name="cmbPlaylist" ItemsSource="{Binding}" IsReadOnly="True" MinWidth="50"/>
+                    <Separator/>
+                    <Label Content="Duration:"/>
+                    <toolkit:IntegerUpDown Name="iudDuration" Value="10" VerticalAlignment="Center"/>
+                    <Label Content="[min]"/>
+                    <Separator/>
+                    <Button Name="btnAdd" Click="btnAdd_Click" ToolTip="Add">
+                        <Image Source="image/action_add_16xLG.png" Stretch="None"/>
+                    </Button>
+                    <Button Name="btnDelete" Click="btnDelete_Click" ToolTip="Delete">
+                        <Image Source="image/action_Cancel_16xLG.png" Stretch="None"/>
+                    </Button>
+                    <Button Name="btnUpdate" Click="btnUpdate_Click" ToolTip="Update">
+                        <Image Source="image/Activity_16xLG.png" Stretch="None"/>
+                    </Button>
+                </ToolBar>
+                <ToolBar>
+                    <Button Name="btnCreatePlaylist" Click="btnCreatePlaylist_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="image/table_16xLG.png" Stretch="None"/>
+                            <TextBlock Text="Create Playlist"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Name="btnWriteToitunes" Click="btnWriteToitunes_Click">
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="image/database_16xLG.png" Stretch="None"/>
+                            <TextBlock Text="Write to iTunes"/>
+                        </StackPanel>
+                    </Button>
+                </ToolBar>
+            </WrapPanel>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="2*"/>
+                </Grid.ColumnDefinitions>
+                <DockPanel LastChildFill="True">
+                    <TextBlock Text="generator source" DockPanel.Dock="Top"/>
+                    <StatusBar DockPanel.Dock="Bottom">
+                        <StatusBarItem Name="sbiSourceDuration" Content="0"/>
+                        <StatusBarItem Content="[min]"/>
+                    </StatusBar>
+                    <ListView Name="lvCode" ItemsSource="{Binding}" SelectionChanged="lvCode_SelectionChanged">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding="{Binding Playlist}" Header="Source" />
+                                <GridViewColumn DisplayMemberBinding="{Binding Duration}" Header="Duration(min)" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </DockPanel>
+                <GridSplitter Grid.Column="1" Width="2" ResizeDirection="Columns" HorizontalAlignment="Stretch"/>
+                <DockPanel LastChildFill="True" Grid.Column="2">
+                    <TextBlock Text="playlist" DockPanel.Dock="Top"/>
+                    <StatusBar DockPanel.Dock="Bottom">
+                        <StatusBarItem Name="sbiPlaylistDuration" Content=" "/>
+                    </StatusBar>
+                    <ListView Name="lvGeneratedPlaylist" ItemsSource="{Binding}" >
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn DisplayMemberBinding="{Binding Name}" Header="Name" />
+                                <GridViewColumn DisplayMemberBinding="{Binding Time}" Header="Time" />
+                                <GridViewColumn DisplayMemberBinding="{Binding Album}" Header="Album" />
+                                <GridViewColumn DisplayMemberBinding="{Binding Artist}" Header="Artist" />
+                                <GridViewColumn DisplayMemberBinding="{Binding BPM}" Header="BPM" />
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                </DockPanel>
+            </Grid>
 
-    </DockPanel>
+        </DockPanel>
+        <!-- It's important that this is in the end of the XAML as it needs to be on top of everything else! -->
+        <Grid x:Name="InputBox" Visibility="Collapsed">
+            <Grid Background="Black" Opacity="0.5"/>
+            <Border
+            MinWidth="250"
+            Background="Orange" 
+            BorderBrush="Black" 
+            BorderThickness="1" 
+            CornerRadius="0,55,0,55" 
+            HorizontalAlignment="Center" 
+            VerticalAlignment="Center">
+                <StackPanel>
+                    <TextBlock Margin="5" Text="Input Box:" FontWeight="Bold" FontFamily="Cambria" />
+                    <TextBox MinWidth="150" HorizontalAlignment="Center" VerticalAlignment="Center" Name="txbPlaylistName"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Name="btnWriteOK" Margin="5" Content="OK" Background="{x:Null}" Click="btnWriteOK_Click" IsDefault="True"/>
+                        <Button Name="btnCancel" Margin="5" Content="Cancel" Background="{x:Null}" Click="btnCancel_Click" IsCancel="True" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Grid>
 </Window>

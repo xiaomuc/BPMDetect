@@ -211,7 +211,7 @@ namespace PlaylistGenerator
 
         private void btnWriteToitunes_Click(object sender, RoutedEventArgs e)
         {
-
+            InputBox.Visibility = System.Windows.Visibility.Visible;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -221,6 +221,46 @@ namespace PlaylistGenerator
                 saveGeneratorlist();
             }
             Properties.Settings.Default.Save();
+        }
+        char[] SPLIT_CHAR = { '\\', '/' };
+        void getSavePlaylist(string value, out string parent, out string target)
+        {
+            parent = string.Empty;
+            target = string.Empty;
+            if (value.Contains('\\') || value.Contains('/'))
+            {
+                string[] s = value.Split(SPLIT_CHAR);
+                parent = s[0];
+                target = s[1];
+            }
+        }
+
+        private void btnWriteOK_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                string parent, target;
+                getSavePlaylist(txbPlaylistName.Text, out parent, out target);
+                IITPlaylist plParent = _app.LibrarySource.Playlists.get_ItemByName(parent);
+                IITUserPlaylist plTarget = _app.LibrarySource.Playlists.get_ItemByName(target) as IITUserPlaylist;
+                if (plTarget != null && plTarget.get_Parent() != null && plTarget.get_Parent().Equals(plParent))
+                {
+                    plTarget.Delete();
+                }
+                plTarget = _app.CreatePlaylist(target) as IITUserPlaylist;
+                plTarget.set_Parent(plParent);
+                foreach (IITTrack track in _tracklist)
+                {
+                    plTarget.AddTrack(track);
+                }
+            }
+            finally { InputBox.Visibility = System.Windows.Visibility.Collapsed; }
+        }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            InputBox.Visibility = System.Windows.Visibility.Collapsed;
+
         }
     }
 
