@@ -6,7 +6,7 @@
         xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:self="clr-namespace:BpmDetector"
         xmlns:treeList="clr-namespace:BpmDetector.TreeList"
-        Title="BpmDetector" FontFamily="Source Code Pro" Closed="Window_Closed">
+        Title="BpmDetector" FontFamily="Source Code Pro" Closed="Window_Closed" Icon="image/1436959457_Music.ico">
     <Window.Resources>
         <treeList:TrackToImageSourceConverter x:Key="TrackToImageSourceConverter" />
         <treeList:BPMToIntervalConverter x:Key="BPMToIntervalConverter" />

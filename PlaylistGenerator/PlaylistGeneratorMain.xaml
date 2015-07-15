@@ -8,13 +8,13 @@
         <DockPanel LastChildFill="True">
             <WrapPanel DockPanel.Dock="Top">
                 <ToolBar>
-                    <Button Name="btNew" Click="btNew_Click" ToolTip="New">
+                    <Button Name="btnNew" Click="btNew_Click" ToolTip="New" IsEnabled="False">
                         <Image Source="image/NewFile_6276_24.png" Stretch="None"/>
                     </Button>
-                    <Button Name="btOpen" Click="btnOpen_Click" ToolTip="Open">
+                    <Button Name="btnOpen" Click="btnOpen_Click" ToolTip="Open">
                         <Image Source="image/Open_6529_32.png" Stretch="None" />
                     </Button>
-                    <Button Name="btSave" Click="btnSave_Click" ToolTip="Save">
+                    <Button Name="btnSave" Click="btnSave_Click" ToolTip="Save" IsEnabled="False">
                         <Image Source="image/Save_6530_32.png" Stretch="None"/>
                     </Button>
                 </ToolBar>
@@ -29,10 +29,10 @@
                     <Button Name="btnAdd" Click="btnAdd_Click" ToolTip="Add">
                         <Image Source="image/action_add_16xLG.png" Stretch="None"/>
                     </Button>
-                    <Button Name="btnDelete" Click="btnDelete_Click" ToolTip="Delete">
+                    <Button Name="btnDelete" Click="btnDelete_Click" ToolTip="Delete" IsEnabled="False">
                         <Image Source="image/action_Cancel_16xLG.png" Stretch="None"/>
                     </Button>
-                    <Button Name="btnUpdate" Click="btnUpdate_Click" ToolTip="Update">
+                    <Button Name="btnUpdate" Click="btnUpdate_Click" ToolTip="Update" IsEnabled="False">
                         <Image Source="image/Activity_16xLG.png" Stretch="None"/>
                     </Button>
                 </ToolBar>
@@ -43,7 +43,7 @@
                             <TextBlock Text="Create Playlist"/>
                         </StackPanel>
                     </Button>
-                    <Button Name="btnWriteToitunes" Click="btnWriteToitunes_Click">
+                    <Button Name="btnWriteToitunes" Click="btnWriteToitunes_Click" IsEnabled="False">
                         <StackPanel Orientation="Horizontal">
                             <Image Source="image/database_16xLG.png" Stretch="None"/>
                             <TextBlock Text="Write to iTunes"/>
@@ -106,7 +106,7 @@
             VerticalAlignment="Center">
                 <StackPanel>
                     <TextBlock Margin="5" Text="Input Box:" FontWeight="Bold" FontFamily="Cambria" />
-                    <TextBox MinWidth="150" HorizontalAlignment="Center" VerticalAlignment="Center" Name="txbPlaylistName"/>
+                    <TextBox MinWidth="150" HorizontalAlignment="Center" VerticalAlignment="Center" Name="txbPlaylistName" Text="{Binding iTunesPlaylistName, Mode=TwoWay, Source={StaticResource settings}}"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Name="btnWriteOK" Margin="5" Content="OK" Background="{x:Null}" Click="btnWriteOK_Click" IsDefault="True"/>
                         <Button Name="btnCancel" Margin="5" Content="Cancel" Background="{x:Null}" Click="btnCancel_Click" IsCancel="True" />

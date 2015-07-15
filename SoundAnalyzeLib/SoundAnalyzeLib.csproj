@@ -45,7 +45,6 @@
     <Compile Include="BpmVolumeDiffDetector.cs" />
     <Compile Include="BpmDetectorConfig.cs" />
     <Compile Include="BPMVolumeAutoCorrelation.cs" />
-    <Compile Include="CsvWriter.cs" />
     <Compile Include="IBpmDetector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

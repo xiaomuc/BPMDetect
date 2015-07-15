@@ -15,7 +15,7 @@ namespace BpmDetector
     /// <summary>
     /// MainWindow.xaml の相互作用ロジック
     /// </summary>
-    public partial class DetectorMainWin : Window
+    public partial class DetectorMainWin : Window,IDisposable
     {
         #region Field
         iTunesApp _itunesApp;
@@ -590,8 +590,11 @@ namespace BpmDetector
         }
         #endregion
 
-
-
+        public void Dispose()
+        {
+            _bgwDetection.Dispose();
+            _bgwWriteiTune.Dispose();
+        }
     }
 
     enum WriteMode { Manual, Immediate, AfterAll };

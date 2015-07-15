@@ -34,5 +34,17 @@ namespace PlaylistGenerator.Properties {
                 this["CodeFileName"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string iTunesPlaylistName {
+            get {
+                return ((string)(this["iTunesPlaylistName"]));
+            }
+            set {
+                this["iTunesPlaylistName"] = value;
+            }
+        }
     }
 }
