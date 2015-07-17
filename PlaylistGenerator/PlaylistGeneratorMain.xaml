@@ -3,19 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:local="clr-namespace:PlaylistGenerator"
-        Title="Playlist Generator" Closing="Window_Closing" FontFamily="Source Code Pro" Icon="image/1436879849_folder_green_music.ico">
+        Title="Playlist Generator" Closing="Window_Closing" Icon="image/1436879849_folder_green_music.ico">
     <Grid>
         <DockPanel LastChildFill="True">
-            <WrapPanel DockPanel.Dock="Top">
+            <WrapPanel DockPanel.Dock="Top" Background="{DynamicResource WindowBackgroundBrush}">
                 <ToolBar>
                     <Button Name="btnNew" Click="btNew_Click" ToolTip="New" IsEnabled="False">
-                        <Image Source="image/NewFile_6276_24.png" Stretch="None"/>
+                        <Image Source="image/NewFile_6276.png" Stretch="None"/>
                     </Button>
                     <Button Name="btnOpen" Click="btnOpen_Click" ToolTip="Open">
-                        <Image Source="image/Open_6529_32.png" Stretch="None" />
+                        <Image Source="image/Open_6529.png" Stretch="None" />
                     </Button>
                     <Button Name="btnSave" Click="btnSave_Click" ToolTip="Save" IsEnabled="False">
-                        <Image Source="image/Save_6530_32.png" Stretch="None"/>
+                        <Image Source="image/Save_6530.png" Stretch="None"/>
                     </Button>
                 </ToolBar>
                 <ToolBar>
@@ -23,7 +23,7 @@
                     <ComboBox Name="cmbPlaylist" ItemsSource="{Binding}" IsReadOnly="True" MinWidth="50"/>
                     <Separator/>
                     <Label Content="Duration:"/>
-                    <toolkit:IntegerUpDown Name="iudDuration" Value="10" VerticalAlignment="Center"/>
+                    <toolkit:IntegerUpDown x:Name="iudDuration" Value="10" VerticalAlignment="Center" Background="{DynamicResource ControlBackgroundBrush}" Foreground="{DynamicResource TextBrush}" Minimum="0"/>
                     <Label Content="[min]"/>
                     <Separator/>
                     <Button Name="btnAdd" Click="btnAdd_Click" ToolTip="Add">
@@ -57,13 +57,13 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="2*"/>
                 </Grid.ColumnDefinitions>
-                <DockPanel LastChildFill="True">
-                    <TextBlock Text="generator source" DockPanel.Dock="Top"/>
+                <DockPanel LastChildFill="True" Background="{DynamicResource WindowBackgroundBrush}">
+                    <TextBlock Text="generator source" DockPanel.Dock="Top" Foreground="{DynamicResource TextBrush}" Background="{DynamicResource WindowBackgroundBrush}" HorizontalAlignment="Center"/>
                     <StatusBar DockPanel.Dock="Bottom">
                         <StatusBarItem Name="sbiSourceDuration" Content="0"/>
                         <StatusBarItem Content="[min]"/>
                     </StatusBar>
-                    <ListView Name="lvCode" ItemsSource="{Binding}" SelectionChanged="lvCode_SelectionChanged">
+                    <ListView Name="lvCode" ItemsSource="{Binding}" SelectionChanged="lvCode_SelectionChanged" >
                         <ListView.View>
                             <GridView>
                                 <GridViewColumn DisplayMemberBinding="{Binding Playlist}" Header="Source" />
@@ -73,8 +73,8 @@
                     </ListView>
                 </DockPanel>
                 <GridSplitter Grid.Column="1" Width="2" ResizeDirection="Columns" HorizontalAlignment="Stretch"/>
-                <DockPanel LastChildFill="True" Grid.Column="2">
-                    <TextBlock Text="playlist" DockPanel.Dock="Top"/>
+                <DockPanel LastChildFill="True" Grid.Column="2" Background="{DynamicResource WindowBackgroundBrush}">
+                    <TextBlock Text="playlist" DockPanel.Dock="Top" Background="{DynamicResource WindowBackgroundBrush}" Foreground="{DynamicResource TextBrush}" HorizontalAlignment="Center"/>
                     <StatusBar DockPanel.Dock="Bottom">
                         <StatusBarItem Name="sbiPlaylistDuration" Content=" "/>
                     </StatusBar>
@@ -106,7 +106,7 @@
             VerticalAlignment="Center">
                 <StackPanel>
                     <TextBlock Margin="5" Text="Input Box:" FontWeight="Bold" FontFamily="Cambria" />
-                    <TextBox MinWidth="150" HorizontalAlignment="Center" VerticalAlignment="Center" Name="txbPlaylistName" Text="{Binding iTunesPlaylistName, Mode=TwoWay, Source={StaticResource settings}}"/>
+                    <TextBox MinWidth="150" HorizontalAlignment="Center" VerticalAlignment="Center" Name="txbPlaylistName" />
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <Button Name="btnWriteOK" Margin="5" Content="OK" Background="{x:Null}" Click="btnWriteOK_Click" IsDefault="True"/>
                         <Button Name="btnCancel" Margin="5" Content="Cancel" Background="{x:Null}" Click="btnCancel_Click" IsCancel="True" />

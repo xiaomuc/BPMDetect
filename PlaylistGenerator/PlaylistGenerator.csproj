@@ -86,6 +86,10 @@
       <DependentUpon>PlaylistGeneratorMain.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Themes\ExpressionDark.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -127,15 +131,6 @@
     </COMReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="image\NewFile_6276_24.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="image\Open_6529_32.png" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="image\Save_6530_32.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="image\action_add_16xLG.png" />
     <Resource Include="image\action_Cancel_16xLG.png" />
   </ItemGroup>
@@ -150,6 +145,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="image\1436879849_folder_green_music.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\Open_6529.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\Save_6530.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="image\NewFile_6276.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

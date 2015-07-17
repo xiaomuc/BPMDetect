@@ -40,6 +40,7 @@ namespace Labo
                 txbConsole.AppendText(track.Name + "/" + track.Artist + Environment.NewLine);
 
             }
+            lbxTracks.ItemsSource = _app.LibraryPlaylist.Tracks;
         }
     }
 }
