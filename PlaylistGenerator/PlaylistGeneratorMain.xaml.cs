@@ -89,6 +89,7 @@ namespace PlaylistGenerator
                 _generateSourceList.Items.CollectionChanged += GenerateSourceItems_CollectionChanged;
                 lvCode.ItemsSource = _generateSourceList.Items;
             }
+            txbPlaylistName.Text = Properties.Settings.Default.iTunesPlaylistName;
         }
         #endregion
 
@@ -385,6 +386,7 @@ namespace PlaylistGenerator
         /// <param name="e"></param>
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            Properties.Settings.Default.iTunesPlaylistName = txbPlaylistName.Text;
             if (_modified)
             {
                 saveGeneratorlist();
