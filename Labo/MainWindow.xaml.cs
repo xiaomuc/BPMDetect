@@ -41,6 +41,10 @@ namespace Labo
 
             }
             lbxTracks.ItemsSource = _app.LibraryPlaylist.Tracks;
+            lvTracks.ItemsSource = _app.LibraryPlaylist.Tracks;
+            CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(lbxTracks.ItemsSource);
+            PropertyGroupDescription groupDescription = new PropertyGroupDescription("Album");
+            view.GroupDescriptions.Add(groupDescription);
         }
     }
 }

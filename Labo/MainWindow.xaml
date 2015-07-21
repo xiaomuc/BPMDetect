@@ -6,30 +6,71 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition/>
             <ColumnDefinition/>
+            <ColumnDefinition/>
         </Grid.ColumnDefinitions>
         <TextBox VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Name="txbConsole"/>
+        <ListView Name="lbxTracks" Grid.Column="1" ItemsSource="{Binding}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="Artist" DisplayMemberBinding="{Binding Artist}"/>
+                    <GridViewColumn Header="Album" DisplayMemberBinding="{Binding Genre}"/>
+                    <GridViewColumn Header="Time" DisplayMemberBinding="{Binding Time}"/>
+                    <GridViewColumn Header="BPM" DisplayMemberBinding="{Binding BPM}"/>
+                </GridView>
+            </ListView.View>
+            <ListView.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="{x:Type GroupItem}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <Expander IsExpanded="True">
+                                            <Expander.Header>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="22" VerticalAlignment="Bottom" Foreground="{DynamicResource TextBrush}" />
+                                                    <TextBlock Text="{Binding ItemCount}" FontSize="22" Foreground="{DynamicResource TextBrush}" FontWeight="Bold" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+                                                    <TextBlock Text=" item(s)" FontSize="22" Foreground="{DynamicResource TextBrush}" FontStyle="Italic" VerticalAlignment="Bottom" />
+                                                </StackPanel>
+                                            </Expander.Header>
+                                            <ItemsPresenter />
+                                        </Expander>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                </GroupStyle>
+            </ListView.GroupStyle>
 
-        <ListBox Name="lbxTracks" Grid.Column="1" ItemsSource="{Binding}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <Grid ShowGridLines="False" UseLayoutRounding="False" Grid.IsSharedSizeScope="True">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition/>
-                            <ColumnDefinition/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                            <RowDefinition/>
-                        </Grid.RowDefinitions>
-                        <TextBlock Text="{Binding Name}"/>
-                        <TextBlock Grid.Row="1" Text="{Binding Album}"/>
-                        <TextBlock Grid.Row="2" Text="{Binding Artist}"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Time}" HorizontalAlignment="Right"/>
-                        <TextBlock Grid.Column="1" Grid.Row="1" Text="{Binding BPM}"/>
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
+        </ListView>
+        <ListView Name="lvTracks" Grid.Column="2" ItemsSource="{Binding}">
+            <ListView.View>
+                <GridView AllowsColumnReorder="True">
+                    <GridViewColumn Header="Name" >
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Name}"  />
+                                    <TextBlock Text="{Binding Artist}"/>
+                                    <TextBlock Text="{Binding Album}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="BPM">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Time}"  TextAlignment="Right"  />
+                                    <TextBlock Text="{Binding BPM}" TextAlignment="Right"  />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
     </Grid>
 </Window>
