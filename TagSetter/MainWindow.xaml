@@ -1,0 +1,47 @@
+﻿<Window x:Class="TagSetter.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:tagSetter="clr-namespace:TagSetter"
+        Title="MainWindow" Height="350" Width="525">
+    <Window.Resources>
+        <tagSetter:CommentComverter x:Key="CommentComverter" />
+        <DataTemplate x:Key="WomanCell">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding Comment,Converter={StaticResource CommentComverter}, ConverterParameter='w'}"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="ManCell">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding Comment,Converter={StaticResource CommentComverter}, ConverterParameter='m'}"/>
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="RejectCell">
+            <StackPanel Orientation="Horizontal">
+                <CheckBox IsChecked="{Binding Comment,Converter={StaticResource CommentComverter}, ConverterParameter='r'}"/>
+            </StackPanel>
+        </DataTemplate>
+        
+    </Window.Resources>
+    <DockPanel LastChildFill="True">
+        <ToolBar DockPanel.Dock="Top" >
+            <Button Click="Button_Click">Connect</Button>
+        </ToolBar>
+        <ListView Name="lvTracks" ItemsSource="{Binding}" VirtualizingPanel.IsVirtualizing="True">
+           
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
+                    <GridViewColumn Header="Artist" DisplayMemberBinding="{Binding Artist}"/>
+                    <GridViewColumn Header="Album" DisplayMemberBinding="{Binding Album}"/>
+                    <GridViewColumn Header="Group" DisplayMemberBinding="{Binding Grouping}"/>
+                    <GridViewColumn Header="Comment" DisplayMemberBinding="{Binding Comment}"/>
+                    <GridViewColumn Header="woman" CellTemplate="{StaticResource WomanCell}" />
+                    <GridViewColumn Header="man" CellTemplate="{StaticResource ManCell}" />
+                    <GridViewColumn Header="reject" CellTemplate="{StaticResource RejectCell}" />
+                    <GridViewColumn Header="lang" DisplayMemberBinding="{Binding Comment,Converter={StaticResource CommentComverter},ConverterParameter='l'}" />
+                </GridView>
+            </ListView.View>
+
+        </ListView>
+    </DockPanel>
+</Window>
