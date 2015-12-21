@@ -34,17 +34,25 @@ namespace Labo
                 txbConsole.AppendText(source.Name + Environment.NewLine);
             }
             IITTrackCollection tc = _app.LibraryPlaylist.Search("a", ITPlaylistSearchField.ITPlaylistSearchFieldArtists);
-            
+            Dictionary<int, int> tempList = new Dictionary<int, int>();
             foreach (IITTrack track in tc)
             {
                 txbConsole.AppendText(track.Name + "/" + track.Artist + Environment.NewLine);
-
             }
             lbxTracks.ItemsSource = _app.LibraryPlaylist.Tracks;
             lvTracks.ItemsSource = _app.LibraryPlaylist.Tracks;
             CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(lbxTracks.ItemsSource);
             PropertyGroupDescription groupDescription = new PropertyGroupDescription("Album");
             view.GroupDescriptions.Add(groupDescription);
+           
+            int t = 0;
+            foreach (IITTrack track in _app.LibraryPlaylist.Tracks)
+            {
+                tempList.Add(t += track.Duration, track.BPM);
+            }
+
+            lineSeries.ItemsSource = tempList;
+        
         }
     }
 }
