@@ -21,10 +21,10 @@ namespace TagSetter
         public void saveToFile(String fileName)
         {
             //ArrayListに追加されているオブジェクトの型の配列を作成
-            
+
             //XMLファイルに保存する
             System.Xml.Serialization.XmlSerializer serializer1 =
-                new System.Xml.Serialization.XmlSerializer(typeof(ArrayList),et);
+                new System.Xml.Serialization.XmlSerializer(typeof(ArrayList), et);
             System.IO.StreamWriter sw = new System.IO.StreamWriter(
                 fileName, false, new System.Text.UTF8Encoding(false));
             serializer1.Serialize(sw, list);
@@ -44,8 +44,18 @@ namespace TagSetter
     }
     public class SettingItem
     {
+        public const String VO_MAN = "M";
+        public const String VO_WOMAN = "W";
+        public const String REJECT = "R";
+        public const String LANG = "l";
+        public const String TAG_MAN = "[" + VO_MAN + "]";
+        public const String TAG_WOMAN = "[" + VO_WOMAN + "]";
+        public const String TAG_REJECT = "[" + REJECT + "]";
+        public const String TAG_LANG = "[lang:";
+
         public String Kind { get; set; }
-        public String Name { get; set; }
+        public String Artist { get; set; }
+        public String Album { get; set; }
         public bool VoWoman { get; set; }
         public bool VoMan { get; set; }
         public String Lang { get; set; }

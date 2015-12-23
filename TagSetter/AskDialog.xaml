@@ -14,6 +14,9 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
 
             <RowDefinition Height="auto"/>
             <RowDefinition/>
@@ -24,18 +27,27 @@
         <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="1" Name="txbAlbum" VerticalAlignment="Center">album</TextBlock>
         <Label Grid.Column="0" Grid.Row="2" VerticalAlignment="Center">Artist</Label>
         <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="2" Name="txbArtist" VerticalAlignment="Center">artist</TextBlock>
-        <Label Grid.Column="0" Grid.Row="3" VerticalAlignment="Center">Vocal</Label>
-        <CheckBox Grid.Column="1" Grid.Row="3" Name="chbMan" VerticalAlignment="Center">Man</CheckBox>
-        <CheckBox Grid.Column="2" Grid.Row="3" Name="chbWoman" VerticalAlignment="Center">Woman</CheckBox>
-        <Label Grid.Column="0" Grid.Row="4" VerticalAlignment="Center">language</Label>
-        <TextBox Grid.Column="1" Grid.Row="4" VerticalAlignment="Center" Name="txbLang"/>
-        <Label Grid.Column="0" Grid.Row="5" VerticalAlignment="Center">Set All</Label>
-        <ComboBox Grid.Column="1" Grid.Row="5" VerticalAlignment="Center" Name="cmbKind">
+        <Label Grid.Column="0" Grid.Row="5" VerticalAlignment="Center">Vocal</Label>
+        <CheckBox Grid.Column="1" Grid.Row="5" Name="chbMan" VerticalAlignment="Center">Man</CheckBox>
+        <CheckBox Grid.Column="2" Grid.Row="5" Name="chbWoman" VerticalAlignment="Center">Woman</CheckBox>
+        <Label Grid.Column="0" Grid.Row="6" VerticalAlignment="Center">language</Label>
+        <CheckBox Grid.Column="2" Grid.Row="6" Name="chbInst" VerticalAlignment="Center">Inst</CheckBox>
+        <TextBox Grid.Column="1" Grid.Row="6" VerticalAlignment="Center" Name="txbLang" />
+        <Label Grid.Column="0" Grid.Row="7" VerticalAlignment="Center">Set All</Label>
+        <CheckBox Grid.Column="3" Grid.Row="7" Name="chbReject" VerticalAlignment="Center">Reject</CheckBox>
+        <ComboBox Grid.Column="1" Grid.Row="7" VerticalAlignment="Center" Name="cmbKind">
             <ComboBoxItem>Ask</ComboBoxItem>
             <ComboBoxItem>All Artist</ComboBoxItem>
             <ComboBoxItem>All Album</ComboBoxItem>
         </ComboBox>
-        <Button Grid.Column="1" Grid.Row="6" Name="okButton" Click="okButton_Click" IsDefault="True">OK</Button>
-        <Button  Grid.Column="2" Grid.Row="6" Name="cancelButton" IsCancel="True">Cancel</Button>
+        <Label Grid.Column="0" Grid.Row="3" VerticalAlignment="Center">Grouping</Label>
+        <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="3" Name="txbGrouping" VerticalAlignment="Center">title</TextBlock>
+        <Label Grid.Column="0" Grid.Row="4" VerticalAlignment="Center">Comment</Label>
+        <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="4" Name="txbComment" VerticalAlignment="Center">title</TextBlock>
+        <Button Grid.Column="1" Grid.Row="8" Name="okButton" Click="okButton_Click" IsDefault="True">OK</Button>
+        <Button  Grid.Column="2" Grid.Row="8" Name="cancelButton" IsCancel="True">Cancel</Button>
+        <Label Grid.Column="0" Grid.Row="9" VerticalAlignment="Center">Lyrics</Label>
+        <TextBox Grid.Column="1" Grid.Row="9" Grid.ColumnSpan="2" Name="txbLyrics" VerticalScrollBarVisibility="Auto"/>
+
     </Grid>
 </Window>

@@ -21,6 +21,8 @@ namespace TagSetter
     /// </summary>
     public partial class MainWindow : Window
     {
+
+
         iTunesApp _app;
         IITTrackCollection _tracks;
         DefaultSet defset;
@@ -48,28 +50,80 @@ namespace TagSetter
         {
             foreach (SettingItem item in defset.list)
             {
-                if (item.Name.Equals(track.Artist)) { return item; }
-                if (item.Name.Equals(track.Album)) { return item; }
+                if (item.Artist.Equals(track.Artist))
+                {
+                    if (item.Album.Equals("*"))
+                    {
+                        return item;
+                    }
+                    else if (item.Album.Equals(track.Album))
+                    {
+                        return item;
+                    }
+                }
             }
             return null;
         }
+
+        String getComment(SettingItem item)
+        {
+            StringBuilder sb = new StringBuilder();
+            if (item.VoMan)
+            {
+                sb.Append(SettingItem.TAG_MAN);
+            }
+            if (item.VoWoman)
+            {
+                sb.Append(SettingItem.TAG_WOMAN);
+            }
+            if (item.Reject)
+            {
+                sb.Append(SettingItem.TAG_REJECT);
+            }
+            if (!String.IsNullOrEmpty(item.Lang))
+            {
+                sb.Append(SettingItem.TAG_LANG + item.Lang + "]");
+            }
+            return sb.ToString();
+        }
+
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            AskDialog dlg = new AskDialog();
             foreach (IITTrack t in _tracks)
             {
+                if (!String.IsNullOrEmpty(t.Comment))
+                {
+                    if (t.Comment.Contains(SettingItem.TAG_MAN)
+                        || t.Comment.Contains(SettingItem.TAG_WOMAN)
+                        || t.Comment.Contains(SettingItem.TAG_LANG)
+                        || t.Comment.Contains(SettingItem.TAG_REJECT))
+                    {
+                        continue;
+                    }
+                }
+
+                lvTracks.SelectedIndex = t.Index - 1;
+                lvTracks.ScrollIntoView(lvTracks.SelectedItem);
                 SettingItem item = findItem(t);
                 if (item == null)
                 {
-                    dlg.setTrack(t);
+                    AskDialog dlg = new AskDialog(t);
                     Nullable<bool> result = dlg.ShowDialog();
                     if (result == true)
                     {
-
+                        item = dlg.Item;
+                        if (!item.Kind.Equals("Ask"))
+                        {
+                            defset.list.Add(item);
+                        }
                     }
                     else { break; }
                 }
+                t.Comment = getComment(item);
+                Console.WriteLine(t.Artist + "/" + t.Album + "/" + t.Name + ":" + getComment(item));
             }
+            _app.Stop();
+            defset.saveToFile(defFileName);
             /*DefaultSet s = new DefaultSet();
             SettingItem item=new SettingItem();
             item.Kind="all";
@@ -83,6 +137,20 @@ namespace TagSetter
             s.saveToFile(@"c:\temp\set.xml");
              */
         }
+
+        private void lvTracks_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            IITTrack track = _tracks[lvTracks.SelectedIndex + 1];
+            AskDialog dlg = new AskDialog(track);
+            Nullable<bool> result = dlg.ShowDialog();
+            if (result == true)
+            {
+                track.Comment = getComment(dlg.Item);
+                System.ComponentModel.ICollectionView view = CollectionViewSource.GetDefaultView(lvTracks.ItemsSource);
+                view.Refresh();
+            }
+            _app.Stop();
+        }
     }
     public class CommentComverter : IValueConverter
     {
@@ -90,24 +158,24 @@ namespace TagSetter
         public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
             String comment = (String)value;
-            if ("w".Equals(parameter))
+            if (SettingItem.VO_WOMAN.Equals(parameter))
             {
-                return !String.IsNullOrEmpty(comment) && comment.Contains("[w]");
+                return !String.IsNullOrEmpty(comment) && comment.Contains(SettingItem.TAG_WOMAN);
             }
-            else if ("m".Equals(parameter))
+            else if (SettingItem.VO_MAN.Equals(parameter))
             {
-                return !String.IsNullOrEmpty(comment) && comment.Contains("[m]");
+                return !String.IsNullOrEmpty(comment) && comment.Contains(SettingItem.TAG_MAN);
             }
-            else if ("r".Equals(parameter))
+            else if (SettingItem.REJECT.Equals(parameter))
             {
-                return !String.IsNullOrEmpty(comment) && comment.Contains("[r]");
+                return !String.IsNullOrEmpty(comment) && comment.Contains(SettingItem.TAG_REJECT);
             }
-            else if ("l".Equals(parameter))
+            else if (SettingItem.LANG.Equals(parameter))
             {
-                if (!String.IsNullOrEmpty(comment) && comment.Contains("[lang:"))
+                if (!String.IsNullOrEmpty(comment) && comment.Contains(SettingItem.TAG_LANG))
                 {
-                    int index = comment.IndexOf("[lang:");
-                    return comment.Substring(index, 9);
+                    int index = comment.IndexOf(SettingItem.TAG_LANG);
+                    return comment.Substring(index, SettingItem.TAG_LANG.Length + 3);
                 }
                 return "";
             }

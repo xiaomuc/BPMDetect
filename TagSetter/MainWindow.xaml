@@ -2,37 +2,38 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:tagSetter="clr-namespace:TagSetter"
-        Title="MainWindow" Height="350" Width="525">
+        Title="MainWindow" Height="350" Width="1000">
     <Window.Resources>
         <tagSetter:CommentComverter x:Key="CommentComverter" />
         <DataTemplate x:Key="WomanCell">
             <StackPanel Orientation="Horizontal">
-                <CheckBox IsChecked="{Binding Comment,Converter={StaticResource CommentComverter}, ConverterParameter='w'}"/>
+                <CheckBox IsEnabled="False" IsChecked="{Binding Comment,Converter={StaticResource CommentComverter}, ConverterParameter='W'}"/>
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="ManCell">
             <StackPanel Orientation="Horizontal">
-                <CheckBox IsChecked="{Binding Comment,Converter={StaticResource CommentComverter}, ConverterParameter='m'}"/>
+                <CheckBox IsEnabled="False" IsChecked="{Binding Comment,Converter={StaticResource CommentComverter}, ConverterParameter='M'}"/>
             </StackPanel>
         </DataTemplate>
         <DataTemplate x:Key="RejectCell">
             <StackPanel Orientation="Horizontal">
-                <CheckBox IsChecked="{Binding Comment,Converter={StaticResource CommentComverter}, ConverterParameter='r'}"/>
+                <CheckBox IsEnabled="False" IsChecked="{Binding Comment,Converter={StaticResource CommentComverter}, ConverterParameter='R'}"/>
             </StackPanel>
         </DataTemplate>
         
     </Window.Resources>
     <DockPanel LastChildFill="True">
         <ToolBar DockPanel.Dock="Top" >
-            <Button Click="Button_Click">Connect</Button>
+            <Button Click="Button_Click">start</Button>
         </ToolBar>
-        <ListView Name="lvTracks" ItemsSource="{Binding}" VirtualizingPanel.IsVirtualizing="True">
+        <ListView Name="lvTracks" ItemsSource="{Binding}" VirtualizingPanel.IsVirtualizing="True" MouseDoubleClick="lvTracks_MouseDoubleClick">
            
             <ListView.View>
                 <GridView>
                     <GridViewColumn Header="Name" DisplayMemberBinding="{Binding Name}"/>
                     <GridViewColumn Header="Artist" DisplayMemberBinding="{Binding Artist}"/>
                     <GridViewColumn Header="Album" DisplayMemberBinding="{Binding Album}"/>
+                    <GridViewColumn Header="time" DisplayMemberBinding="{Binding Time}"/>
                     <GridViewColumn Header="Group" DisplayMemberBinding="{Binding Grouping}"/>
                     <GridViewColumn Header="Comment" DisplayMemberBinding="{Binding Comment}"/>
                     <GridViewColumn Header="woman" CellTemplate="{StaticResource WomanCell}" />
